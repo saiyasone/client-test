@@ -36,6 +36,7 @@ import Trash from "./pages/trash/Trash";
 import UppyUpload from "components/UppyUpload";
 import ConfirmPayment from "./pages/confirm-payment/Confirmpayment";
 import ResetPassword from "./pages/reset-password/ResetPassword";
+import PaymentDetail from "./pages/account-info/paymentDetail";
 
 const routes: RouteObject[] = [
   {
@@ -178,6 +179,10 @@ const routes: RouteObject[] = [
       {
         path: "file/:user/:fileType/:status",
         element: <File />,
+      },
+      {
+        path: "account-setting/payment-detail/:paymentId",
+        element: <PaymentDetail />,
       },
     ],
   },

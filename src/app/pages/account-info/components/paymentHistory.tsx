@@ -5,194 +5,202 @@ import * as MUI from "../styles/accountInfo.styles";
 // material ui
 import { DataGrid } from "@mui/x-data-grid";
 import PaginationStyled from "components/PaginationStyled";
-import AddIcon from "@mui/icons-material/Add";
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   FormControl,
   IconButton,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 
 // hooks
 import useFilter from "hooks/payment/useFilter";
 import useManagePayment from "hooks/payment/useManage";
-
-const columns: any = [
-  {
-    field: "id",
-    headerName: "ID",
-    width: 100,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      return (
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-          >
-            {params?.row?.no}
-          </Typography>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "firstName",
-    headerName: "CLIENT",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "start",
-          }}
-        >
-          <Avatar />
-          <Box sx={{ marginLeft: "0.5rem" }}>
-            <Typography
-              variant="h5"
-              sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
-            >
-              {params?.row?.payerId?.firstName ?? ""}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
-            >
-              {params?.row?.payerId?.lastName ?? ""}
-            </Typography>
-          </Box>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "paymentMethod",
-    headerName: "PaymentMethod",
-    width: 100,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      return (
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-          >
-            {params?.row?.paymentMethod}
-          </Typography>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "amount",
-    headerName: "TOTAL",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Typography
-          variant="h5"
-          sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-        >
-          ${params?.row?.amount}
-        </Typography>
-      );
-    },
-  },
-  {
-    field: "expiredAt",
-    headerName: "ISSUED DATE",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Typography
-          variant="h5"
-          sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-        >
-          {params?.row?.expiredAt}
-        </Typography>
-      );
-    },
-  },
-  {
-    field: "fullName",
-    headerName: "BALANCE",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      const status = params?.row?.status;
-      return (
-        <Chip
-          label={status}
-          sx={{
-            background:
-              status === "refunded"
-                ? "#FFD9B4"
-                : status === "failed" ||
-                  status === "cancelled" ||
-                  status === "expired"
-                ? "#FBDDDD"
-                : status === "success"
-                ? "#D4F4E2"
-                : "",
-            color:
-              status === "refunded"
-                ? "#FF9F43"
-                : status === "failed" ||
-                  status === "cancelled" ||
-                  status === "expired"
-                ? "#EA5455"
-                : status === "success"
-                ? "#209F59"
-                : "",
-            fontWeight: "600",
-          }}
-        />
-      );
-    },
-  },
-  {
-    headerName: "ACTIONS",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    renderCell: () => {
-      return (
-        <Box>
-          <IconButton>
-            <EmailOutlinedIcon />
-          </IconButton>
-          <IconButton>
-            <RemoveRedEyeOutlinedIcon />
-          </IconButton>
-          <IconButton>
-            <MoreVertOutlinedIcon />
-          </IconButton>
-        </Box>
-      );
-    },
-  },
-];
+import { DateTimeFormate } from "utils/date.util";
+import { useNavigate } from "react-router-dom";
 
 function PaymentHistory() {
+  const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
   const filterPayment = useFilter();
   const managePayment: any = useManagePayment({
     filter: filterPayment.data,
   });
+
+  const columns: any = [
+    {
+      field: "no",
+      headerName: "ID",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      key: "no",
+      renderCell: (params) => {
+        return (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+            >
+              {params?.row?.no}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "firstName",
+      headerName: "CLIENT",
+      flex: 1,
+      key: "firstName",
+      renderCell: (params) => {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "start",
+            }}
+          >
+            <Avatar />
+            <Box sx={{ marginLeft: "0.5rem" }}>
+              <Typography
+                variant="h5"
+                sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
+              >
+                {params?.row?.payerId?.firstName ?? ""}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
+              >
+                {params?.row?.payerId?.lastName ?? ""}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "paymentMethod",
+      headerName: "PaymentMethod",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      key: "paymentMethod",
+      renderCell: (params) => {
+        return (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+            >
+              {params?.row?.paymentMethod}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "amount",
+      headerName: "TOTAL",
+      flex: 1,
+      key: "amount",
+      renderCell: (params) => {
+        return (
+          <Typography
+            variant="h5"
+            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+          >
+            ${params?.row?.amount}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "expiredAt",
+      headerName: "ISSUED DATE",
+      flex: 1,
+      key: "expiredAt",
+      renderCell: (params) => {
+        return (
+          <Typography
+            variant="h5"
+            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+          >
+            {DateTimeFormate(params?.row?.expiredAt)}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "status",
+      headerName: "BALANCE",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      key: "status",
+      renderCell: (params) => {
+        const status = params?.row?.status;
+        return (
+          <Chip
+            label={status}
+            sx={{
+              background:
+                status === "refunded"
+                  ? "#FFD9B4"
+                  : status === "failed" ||
+                    status === "cancelled" ||
+                    status === "expired"
+                  ? "#FBDDDD"
+                  : status === "success"
+                  ? "#D4F4E2"
+                  : "",
+              color:
+                status === "refunded"
+                  ? "#FF9F43"
+                  : status === "failed" ||
+                    status === "cancelled" ||
+                    status === "expired"
+                  ? "#EA5455"
+                  : status === "success"
+                  ? "#209F59"
+                  : "",
+              fontWeight: "600",
+            }}
+          />
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "ACTIONS",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      key: "actions",
+      renderCell: (params) => {
+        // const paymentId = params?.row?.paymentId;
+        const paymentId = params?.row?._id;
+        return (
+          <Box>
+            <IconButton
+              onClick={() =>
+                navigate(`/account-setting/payment-detail/${paymentId}`)
+              }
+            >
+              <RemoveRedEyeOutlinedIcon />
+            </IconButton>
+          </Box>
+        );
+      },
+    },
+  ];
+
   return (
     <>
       <Typography variant="h5" sx={{ color: "#4B465C" }}>
@@ -232,26 +240,6 @@ function PaymentHistory() {
               }}
             />
           </Box>
-          <Button
-            startIcon={<AddIcon />}
-            sx={{
-              background: "#17766B",
-              color: "#ffffff",
-              fontSize: isMobile ? "0.8rem" : "",
-              "&:hover": {
-                color: "#17766B",
-              },
-              padding: isTablet
-                ? "0.4rem 0.2rem"
-                : isMobile
-                ? "0.4rem 0.6rem"
-                : "0.4rem 2rem",
-              width: isMobile ? "45%" : "auto",
-            }}
-            size="small"
-          >
-            Create Invoice
-          </Button>
         </MUI.BoxShowLeftPaymentHistory>
         <MUI.BoxShowRightPaymentHistory>
           <FormControl
@@ -266,7 +254,6 @@ function PaymentHistory() {
               selectStyle={{
                 height: "35px",
                 minHeight: "35px",
-                marginTop: "0.3rem",
               }}
               selectProps={{
                 disableClear: true,
@@ -304,12 +291,6 @@ function PaymentHistory() {
           getRowId={(row) => row._id}
           rows={managePayment.data || []}
           columns={columns}
-          initialState={{
-            pagination: {
-              page: 0,
-              pageSize: 5,
-            },
-          }}
           checkboxSelection
           disableSelectionOnClick
           disableColumnFilter
@@ -317,7 +298,6 @@ function PaymentHistory() {
           hideFooter
           onSelectionModelChange={(ids) => {
             managePayment.setSelectedRow(ids);
-            // setMultiId(ids);
           }}
         />
         {managePayment?.data?.length > filterPayment.state.pageSize && (

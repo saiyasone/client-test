@@ -38,7 +38,6 @@ interface CurrentPlanProps {
 }
 
 const CurrentPlan: React.FC<CurrentPlanProps> = ({ paymentState }) => {
-  console.log(paymentState);
   const { user }: any = useAuth();
   const isMobile = useMediaQuery("(max-width:600px)");
   return (
