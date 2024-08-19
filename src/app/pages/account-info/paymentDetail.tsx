@@ -16,6 +16,8 @@ import useAuth from "hooks/useAuth";
 import React, { Fragment } from "react";
 import { useParams } from "react-router-dom";
 import VshareLogo from "../../../assets/images/vshare.png";
+import { DateTimeFormate } from "utils/date.util";
+import { prettyNumberFormat } from "utils/number.util";
 
 const ContainerQRContent = styled(Paper)({
   padding: "1.5rem",
@@ -43,15 +45,80 @@ const BoxDivider = styled(Box)({
   borderBottom: "1px solid gray",
 });
 
+interface PackageDetails {
+  _id: string;
+  packageId: string;
+  name: string;
+  category: string;
+  annualPrice: number;
+  description: string;
+  // Add any other fields that might be part of the package details
+}
+
+interface PayerDetails {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+}
+
+interface PaymentData {
+  amount: number;
+  category: string;
+  countPurchase: number;
+  createdAt: string;
+  description: string;
+  expiredAt: string;
+  orderedAt: string;
+  packageId: PackageDetails;
+  payerId: PayerDetails;
+  paymentId: string;
+  paymentMethod: string;
+  status: string;
+  updatedAt: string;
+  _id: string;
+}
+
 function PaymentDetail() {
   const params = useParams();
   const { user }: any = useAuth();
+  const [paymentData, setPaymentData] = React.useState<PaymentData>({
+    amount: 0,
+    category: "",
+    countPurchase: 0,
+    createdAt: "",
+    description: "",
+    expiredAt: "",
+    orderedAt: "",
+    packageId: {
+      _id: "",
+      packageId: "",
+      description: "",
+      name: "",
+      category: "",
+      annualPrice: 0,
+    },
+    payerId: {
+      _id: "",
+      firstName: "",
+      lastName: "",
+      email: "",
+      phone: "",
+      address: "",
+    },
+    paymentId: "",
+    paymentMethod: "",
+    status: "",
+    updatedAt: "",
+    _id: "",
+  });
   const [querySinglePayment] = useLazyQuery(QUERY_PAYMENT, {
     fetchPolicy: "no-cache",
   });
 
   const handleQueryPayment = async () => {
-    console.log(typeof params?.paymentId, typeof user?._id);
     await querySinglePayment({
       variables: {
         where: {
@@ -60,10 +127,13 @@ function PaymentDetail() {
         },
       },
       onCompleted: (data) => {
-        console.log(data?.getPayments.data[0]);
+        setPaymentData(data?.getPayments.data[0]);
       },
     });
   };
+
+  const discont = 1;
+  const tax = 1;
 
   React.useEffect(() => {
     handleQueryPayment();
@@ -85,19 +155,28 @@ function PaymentDetail() {
             </Typography>
           </LeftRightBox>
           <LeftRightBox>
-            <Typography variant="h5">Payment Id:</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Issues Date:</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Due Date:</Typography>
+            <Typography variant="h5">
+              Payment Id: {paymentData?.paymentId}
+            </Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Issues Date: {DateTimeFormate(paymentData?.createdAt)}
+            </Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Due Date:{DateTimeFormate(paymentData?.expiredAt)}
+            </Typography>
           </LeftRightBox>
         </BoxContent>
         <BoxDivider />
         <BoxContent>
           <LeftRightBox>
             <Typography variant="h4">Payment Details</Typography>
-            <Typography>Name:</Typography>
-            <Typography>Address:</Typography>
-            <Typography>Tel:</Typography>
-            <Typography>Email:</Typography>
+            <Typography>
+              Name: {paymentData?.payerId?.firstName}&nbsp;
+              {paymentData?.payerId?.lastName}
+            </Typography>
+            <Typography>Address: {paymentData?.payerId?.address}</Typography>
+            <Typography>Tel: {paymentData?.payerId?.phone}</Typography>
+            <Typography>Email: {paymentData?.payerId?.email}</Typography>
           </LeftRightBox>
           <LeftRightBox></LeftRightBox>
         </BoxContent>
@@ -107,6 +186,7 @@ function PaymentDetail() {
               <TableHead>
                 <TableRow sx={{ borderTop: "1px solid gray" }}>
                   <TableCell>ITEM</TableCell>
+                  <TableCell>PAYMENT METHOD</TableCell>
                   <TableCell>DESCRIPTION</TableCell>
                   <TableCell>COST</TableCell>
                   <TableCell>QTY</TableCell>
@@ -119,13 +199,23 @@ function PaymentDetail() {
                   sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                 >
                   <TableCell component="th" scope="row">
-                    Premium Package
+                    {paymentData?.packageId?.name} Plan
                   </TableCell>
-                  <TableCell>Upgrad to premium</TableCell>
-                  <TableCell>$32</TableCell>
-                  <TableCell>1</TableCell>
-                  <TableCell>1</TableCell>
-                  <TableCell>$32</TableCell>
+                  <TableCell>{paymentData?.paymentMethod}</TableCell>
+                  <TableCell>{paymentData?.description}</TableCell>
+                  <TableCell>
+                    ${prettyNumberFormat(paymentData?.amount)}
+                  </TableCell>
+                  <TableCell>{paymentData?.countPurchase}</TableCell>
+                  <TableCell>
+                    {DateTimeFormate(paymentData?.createdAt)}
+                  </TableCell>
+                  <TableCell>
+                    $
+                    {prettyNumberFormat(
+                      paymentData?.amount * paymentData?.countPurchase,
+                    )}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
@@ -139,10 +229,26 @@ function PaymentDetail() {
             </Typography>
           </LeftRightBox>
           <LeftRightBox>
-            <Typography sx={{ fontWeight: 500 }}>Subtotal:</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Discount:</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Tax:</Typography>
-            <Typography sx={{ fontWeight: 500 }}>Total:</Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Subtotal: $
+              {prettyNumberFormat(
+                paymentData?.amount * paymentData?.countPurchase,
+              )}
+            </Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Discount: ${prettyNumberFormat(discont)}
+            </Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Tax: ${prettyNumberFormat(tax)}
+            </Typography>
+            <Typography sx={{ fontWeight: 500 }}>
+              Total: $
+              {prettyNumberFormat(
+                paymentData?.amount * paymentData?.countPurchase +
+                  discont +
+                  tax,
+              )}
+            </Typography>
           </LeftRightBox>
         </BoxContent>
         <BoxDivider />
