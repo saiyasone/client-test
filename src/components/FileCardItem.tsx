@@ -230,6 +230,8 @@ const FileCardItem: React.FC<any> = ({
     fileType,
     user,
     isPublic: props?.isPublic ? true : false,
+    height: 200,
+    width: 200,
   });
 
   const [isOpenMenu, setIsOpenMenu] = useState(false);

@@ -64,9 +64,6 @@ const useResizeImage = ({
             setImageFound(false);
           }
         } catch (e) {
-          if (axios.isCancel(e)) {
-            console.log("Request canceled", e.message);
-          }
           setImageFound(false);
         }
       };

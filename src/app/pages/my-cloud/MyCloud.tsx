@@ -51,7 +51,7 @@ import useBreadcrumbData from "hooks/useBreadcrumbData";
 import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
-import useScroll from "hooks/useScroll";
+// import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { Base64 } from "js-base64";
 import moment from "moment";
@@ -78,7 +78,7 @@ import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 
-const ITEM_PER_PAGE_GRID = 20;
+// const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
   const { user }: any = useAuth();
@@ -179,6 +179,7 @@ export function MyCloud() {
   const [_optionsValue, setOptionsValue] = useState(false);
   const [getValue, setGetValue] = useState<any>(null);
   const [viewMore, setViewMore] = useState(20);
+  const [fileViewMore, setFileViewMore] = useState(20);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { setIsAutoClose, isAutoClose } = useMenuDropdownState();
   const [total, setTotal] = useState(0);
@@ -187,10 +188,10 @@ export function MyCloud() {
   const location = useLocation();
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
-  const { limitScroll, addMoreLimit } = useScroll({
-    total,
-    limitData: ITEM_PER_PAGE_GRID,
-  });
+  // const { limitScroll, addMoreLimit } = useScroll({
+  //   total,
+  //   limitData: ITEM_PER_PAGE_GRID,
+  // });
   const { setFolderId, handleTriggerFolder }: any = useContext(FolderContext);
   const [dataGetUrl, setDataGetUrl] = useState(null);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
@@ -436,8 +437,9 @@ export function MyCloud() {
     setFolderId(value?._id);
     handleClose();
     const url = value?.url;
-    const base64URL = Base64.encodeURI(url);
-    navigate(`/folder/${base64URL}`);
+    console.log({ url });
+    // const base64URL = Base64.encodeURI(url);
+    // navigate(`/folder/${base64URL}`);
   };
 
   const handleClosePreview = () => {
@@ -458,7 +460,7 @@ export function MyCloud() {
               source: "default",
             },
             orderBy: "updatedAt_DESC",
-            limit: limitScroll,
+            limit: fileViewMore,
           },
           onCompleted: (data) => {
             if (data) {
@@ -510,7 +512,7 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFileGrid();
-  }, [limitScroll, toggle]);
+  }, [fileViewMore, toggle]);
 
   //query all files count and separate base on file type
   const queryCategory = async () => {
@@ -605,7 +607,8 @@ export function MyCloud() {
   };
 
   const handleViewMoreFile = () => {
-    addMoreLimit();
+    // addMoreLimit();
+    setFileViewMore((prev) => prev + 10);
   };
 
   const handleDownloadFile = async (inputData) => {
@@ -1685,11 +1688,11 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    limitScroll < total &&
+                    fileViewMore < total &&
                     toggle === "grid" && (
                       <Box
                         sx={{
-                          mt: 3,
+                          my: 3,
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
@@ -1704,7 +1707,6 @@ export function MyCloud() {
                           <Button
                             endIcon={<ExpandMore />}
                             sx={{ mt: 2 }}
-                            // disabled={loading === "loading"}
                             size="small"
                             variant="outlined"
                             onClick={handleViewMoreFile}

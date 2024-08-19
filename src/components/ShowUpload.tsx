@@ -54,12 +54,13 @@ import { limitContent } from "utils/string.util";
 type Props = {
   open?: boolean;
   data?: any;
-  onSelectMore?: () => void;
+  onSelectMore?: (str: string) => void;
   onDeleteData?: (index?: number, type?: string) => void;
   onClose?: () => void;
   onRemoveAll?: () => void;
   folderData: any[];
   parentComponent?: string;
+  getType?: string;
 };
 
 export default function ShowUpload(props: Props) {
@@ -1059,7 +1060,7 @@ export default function ShowUpload(props: Props) {
   };
 
   const handleSelectMore = () => {
-    onSelectMore?.();
+    onSelectMore?.("file");
   };
 
   const handleActionFile = async (id: string) => {

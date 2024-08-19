@@ -41,7 +41,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import { ENV_KEYS } from "constants/env.constant";
 import menuItems, { favouriteMenuItems } from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -193,8 +192,6 @@ function ExtendFolder() {
   }, [triggerFolder]);
 
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
 
   const [showPreview, setShowPreview] = useState<any>(false);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
@@ -745,8 +742,6 @@ function ExtendFolder() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -764,7 +759,7 @@ function ExtendFolder() {
     //       successMessage("Download successful", 2000);
     //     },
     //     onClosure: async () => {
-    //       setShowProgressing(false);
+    //
     //       resetDataForEvent();
     //     },
     //   },
@@ -856,8 +851,6 @@ function ExtendFolder() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -1084,8 +1077,8 @@ function ExtendFolder() {
     fetchSubFoldersAndFiles.resetFolderData();
     fetchSubFoldersAndFiles.resetFileData();
     const base64URL = Base64.encodeURI(dataForEvent.data?.url);
-    resetDataForEvent();
     navigate(`/folder/${base64URL}`);
+    resetDataForEvent();
   };
 
   const handleDeletedUserFromShareOnSave = async (sharedData) => {
