@@ -633,7 +633,7 @@ const DialogCreateFileDrop = (props) => {
                               <DownloadSharpIcon sx={{ mr: 3 }} />
                               Download
                             </Button>
-                            <Button
+                            {/* <Button
                               variant="contained"
                               onClick={(e) =>
                                 handleShareQR(e, qrCodeRef, {
@@ -650,7 +650,7 @@ const DialogCreateFileDrop = (props) => {
                                   transform: "rotate(180deg) scale(1,-1)",
                                 }}
                               />
-                            </Button>
+                            </Button> */}
                           </Box>
                         </Box>
                       </Box>

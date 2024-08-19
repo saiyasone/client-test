@@ -845,7 +845,7 @@ function FileDrop() {
                       <DownloadSharpIcon sx={{ mr: 3 }} />
                       Download
                     </Button>
-                    <Button
+                    {/* <Button
                       variant="contained"
                       onClick={(e) => handleShareQR(e, qrCodeRef, headerData)}
                       sx={{ ml: 5, width: "130px" }}
@@ -854,7 +854,7 @@ function FileDrop() {
                       <ReplyAllSharpIcon
                         sx={{ ml: 3, transform: "rotate(180deg) scale(1,-1)" }}
                       />
-                    </Button>
+                    </Button> */}
                   </Box>
                 </Box>
               </Grid>
