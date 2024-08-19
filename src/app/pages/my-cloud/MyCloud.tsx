@@ -11,7 +11,6 @@ import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
 import {
   MUTATION_ACTION_FILE,
-  MUTATION_UPDATE_FILE_PUBLIC,
   QUERY_FILE,
   QUERY_FILE_CATEGORY,
 } from "api/graphql/file.graphql";
@@ -102,7 +101,6 @@ export function MyCloud() {
   const [createFileDropLink] = useMutation(
     MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
   );
-  const [updateFileDrop] = useMutation(MUTATION_UPDATE_FILE_PUBLIC);
 
   const [fileAction] = useMutation(MUTATION_ACTION_FILE);
   const [deleteFolder] = useMutation(MUTATION_UPDATE_FOLDER);
@@ -128,6 +126,7 @@ export function MyCloud() {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [userPackage, setUserPackage] = useState<any>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+
   // slice in redux
   const dispatch = useDispatch();
   const dataSelector = useSelector(
@@ -611,8 +610,6 @@ export function MyCloud() {
 
   const handleDownloadFile = async (inputData) => {
     const data = inputData || getValue;
-    setShowProgressing(true);
-    setProcesing(true);
 
     const newFileData = [
       {
@@ -647,9 +644,7 @@ export function MyCloud() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setIsAutoClose(true);
           setFileDetailsDialog(false);
@@ -671,9 +666,6 @@ export function MyCloud() {
   };
 
   const handleDownloadFolder = async (data) => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const multipleData = [
       {
         id: data?._id,
@@ -703,7 +695,6 @@ export function MyCloud() {
           setFileDetailsDialog(false);
           setIsOpenMenu(false);
         },
-        onProcess: () => {},
       },
     );
   };
@@ -881,19 +872,6 @@ export function MyCloud() {
   ) => {
     try {
       if (activePrivateFileDrop) {
-        // console.log('124564654');
-        // const fileDropLink = await updateFileDrop({
-        //   variables: {
-        //     id: activePrivateFileDrop._id,
-        //     input: convertObjectEmptyStringToNull({
-        //       url: link,
-        //       expiredAt: date,
-        //       title: values?.title,
-        //       description: values?.description || null,
-        //       folderId: folderDropId,
-        //     }),
-        //   },
-        // });
         const fileDropLink = await createFileDropLink({
           variables: {
             input: convertObjectEmptyStringToNull({
@@ -902,6 +880,9 @@ export function MyCloud() {
               title: values?.title,
               description: values?.description || null,
               folderId: folderDropId,
+              allowDownload: values.allowDownload,
+              allowMultiples: values.allowMultiples,
+              allowUpload: values.allowUpload,
             }),
           },
         });
@@ -917,6 +898,9 @@ export function MyCloud() {
               title: values?.title,
               description: values?.description || null,
               folderId: folderDropId,
+              allowDownload: values.allowDownload,
+              allowMultiples: values.allowMultiples,
+              allowUpload: values.allowUpload,
             }),
           },
         });

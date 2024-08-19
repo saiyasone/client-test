@@ -14,7 +14,6 @@ import {
 import { DataGrid } from "@mui/x-data-grid";
 import heDecode from "he";
 import useFilterTicket from "hooks/ticket/useFilterTicket";
-import useManageTicket from "hooks/ticket/useManageTicket";
 import moment from "moment";
 import { Fragment, useEffect } from "react";
 import { GoPlus, GoSearch } from "react-icons/go";
@@ -30,13 +29,14 @@ import {
   TickCardContent,
   TicketSectionContainer,
 } from "./styles/ticket2.style";
+import useManageMainTicket from "hooks/ticket/useManageMainTicket";
 
 function Ticket() {
   const { user }: any = useAuth();
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width: 950px)");
   const filter = useFilterTicket();
-  const dataTicket = useManageTicket({ filter: filter.data });
+  const dataTicket = useManageMainTicket({ filter: filter.data });
 
   const columns: any = [
     {
@@ -67,7 +67,7 @@ function Ticket() {
         const row = params?.row;
         return (
           <Box sx={{ color: "#17766B", fontWeight: "600" }}>
-            {heDecode.decode(row?.title)}
+            {heDecode.decode(row?.title || "")}
           </Box>
         );
       },
@@ -121,7 +121,7 @@ function Ticket() {
       type: filter.ACTION_TYPE.CREATED_BY,
       payload: user?._id,
     });
-  }, []);
+  }, [user]);
 
   function handleAddTicket() {
     navigate("new", { relative: "path" });

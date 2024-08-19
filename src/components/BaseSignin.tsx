@@ -80,7 +80,10 @@ function BaseSignin(props) {
   };
 
   const handleData = (value) => {
-    if (value) setCaptchaKey(false);
+    if (value) {
+      window.__reCaptcha = value;
+      setCaptchaKey(false);
+    }
   };
 
   useEffect(() => {

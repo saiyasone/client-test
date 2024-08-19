@@ -461,9 +461,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       const signInUser = await userLogin({
         variables: {
           where: {
-            username: username || "",
-            password: password || "",
-            ip: responseIp.data || "",
+            username: username ?? "",
+            password: password ?? "",
+            ip: responseIp.data ?? "",
+            captcha: window.__reCaptcha!,
           },
         },
       });
@@ -667,6 +668,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       await userForgotPasword({
         variables: {
           email: email,
+          captcha: window.__reCaptcha,
         },
         onCompleted: (data) => {
           if (data?.forgotPassword?.token) {

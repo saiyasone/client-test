@@ -543,9 +543,6 @@ function RecentFile() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const newFileData = [
       {
         id: dataForEvent.data?._id,
@@ -576,9 +573,7 @@ function RecentFile() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
@@ -587,41 +582,6 @@ function RecentFile() {
         },
       },
     );
-    // await manageFile.handleDownloadFile(
-    //   {
-    //     id: dataForEvent.data._id,
-    //     newPath: dataForEvent.data.newPath,
-    //     newFilename: dataForEvent.data.newFilename,
-    //     filename: dataForEvent.data.filename,
-    //   },
-    //   {
-    //     onProcess: async (countPercentage) => {
-    //       setProgressing(countPercentage);
-    //     },
-    //     onSuccess: async () => {
-    //       successMessage("Download successful", 2000);
-
-    //       setDataForEvent((state) => ({
-    //         ...state,
-    //         action: null,
-    //         data: {
-    //           ...state.data,
-    //           totalDownload: dataForEvent.data.totalDownload + 1,
-    //         },
-    //       }));
-    //       recentFileRefetch();
-    //     },
-    //     onFailed: async (error) => {
-    //       errorMessage(error, 2000);
-    //     },
-    //     onClosure: () => {
-    //       setIsAutoClose(false);
-    //       setFileDetailsDialog(false);
-    //       setShowProgressing(false);
-    //       setProcesing(false);
-    //     },
-    //   },
-    // );
   };
 
   const handleDeleteRecentFile = async () => {

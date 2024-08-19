@@ -14,6 +14,7 @@ const FileDeleteDialogBoby = muiStyled("div")(({ theme }) => ({
 
 const DialogDeleteV1 = (props) => {
   const { t } = useTranslation();
+
   return (
     <BaseDialogV1
       {...props}

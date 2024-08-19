@@ -31,13 +31,17 @@ function BaseSignUp(props) {
   const [captcha, setCaptcha] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const mobileScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const [isLoading, setIsLoading] = useState(false);
 
   const captchaStyle = {
     width: "100%",
   };
 
   function handleData(data) {
-    if (data) setCaptcha(false);
+    if (data) {
+      window.__reCaptcha = data;
+      setCaptcha(false);
+    }
   }
 
   useEffect(() => {
@@ -86,6 +90,7 @@ function BaseSignUp(props) {
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
           if (!captcha) {
+            setIsLoading(true);
             await signUp(
               values.firstName,
               values.lastName,
@@ -93,8 +98,10 @@ function BaseSignUp(props) {
               values.email,
               values.password,
             );
+            setIsLoading(false);
           }
         } catch (error: any) {
+          setIsLoading(false);
           const message = error.message || "Something went wrong";
           setStatus({ success: false });
           setErrors({ submit: message });
@@ -293,7 +300,7 @@ function BaseSignUp(props) {
               variant="contained"
               color="primary"
               disabled={captcha}
-              loading={authLoading}
+              loading={isLoading}
               size={mobileScreen ? "small" : "medium"}
             >
               Register

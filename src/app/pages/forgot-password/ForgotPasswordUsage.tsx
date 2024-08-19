@@ -50,7 +50,10 @@ function ForgotPasswordUsage() {
   };
 
   function handleData(data) {
-    if (data) setCaptcha(false);
+    if (data) {
+      window.__reCaptcha = data;
+      setCaptcha(false);
+    }
   }
 
   function handleClearDateForgetPassword() {
@@ -64,6 +67,7 @@ function ForgotPasswordUsage() {
       );
 
       if (resData) {
+        console.log(resData);
         const forgetCaptcha = resData?.status;
         if (forgetCaptcha === "on") {
           setCaptcha(true);

@@ -1,10 +1,9 @@
 import { useMutation } from "@apollo/client";
 import { DataGrid } from "@mui/x-data-grid";
-import { Base64 } from "js-base64";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
-import { NavLink } from "react-router-dom";
 import * as Mui from "./styles/fileDrop.style";
+import { BiEdit } from "react-icons/bi";
 
 // components
 import { AiOutlinePlus } from "react-icons/ai";
@@ -17,21 +16,24 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import DownloadSharpIcon from "@mui/icons-material/DownloadSharp";
 import FileDownloadDoneIcon from "@mui/icons-material/FileDownloadDone";
-import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import ReplyAllSharpIcon from "@mui/icons-material/ReplyAllSharp";
+import RemoveRedEyeIcon from "@mui/icons-material/RemoveRedEye";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   Box,
   Button,
   Card,
   CardContent,
+  Checkbox,
   Chip,
+  FormControlLabel,
   Grid,
   IconButton,
   InputAdornment,
   TextField,
   Typography,
   createTheme,
+  styled,
   useMediaQuery,
 } from "@mui/material";
 import FormControl from "@mui/material/FormControl";
@@ -54,7 +56,38 @@ import QRCode from "react-qr-code";
 import { THEMES } from "theme/variant";
 import { errorMessage, successMessage } from "utils/alert.util";
 import { generateRandomUniqueNumber } from "utils/number.util";
-import { handleDownloadQRCode, handleShareQR } from "utils/image.share.download";
+import {
+  handleDownloadQRCode,
+  handleShareQR,
+} from "utils/image.share.download";
+import { decryptId, encryptDataLink } from "utils/secure.util";
+import { DatePicker } from "@mui/x-date-pickers";
+import DialogEditExpiryLinkFileDrop from "components/dialog/DialogEditExpiryLinkFileDrop";
+import { NavLink } from "react-router-dom";
+
+const DatePickerV1Container = styled(Box)({
+  width: "100%",
+  display: "flex",
+  flexDirection: "column",
+  height: "100%",
+  minHeight: "100%",
+  position: "relative",
+});
+
+const DatePickerV1Lable = styled(Box)(({ theme }) => ({
+  fontWeight: theme.typography.fontWeightMedium,
+  textAlign: "start",
+  color: "grey !important",
+  position: "absolute",
+  top: "-1rem",
+  left: "2px",
+}));
+
+const DatePickerV1Content = styled(Box)(({ theme }) => ({
+  marginTop: theme.spacing(1),
+  width: "100%",
+  position: "relative",
+}));
 
 function FileDrop() {
   const theme: any = createTheme();
@@ -63,7 +96,7 @@ function FileDrop() {
   const link = ENV_KEYS.VITE_APP_FILE_DROP_LINK;
   const qrCodeRef = useRef<SVGSVGElement | any>(null);
   const [value, setValue] = useState<any>(link);
-  const [isEmptyTitle, setIsEmptyTitle] = useState('');
+  const [isEmptyTitle, setIsEmptyTitle] = useState("");
   const [isCopy, setIsCopy] = useState<any>(false);
   const [isCopied, setIsCopied] = useState<any>({});
   const [selectDay, setSelectDay] = useState<any>(1);
@@ -73,15 +106,26 @@ function FileDrop() {
   const [multiId, setMultiId] = useState<any>([]);
   const [openDelete, setOpenDelete] = useState<any>(false);
   const [showCreateform, setShowCreateForm] = useState<any>(false);
+  const [packageType, setPackageType] = useState("Free");
+  const [selectDate, setSelectDate] = useState<moment.Moment | null>(null);
+  const [openEditExpiry, setOpenEditExpiry] = useState(false);
 
   const [createFileDropLink] = useMutation(
     MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
   );
   const [deleteFiledropLink] = useMutation(MUTATION_DELETE_FILE_DROP_URL);
+  const [dataForEvents, setDataForEvents] = useState<any>({
+    action: null,
+    type: null,
+    data: {},
+  });
 
   const [headerData, setHeaderData] = useState<any>({
     title: "",
     description: "",
+    allowDownload: false,
+    allowMultiples: false,
+    allowUpload: true,
   });
 
   const filter = useFilter();
@@ -89,8 +133,8 @@ function FileDrop() {
 
   // checked file pagination
   const generateFileDropLink = async () => {
-    if(!headerData.title){
-      setIsEmptyTitle('Title is required');
+    if (!headerData.title) {
+      setIsEmptyTitle("Title is required");
       return false;
     }
     setIsCopy(false);
@@ -101,6 +145,9 @@ function FileDrop() {
         variables: {
           input: {
             url: genLink,
+            allowDownload: headerData.allowDownload || false,
+            allowMultiples: headerData.allowMultiples || false,
+            allowUpload: headerData.allowUpload || false,
             title: headerData?.title,
             description: headerData?.description,
             expiredAt:
@@ -117,7 +164,13 @@ function FileDrop() {
         setExpiredDate(null);
         manageFileDrop.customeFileDrop();
         setIsShow(true);
-        setHeaderData({ title: "", description: "" });
+        setHeaderData({
+          title: "",
+          description: "",
+          allowDownload: false,
+          allowMultiples: false,
+          allowUpload: true,
+        });
         successMessage("Your new link is created!!", 3000);
       }
     } catch (error: any) {
@@ -157,14 +210,27 @@ function FileDrop() {
     setExpiredDate(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
   };
 
+  const handleDateChange = (date: moment.Moment | null) => {
+    if (date) {
+      const currentDate = moment().startOf("day").utc();
+      const totalDays = date.startOf("day").utc().diff(currentDate, "days");
+      setSelectDate(currentDate);
+
+      if (totalDays > 0) {
+        const expirationDateTime = calculateExpirationDate(totalDays);
+        setExpiredDate(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
+      }
+    }
+  };
+
   const handleTitleChange = (event) => {
     setHeaderData((prevHeaderData) => ({
       ...prevHeaderData,
       title: event.target.value,
     }));
 
-    if(!headerData.title && !event.target.value){
-      setIsEmptyTitle('');
+    if (!headerData.title && !event.target.value) {
+      setIsEmptyTitle("");
     }
   };
 
@@ -172,6 +238,25 @@ function FileDrop() {
     setHeaderData((prevHeaderData) => ({
       ...prevHeaderData,
       description: event.target.value,
+    }));
+  };
+
+  const handleAllowDownloadChange = (event) => {
+    setHeaderData((prevHeaderData) => ({
+      ...prevHeaderData,
+      allowDownload: event.target.checked,
+    }));
+  };
+  const handleAllowMultiplesChange = (event) => {
+    setHeaderData((prevHeaderData) => ({
+      ...prevHeaderData,
+      allowMultiples: event.target.checked,
+    }));
+  };
+  const handleAllowUploadChange = (event) => {
+    setHeaderData((prevHeaderData) => ({
+      ...prevHeaderData,
+      allowUpload: event.target.checked,
     }));
   };
 
@@ -224,6 +309,15 @@ function FileDrop() {
       errorMessage(cutErr, 3000);
     }
   };
+  const menuOnClick = async (action) => {
+    switch (action) {
+      case "edit_expiry":
+        setOpenEditExpiry(true);
+        break;
+      default:
+        return;
+    }
+  };
 
   useEffect(() => {
     if (showValid) {
@@ -232,6 +326,15 @@ function FileDrop() {
       }, 5000);
     }
   }, [showValid, headerData.title]);
+
+  React.useEffect(() => {
+    if (
+      dataForEvents.action &&
+      (dataForEvents.data || dataForEvents.action === "edit_expiry")
+    ) {
+      menuOnClick(dataForEvents.action);
+    }
+  }, [dataForEvents.action]);
 
   const columns: any = [
     {
@@ -255,10 +358,9 @@ function FileDrop() {
           <div style={{ color: "green" }}>
             <Chip
               sx={{
-                backgroundColor: params?.row?.status
-                  ? "rgba(168, 170, 174,0.16)"
-                  : "#dcf6e8",
-                color: params?.row?.status ? "rgb(168, 170, 174)" : "#29c770",
+                backgroundColor: params?.row?.status && params?.row?.status ==='expired'
+                  ? "#FFEFE1" : "#dcf6e8",
+                color: params?.row?.status && params?.row?.status ==='expired' ? "#FFA44F" : "#29c770",
               }}
               label={params?.row?.status}
               size="small"
@@ -306,7 +408,7 @@ function FileDrop() {
     {
       field: "expiredAt",
       headerName: "Expired date",
-      flex: 1,
+      // flex: 1,
       renderCell: (params) => {
         return (
           <div>
@@ -324,33 +426,96 @@ function FileDrop() {
       headerAlign: "center",
       align: "center",
       flex: 1,
-      renderCell: (params) => (
-        <strong>
-          <Tooltip title="Copy file drop link" placement="top">
-            {isCopied[params?.row?._id] ? (
-              <IconButton disabled>
-                <FileDownloadDoneIcon sx={{ color: "#17766B" }} />
-              </IconButton>
-            ) : (
+      renderCell: (params) => {
+        const url = String(params?.row?.url);
+
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              flexWrap: "nowrap",
+              gap: 2,
+              minWidth: "auto",
+            }}
+          >
+            <Tooltip title="Copy file drop link" placement="top">
+              {isCopied[params?.row?._id] ? (
+                <IconButton disabled>
+                  <FileDownloadDoneIcon sx={{ color: "#17766B" }} />
+                </IconButton>
+              ) : (
+                <IconButton
+                  onClick={() => handleCopy(params?.row?.url, params?.row?._id)}
+                >
+                  <ContentCopyIcon sx={{ fontSize: "16px" }} />
+                </IconButton>
+              )}
+            </Tooltip>
+            <Tooltip title="View details" placement="top">
               <IconButton
-                onClick={() => handleCopy(params?.row?.url, params?.row?._id)}
+                component={NavLink}
+                to={`/file-drop-detail/${encryptDataLink(url)}`}
               >
-                <ContentCopyIcon sx={{ fontSize: "16px" }} />
+                <RemoveRedEyeIcon sx={{ fontSize: "18px" }} />
               </IconButton>
-            )}
-          </Tooltip>
-          <Tooltip title="View details" placement="top">
-            <IconButton
-              component={NavLink}
-              to={`/file-drop-detail/${Base64.encode(params?.row?.url)}`}
-            >
-              <RemoveRedEyeIcon sx={{ fontSize: "18px" }} />
-            </IconButton>
-          </Tooltip>
-        </strong>
-      ),
+            </Tooltip>
+            <Tooltip title="Edit the expiry date-time" placement="top">
+              <NormalButton
+                sx={{
+                  cursor: "pointer",
+                  opacity: 1,
+                }}
+                onClick={() => {
+                  {
+                    if (params?.row?._id) {
+                      setDataForEvents({
+                        action: "edit_expiry",
+                        data: params.row,
+                      });
+                    }
+                  }
+                }}
+              >
+                <BiEdit
+                  size="16px"
+                  color={theme.name === THEMES.DARK ? "white" : "grey"}
+                />
+              </NormalButton>
+            </Tooltip>
+          </Box>
+        );
+      },
     },
   ];
+
+  useEffect(() => {
+    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
+      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
+      : null;
+
+    if (data) {
+      const plainData = decryptId(
+        data,
+        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+      );
+
+      if (plainData) {
+        const jsonPlain = JSON.parse(plainData);
+        if (
+          jsonPlain &&
+          jsonPlain?.packageId &&
+          jsonPlain?.packageId?.category
+        ) {
+          const category = jsonPlain?.packageId?.category;
+          if (category) {
+            setPackageType(category);
+          }
+        }
+      }
+    }
+  }, [packageType]);
 
   return (
     <Typography
@@ -379,28 +544,26 @@ function FileDrop() {
                     color: "grey !important",
                   }}
                 >
-                  <b style={{color:'red'}}>*</b> Title
+                  <b style={{ color: "red" }}>*</b> Title
                 </InputLabel>
-              <TextField
-                sx={{
-                  width: "100%",
-                  fontSize: "18px !important",
-                  color: "grey !important",
-                }}
-                size="small"
-                InputLabelProps={{
-                  shrink: false,
-                }}
-                placeholder="Title...."
-                value={headerData.title}
-                onChange={handleTitleChange}
-              />
-              <Typography component={'p'} style={{color:'red'}}>
-                {
-                  !headerData.title && isEmptyTitle
-                }
-              </Typography>
-            </Box>
+                <TextField
+                  sx={{
+                    width: "100%",
+                    fontSize: "18px !important",
+                    color: "grey !important",
+                  }}
+                  size="small"
+                  InputLabelProps={{
+                    shrink: false,
+                  }}
+                  placeholder="Title...."
+                  value={headerData.title}
+                  onChange={handleTitleChange}
+                />
+                <Typography component={"p"} style={{ color: "red" }}>
+                  {!headerData.title && isEmptyTitle}
+                </Typography>
+              </Box>
               <InputLabel
                 sx={{
                   color: "grey !important",
@@ -428,38 +591,112 @@ function FileDrop() {
             </div>
             <Mui.GenerateLinkArea>
               <Grid container gap={6}>
-                <Grid item xs={12} md={6}>
-                  <FormControl sx={{ width: "100%" }} size="small">
-                    <InputLabel id="demo-simple-select-label">
-                      Expired date
-                    </InputLabel>
-                    <Select
-                      labelId="demo-simple-select-label"
-                      id="demo-simple-select"
-                      value={selectDay}
-                      label="Expired date"
-                      onChange={handleExpiredDateChange}
-                      sx={{ textAlign: "start" }}
-                    >
-                      <MenuItem value={1}>1 day after created</MenuItem>
-                      <MenuItem value={2}>2 days after created</MenuItem>
-                      <MenuItem value={3}>3 days after created</MenuItem>
-                    </Select>
-                  </FormControl>
+                <Grid item xs={12} md={4}>
+                  {packageType ? (
+                    packageType.toLowerCase().indexOf("free") === 0 ||
+                    packageType?.toLowerCase().indexOf("anonymous") === 0 ? (
+                      <FormControl sx={{ width: "100%" }} size="small">
+                        <InputLabel id="demo-simple-select-label">
+                          Expired date
+                        </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={selectDay}
+                          label="Expired date"
+                          onChange={handleExpiredDateChange}
+                          sx={{ textAlign: "start" }}
+                        >
+                          <MenuItem value={1}>1 day after created</MenuItem>
+                          <MenuItem value={2}>2 days after created</MenuItem>
+                          <MenuItem value={3}>3 days after created</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      <DatePickerV1Container>
+                        <DatePickerV1Lable>Expired date</DatePickerV1Lable>
+                        <DatePickerV1Content
+                          sx={{
+                            "& .MuiTextField-root": {
+                              width: "100% !important",
+                            },
+                            "& .MuiInputBase-root": {},
+                            "input::placeholder": {
+                              opacity: "1 !important",
+                              color: "#9F9F9F",
+                            },
+                          }}
+                        >
+                          <DatePicker
+                            format="DD/MM/YYYY"
+                            name="demo-simple-select"
+                            value={selectDate}
+                            sx={{
+                              ".MuiInputBase-root": {
+                                height: "35px",
+                              },
+                            }}
+                            onChange={(date) => handleDateChange(date)}
+                          />
+                        </DatePickerV1Content>
+                      </DatePickerV1Container>
+                    )
+                  ) : null}
                 </Grid>
                 <Grid
                   item
                   xs={12}
-                  md={4}
+                  md={7}
                   sx={{
                     display: "flex",
-                    justifyContent: { xs: "flex-end", md: "flex-start" },
+                    justifyContent: {
+                      xs: "flex-end",
+                      md: "center",
+                      rowGap: 10,
+                    },
                   }}
                 >
+                  <FormControl sx={{ display: "flex", flexDirection: "row" }}>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-download"
+                          name="allow-download"
+                          checked={headerData.allowDownload}
+                          onChange={handleAllowDownloadChange}
+                        />
+                      }
+                      label="Allow Download"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-upload"
+                          name="allow-upload"
+                          checked={headerData.allowUpload}
+                          onChange={handleAllowUploadChange}
+                        />
+                      }
+                      label="Allow Upload"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-multiple"
+                          name="allow-multiple"
+                          checked={headerData.allowMultiples}
+                          onChange={handleAllowMultiplesChange}
+                        />
+                      }
+                      label="Allow Multiples"
+                    />
+                  </FormControl>
+                </Grid>
+                <Grid item xs={12} md={4}>
                   <Button
                     variant="contained"
                     onClick={generateFileDropLink}
-                    sx={{ width: { xs: "100%", md: "auto" } }}
+                    sx={{ width: { xs: "100%" } }}
                   >
                     Generate link now
                   </Button>
@@ -537,7 +774,7 @@ function FileDrop() {
                   }}
                 >
                   {/* <div ref={qrRef}> */}
-                    {/* <QRCode
+                  {/* <QRCode
                       style={{
                         width: "100px",
                         height: "100px",
@@ -550,7 +787,17 @@ function FileDrop() {
                       viewBox={`0 0 256 256`}
                     /> */}
                   {/* </div> */}
-                  <div ref={qrCodeRef} style={{ display: 'inline-block', padding: '7px', border: '1px solid gray', borderRadius: '7px' }}>
+                  <div
+                    ref={qrCodeRef}
+                    style={{
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      padding: "7px",
+                      border: "1px solid gray",
+                      borderRadius: "7px",
+                    }}
+                  >
                     <QRCode
                       style={{ width: "100px", height: "100px" }}
                       value={value}
@@ -590,7 +837,9 @@ function FileDrop() {
                   >
                     <Button
                       variant="contained"
-                      onClick={(e)=>handleDownloadQRCode(e, qrCodeRef, headerData)}
+                      onClick={(e) =>
+                        handleDownloadQRCode(e, qrCodeRef, headerData)
+                      }
                       sx={{ width: "130px" }}
                     >
                       <DownloadSharpIcon sx={{ mr: 3 }} />
@@ -598,7 +847,7 @@ function FileDrop() {
                     </Button>
                     <Button
                       variant="contained"
-                      onClick={(e)=>handleShareQR(e, qrCodeRef, headerData)}
+                      onClick={(e) => handleShareQR(e, qrCodeRef, headerData)}
                       sx={{ ml: 5, width: "130px" }}
                     >
                       Share
@@ -819,9 +1068,9 @@ function FileDrop() {
                 borderRadius: 0,
                 height: "100% !important",
                 "& .MuiDataGrid-columnSeparator": { display: "none" },
-                "& .MuiDataGrid-virtualScroller": {
-                  overflowX: "hidden",
-                },
+                // "& .MuiDataGrid-virtualScroller": {
+                //   overflowX: "hidden",
+                // },
                 "& .MuiDataGrid-cell:focus": {
                   outline: "none",
                 },
@@ -887,6 +1136,17 @@ function FileDrop() {
           multiId.length > 1 ? handleMultipleDelete : handleSingleDelete
         }
       />
+      {openEditExpiry && (
+        <DialogEditExpiryLinkFileDrop
+          isOpen={openEditExpiry}
+          onClose={() => {
+            setOpenEditExpiry(false);
+            setDataForEvents("");
+            manageFileDrop.customeFileDrop();
+          }}
+          data={dataForEvents?.data}
+        />
+      )}
     </Typography>
   );
 }

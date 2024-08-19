@@ -526,9 +526,6 @@ function ExtendShare() {
 
   /* handle download folders */
   const handleDownloadFolders = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const newFileData = [
       {
         id: dataForEvent.data?._id,
@@ -555,9 +552,7 @@ function ExtendShare() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setShowProgressing(false);
           setIsAutoClose(false);
@@ -608,9 +603,6 @@ function ExtendShare() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const newFileData = [
       {
         id: dataForEvent.data?._id,
@@ -642,9 +634,7 @@ function ExtendShare() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);

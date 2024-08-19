@@ -193,7 +193,6 @@ function ExtendFolder() {
   }, [triggerFolder]);
 
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [progressing, setProgressing] = useState<any>(0);
   const [procesing, setProcesing] = useState<any>(true);
   const [showProgressing, setShowProgressing] = useState<any>(false);
 
@@ -711,9 +710,6 @@ function ExtendFolder() {
 
   /* handle download folders */
   const handleDownloadFolder = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const newFileData = [
       {
         id: dataForEvent.data?._id,
@@ -745,9 +741,7 @@ function ExtendFolder() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
@@ -827,9 +821,6 @@ function ExtendFolder() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const newFileData = [
       {
         id: dataForEvent.data?._id,
@@ -861,9 +852,7 @@ function ExtendFolder() {
         onFailed: (error) => {
           errorMessage(error, 3000);
         },
-        onProcess: (percentage) => {
-          setProgressing(percentage);
-        },
+
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
@@ -872,38 +861,6 @@ function ExtendFolder() {
         },
       },
     );
-
-    // await manageFile.handleDownloadFile(
-    //   {
-    //     id: dataForEvent.data._id,
-    //     newPath: dataForEvent.data.newPath,
-    //     newFilename: dataForEvent.data.newName,
-    //     filename: dataForEvent.data.name,
-    //   },
-    //   {
-    //     onProcess: async (countPercentage) => {
-    //       setProgressing(countPercentage);
-    //     },
-    //     onSuccess: async () => {
-    //       setDataForEvent((state) => ({
-    //         ...state,
-    //         action: null,
-    //         data: {
-    //           ...state.data,
-    //           totalDownload: dataForEvent.data.totalDownload + 1,
-    //         },
-    //       }));
-    //       customGetSubFoldersAndFiles();
-    //     },
-    //     onFailed: async (error) => {
-    //       errorMessage(error, 2000);
-    //     },
-    //     onClosure: () => {
-    //       setShowProgressing(false);
-    //       setProcesing(false);
-    //     },
-    //   },
-    // );
   };
 
   const handleDeleteFilesAndFolders = async () => {
@@ -1175,10 +1132,6 @@ function ExtendFolder() {
           " will be deleted?"
         }
       />
-
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
       <MUI.ExtendContainer>
         <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
@@ -1664,10 +1617,6 @@ function ExtendFolder() {
         }
       />
 
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
-
       <DialogCreateFileDrop
         isOpen={openFileDrop}
         onClose={handleCloseFileDrop}
@@ -1776,10 +1725,6 @@ function ExtendFolder() {
           " will be deleted?"
         }
       />
-
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
     </Fragment>
   );
 }

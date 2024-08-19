@@ -16,6 +16,7 @@ import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import * as Yup from "yup";
 
 import useAuth from "hooks/useAuth";
+import { LoadingButton } from "@mui/lab";
 
 const Alert = styled(MuiAlert)(spacing);
 
@@ -32,6 +33,7 @@ function ResetPassword(props) {
   const { token } = props;
   const { resetPassword }: { resetPassword: (values) => void } = useAuth();
 
+  const [isLoading, setIsLoading] = useState(false);
   const [showConfimPassword, setShowConfimPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -54,7 +56,7 @@ function ResetPassword(props) {
       validationSchema={Yup.object().shape({
         newPassword: Yup.string()
           .required("Please enter a password.")
-          .min(8, "Password must be at least 8 characters long.")
+          .min(4, "Password must be at least 8 characters long.")
           .matches(
             /[a-z]/,
             "Password must contain at least one lowercase letter.",
@@ -64,10 +66,13 @@ function ResetPassword(props) {
           .required("Please confirm your password.")
           .oneOf([Yup.ref("newPassword")], "Passwords does not match"),
       })}
-      onSubmit={(values, { setErrors, setStatus, setSubmitting }) => {
+      onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
-          resetPassword?.(values);
+          setIsLoading(true);
+          await resetPassword?.(values);
+          setIsLoading(false);
         } catch (error) {
+          setIsLoading(false);
           const message = error.message || "Something went wrong";
 
           setStatus({ success: false });
@@ -93,6 +98,7 @@ function ResetPassword(props) {
 
           <InputLabel sx={{ mt: 5, mb: -2 }}>New Password</InputLabel>
           <TextField
+            placeholder="New password"
             type={showPassword ? "text" : "password"}
             name="newPassword"
             size="small"
@@ -125,6 +131,7 @@ function ResetPassword(props) {
           />
           <InputLabel sx={{ mb: -2 }}>Confirm Password</InputLabel>
           <TextField
+            placeholder="Confirm password"
             type={showConfimPassword ? "text" : "password"}
             name="confirmPassword"
             size="small"
@@ -155,15 +162,16 @@ function ResetPassword(props) {
               ),
             }}
           />
-          <Button
+          <LoadingButton
             type="submit"
             fullWidth
             variant="contained"
             color="primaryTheme"
             sx={{ borderRadius: "6px", mt: 2 }}
+            loading={isLoading}
           >
             Set New Password
-          </Button>
+          </LoadingButton>
           <LinkBack href="/auth/sign-in">
             <ArrowBackIosIcon sx={{ fontSize: "15px", mt: 0.5 }} />
             Back to sign in

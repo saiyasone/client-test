@@ -14,10 +14,22 @@ export const PAYMENT_METHOD = {
   TwopaymentCheckout: "Payment 2 checkout",
 };
 
+export const COUNTRIES = {
+  LAOS: 'LA',
+  FOREIGN: "Fireign"
+};
+
+export const CURRENCIES = {
+  DOLLAR: '$',
+  KIP: '₭',
+}
+
 const initialState = {
   paymentId: null,
   isPayment: false,
-  currencySymbol: "$",
+  currencySymbol: CURRENCIES.DOLLAR,
+  exchangeRate: 0,
+  country: COUNTRIES.FOREIGN,
   taxValue: TAX_PERCENT / 100,
   taxPercent: TAX_PERCENT,
   couponCode: null,
@@ -124,6 +136,19 @@ export const paymentSlice = createSlice({
       state.activePackageType = action.payload;
     },
 
+    setExchangeRate: (state, action) => {
+      console.log(action.payload);
+        state.exchangeRate = action.payload;
+    },
+
+    setCountry: (state, action)=>{
+      state.country = action.payload;
+    },
+
+    setCurencySymbol: (state, action)=>{
+      state.currencySymbol = action.payload;
+    },
+
     setShowBcel: (state, action) => {
       state.showBcelOne = action.payload;
     },
@@ -174,9 +199,12 @@ export const paymentSlice = createSlice({
 });
 
 export const {
+  setCurencySymbol,
   setActivePaymentType,
   setPackageType,
   setActivePaymentId,
+  setCountry,
+  setExchangeRate,
   setPackageData,
   setCalculatePrice,
   setAddressData,

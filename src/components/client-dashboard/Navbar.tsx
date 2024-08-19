@@ -582,35 +582,6 @@ const Navbar = ({ onDrawerToggle }) => {
         },
       },
     );
-
-    // await manageFile.handleDownloadFile(
-    //   {
-    //     id: currentActiveData._id,
-    //     newPath: currentActiveData.newPath,
-    //     newFilename: currentActiveData.newName,
-    //     filename: currentActiveData.name,
-    //   },
-    //   {
-    //     onProcess: async (countPercentage) => {
-    //       setProgressing(countPercentage);
-    //     },
-    //     onSuccess: async () => {
-    //       setActiveData((prev) => ({
-    //         ...prev,
-    //         totalDownloadFile: activeData.totalDownloadFile + 1,
-    //       }));
-    //       successMessage("Download successful", 2000);
-    //       eventUploadTrigger.trigger();
-    //     },
-    //     onFailed: async (error) => {
-    //       errorMessage(error, 2000);
-    //     },
-    //     onClosure: async () => {
-    //       setShowProgressing(false);
-    //       setProcesing(false);
-    //     },
-    //   },
-    // );
   };
 
   const handleDeleteFilesAndFolders = async (value) => {

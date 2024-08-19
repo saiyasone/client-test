@@ -48,6 +48,38 @@ export const QUERY_TICKET = gql`
   }
 `;
 
+export const QUERY_TICKET_TYPE = gql`
+  query Typetickets(
+    $limit: Int
+    $skip: Int
+    $orderBy: OrderByFolderAndFileInput
+    $where: TypeticketsWhereInput
+  ) {
+    typetickets(limit: $limit, skip: $skip, orderBy: $orderBy, where: $where) {
+      total
+      data {
+        _id
+        title
+        email
+        expired
+        status
+        code
+        updatedAt
+        createdAt
+        createdBy {
+          _id
+          firstName
+          lastName
+          profile
+          phone
+          email
+          newName
+        }
+      }
+    }
+  }
+`;
+
 export const MUTATION_CREATE_TICKET = gql`
   mutation CreateTickets($data: TicketsInput!) {
     createTickets(data: $data) {

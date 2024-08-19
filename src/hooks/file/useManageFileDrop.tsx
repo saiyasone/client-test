@@ -14,7 +14,7 @@ function useManageFileDrop({ filter }) {
     const skip = (currentPageNumber - 1) * pageLimit;
     getFileDrop({
       variables: {
-        orderBy: "createdAt_ASC",
+        orderBy: "createdAt_DESC",
         limit: pageLimit,
         skip,
         where: {

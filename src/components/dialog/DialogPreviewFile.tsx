@@ -73,6 +73,16 @@ export default function DialogPreviewFile(props) {
 
   const descriptionElementRef = React.useRef(null);
   const [showNotFoundImage, setShowNotFoundImage] = useState(false);
+
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath = props?.isPublicPath
+    ? "public" + "/" + newFilename
+    : user?.newName + "-" + user?._id + "/" + real_path + newFilename;
+
+  const handleImageError = () => {
+    setShowNotFoundImage(true);
+  };
+
   React.useEffect(() => {
     if (open) {
       const { current: descriptionElement }: any = descriptionElementRef;
@@ -81,14 +91,6 @@ export default function DialogPreviewFile(props) {
       }
     }
   }, [open, newFilename]);
-  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
-  const publicPath = props?.isPublicPath
-    ? props?.isPublicPath + "/" + newFilename
-    : user?.newName + "-" + user?._id + "/" + real_path + newFilename;
-
-  const handleImageError = () => {
-    setShowNotFoundImage(true);
-  };
 
   return (
     <MUI.DivContainer>
@@ -141,7 +143,7 @@ export default function DialogPreviewFile(props) {
                 {!showNotFoundImage ? (
                   <MUI.ImagePreview
                     className="image-preview"
-                    src={newUrl + publicPath}
+                    src={newUrl + sourcePath}
                     onError={handleImageError}
                     alt=""
                     style={{ objectFit: "contain" }}
@@ -180,12 +182,7 @@ export default function DialogPreviewFile(props) {
                   "https://view.officeapps.live.com/op/embed.aspx?" +
                   "src=" +
                   newUrl +
-                  user?.newName +
-                  "-" +
-                  user?._id +
-                  "/" +
-                  real_path +
-                  newFilename
+                  sourcePath
                 }
                 style={{
                   height: "600px",
@@ -207,15 +204,7 @@ export default function DialogPreviewFile(props) {
                   Audio player
                 </Typography>
                 <ReactAudioPlayer
-                  src={
-                    newUrl +
-                    user?.newName +
-                    "-" +
-                    user?._id +
-                    "/" +
-                    real_path +
-                    newFilename
-                  }
+                  src={newUrl + sourcePath}
                   autoPlay
                   controls
                   preload=""
@@ -238,41 +227,17 @@ export default function DialogPreviewFile(props) {
             ) : type == "video" ? (
               <ReactPlayer
                 width={"100%"}
-                url={
-                  newUrl +
-                  user?.newName +
-                  "-" +
-                  user?._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                url={newUrl + sourcePath}
                 controls={true}
               />
             ) : type === "application" && getType === "pdf" ? (
               <iframe
-                src={
-                  newUrl +
-                  user?.newName +
-                  "-" +
-                  user?._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                src={newUrl + sourcePath}
                 style={{ width: "100%", height: "80vh", border: "none" }}
               ></iframe>
             ) : type === "text" && getType === "txt" ? (
               <iframe
-                src={
-                  newUrl +
-                  user?.newName +
-                  "-" +
-                  user?._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                src={newUrl + sourcePath}
                 width="100%"
                 height="500px"
               ></iframe>
