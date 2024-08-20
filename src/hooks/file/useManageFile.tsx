@@ -253,15 +253,12 @@ const useManageFile = ({ user }) => {
     try {
       const headers = {
         accept: "*/*",
-        storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
         isFolder: false,
         path:
           (isPublicPath ? "" : userData.newName + "-" + userData._id) +
           "/" +
           real_path +
           newFilename,
-        fileName: CryptoJS.enc.Utf8.parse(filename),
-        AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
         createdBy: userData?._id,
       };
 

@@ -64,6 +64,8 @@ import { decryptId, encryptDataLink } from "utils/secure.util";
 import { DatePicker } from "@mui/x-date-pickers";
 import DialogEditExpiryLinkFileDrop from "components/dialog/DialogEditExpiryLinkFileDrop";
 import { NavLink } from "react-router-dom";
+import DialogPreviewQRcode from "components/dialog/DialogPreviewQRCode";
+import QrIcon from "@mui/icons-material/QrCode";
 
 const DatePickerV1Container = styled(Box)({
   width: "100%",
@@ -109,6 +111,7 @@ function FileDrop() {
   const [packageType, setPackageType] = useState("Free");
   const [selectDate, setSelectDate] = useState<moment.Moment | null>(null);
   const [openEditExpiry, setOpenEditExpiry] = useState(false);
+  const [showQrCode, setShowQrCode] = useState(false);
 
   const [createFileDropLink] = useMutation(
     MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
@@ -309,14 +312,31 @@ function FileDrop() {
       errorMessage(cutErr, 3000);
     }
   };
+
   const menuOnClick = async (action) => {
     switch (action) {
       case "edit_expiry":
         setOpenEditExpiry(true);
         break;
+
+      case "preview-qrcode":
+        setShowQrCode(true);
+        break;
       default:
         return;
     }
+  };
+
+  const resetDataForEvent = () => {
+    setDataForEvents({
+      data: {},
+      action: "",
+    });
+  };
+
+  const handleCloseQrCode = () => {
+    setShowQrCode(false);
+    resetDataForEvent();
   };
 
   useEffect(() => {
@@ -358,9 +378,14 @@ function FileDrop() {
           <div style={{ color: "green" }}>
             <Chip
               sx={{
-                backgroundColor: params?.row?.status && params?.row?.status ==='expired'
-                  ? "#FFEFE1" : "#dcf6e8",
-                color: params?.row?.status && params?.row?.status ==='expired' ? "#FFA44F" : "#29c770",
+                backgroundColor:
+                  params?.row?.status && params?.row?.status === "expired"
+                    ? "#FFEFE1"
+                    : "#dcf6e8",
+                color:
+                  params?.row?.status && params?.row?.status === "expired"
+                    ? "#FFA44F"
+                    : "#29c770",
               }}
               label={params?.row?.status}
               size="small"
@@ -436,7 +461,6 @@ function FileDrop() {
               flexDirection: "row",
               alignItems: "center",
               flexWrap: "nowrap",
-              gap: 2,
               minWidth: "auto",
             }}
           >
@@ -455,6 +479,18 @@ function FileDrop() {
             </Tooltip>
             <Tooltip title="View details" placement="top">
               <IconButton
+                onClick={() => {
+                  setDataForEvents({
+                    data: params?.row,
+                    action: "preview-qrcode",
+                  });
+                }}
+              >
+                <QrIcon sx={{ fontSize: "18px" }} />
+              </IconButton>
+            </Tooltip>
+            <Tooltip title="View details" placement="top">
+              <IconButton
                 component={NavLink}
                 to={`/file-drop-detail/${encryptDataLink(url)}`}
               >
@@ -462,7 +498,7 @@ function FileDrop() {
               </IconButton>
             </Tooltip>
             <Tooltip title="Edit the expiry date-time" placement="top">
-              <NormalButton
+              <IconButton
                 sx={{
                   cursor: "pointer",
                   opacity: 1,
@@ -482,14 +518,14 @@ function FileDrop() {
                   size="16px"
                   color={theme.name === THEMES.DARK ? "white" : "grey"}
                 />
-              </NormalButton>
+              </IconButton>
             </Tooltip>
           </Box>
         );
       },
     },
   ];
-
+``
   useEffect(() => {
     const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
       ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
@@ -1068,9 +1104,6 @@ function FileDrop() {
                 borderRadius: 0,
                 height: "100% !important",
                 "& .MuiDataGrid-columnSeparator": { display: "none" },
-                // "& .MuiDataGrid-virtualScroller": {
-                //   overflowX: "hidden",
-                // },
                 "& .MuiDataGrid-cell:focus": {
                   outline: "none",
                 },
@@ -1089,7 +1122,7 @@ function FileDrop() {
                 setMultiId(ids);
               }}
             />
-            {/* {manageFileDrop?.data?.length > filter.state.pageLimit && ( */}
+
             <Box
               sx={{
                 display: "flex",
@@ -1129,6 +1162,7 @@ function FileDrop() {
           </CardContent>
         </Card>
       </Mui.PaperGlobal>
+
       <DialogDeleteV1
         isOpen={openDelete}
         onClose={handleDeleteClose}
@@ -1141,12 +1175,18 @@ function FileDrop() {
           isOpen={openEditExpiry}
           onClose={() => {
             setOpenEditExpiry(false);
-            setDataForEvents("");
+            resetDataForEvent();
             manageFileDrop.customeFileDrop();
           }}
           data={dataForEvents?.data}
         />
       )}
+
+      <DialogPreviewQRcode
+        isOpen={showQrCode}
+        data={dataForEvents?.data?.url || ""}
+        onClose={handleCloseQrCode}
+      />
     </Typography>
   );
 }

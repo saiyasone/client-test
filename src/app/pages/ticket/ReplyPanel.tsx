@@ -1,9 +1,7 @@
 import IconReply from "@mui/icons-material/Reply";
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
-import { ENV_KEYS } from "constants/env.constant";
-import CryptoJS from "crypto-js";
+import { Box, IconButton, Typography } from "@mui/material";
 import heEntry from "he";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { FileIcon, defaultStyles } from "react-file-icon";
 import { useDispatch } from "react-redux";
 import { setChatMessage } from "stores/features/chatSlice";
@@ -13,19 +11,9 @@ import * as MUI from "./styles/chat.style";
 
 function ReplyPanel(props) {
   const { chat, ticketStatus } = props;
-  const [progress, setProgress] = useState({
-    id: "",
-    percentage: 0,
-  });
+
   const dispatch = useDispatch();
   const messagesEndRef = useRef<any>(null);
-
-  const { VITE_APP_DOWNLOAD_URL, VITE_APP_STORAGE_ZONE } = ENV_KEYS;
-  const SECRET_KEY = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
-
-  const bunnyDownloadURL = VITE_APP_DOWNLOAD_URL;
-  const storageZone = VITE_APP_STORAGE_ZONE;
-  const bunnyKey = ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollTo(0, 0);
@@ -38,73 +26,7 @@ function ReplyPanel(props) {
 
   async function onDownloadFile(chat, file) {
     try {
-      const user = chat?.createdByCustomer?._id
-        ? chat?.createdByCustomer
-        : chat?.createdByStaff;
-
-      const headers = {
-        accept: "*/*",
-        storageZoneName: storageZone,
-        isFolder: false,
-        path: user?.newName + "-" + user?._id + "/" + file?.newNameImage,
-        fileName: CryptoJS.enc.Utf8.parse(file?.image),
-        AccessKey: bunnyKey,
-      };
-
-      const key = CryptoJS.enc.Utf8.parse(SECRET_KEY);
-      const iv = CryptoJS.lib.WordArray.random(16);
-      const encrypted = CryptoJS.AES.encrypt(JSON.stringify(headers), key, {
-        iv: iv,
-        mode: CryptoJS.mode.CBC,
-        padding: CryptoJS.pad.Pkcs7,
-      });
-      const cipherText = encrypted.ciphertext.toString(CryptoJS.enc.Base64);
-      const ivText = iv.toString(CryptoJS.enc.Base64);
-      const encryptedData = cipherText + ":" + ivText;
-
-      const response = await fetch(bunnyDownloadURL, {
-        headers: { encryptedHeaders: encryptedData },
-      });
-
-      if (!response.body) return;
-
-      const contentLength = await response.headers.get("Content-Length");
-      const totalLength: any =
-        typeof contentLength === "string" && parseInt(contentLength);
-      let receivedLength = 0;
-
-      const reader = await response.body.getReader();
-      const chunks: any[] = [];
-      // eslint-disable-next-line no-constant-condition
-      while (true) {
-        const { done, value }: any = await reader.read();
-        if (done) break;
-
-        chunks.push(value);
-        receivedLength += value.length;
-        if (typeof totalLength === "number") {
-          const step =
-            parseFloat((receivedLength / totalLength).toFixed(2)) * 100;
-
-          if (step > 0) {
-            setProgress({
-              id: file?.newNameImage,
-              percentage: step,
-            });
-          }
-        }
-      }
-
-      const blob = new Blob(chunks);
-      const href = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = href;
-      link.download = file?.image;
-      document.body.appendChild(link);
-      link.click();
-
-      setProgress({ id: "", percentage: 0 });
-      document.body.removeChild(link);
+      console.log(chat, file);
     } catch (err) {
       console.error(err);
     }
@@ -188,15 +110,6 @@ function ReplyPanel(props) {
                             />
                           </Box>
                           <Typography component="span">{file.image}</Typography>
-
-                          {file.newNameImage === progress?.id && (
-                            <CircularProgress
-                              variant="determinate"
-                              size="1rem"
-                              value={progress.percentage}
-                              sx={{ ml: 3 }}
-                            />
-                          )}
                         </Box>
                         {/* <IconButton
                             aria-label="download-file"
@@ -284,15 +197,6 @@ function ReplyPanel(props) {
                           <Typography component="span">
                             {file?.image}
                           </Typography>
-
-                          {file.newNameImage === progress?.id && (
-                            <CircularProgress
-                              variant="determinate"
-                              size="1rem"
-                              value={progress.percentage}
-                              sx={{ ml: 3 }}
-                            />
-                          )}
                         </Box>
                       </MUI.ChatBoxFileItem>
                     ) : null;

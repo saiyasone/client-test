@@ -58,91 +58,8 @@ function SignIn() {
   const [initialTime, setInitialTime] = useState(0);
   const [initialTimeMessage, setInitialTimeMessage] = useState("");
   const mobileScreen = useMediaQuery(theme.breakpoints.down("sm"));
-  // const manageGraphqlError = useManageGraphqlError();
 
-  // const [loginWithGoogle] = useMutation(MUTATION_GOOGLE_AUTH);
-  // const [loginWithFacebook] = useMutation(MUTATION_FACEBOOK_OAUTH);
-  // const [loginWithGithub] = useMutation(MUTATION_SOCIAL_AUTH);
   const useDataSetting = useManageSetting();
-
-  // const googleOauth = useGoogleOauth(ENV_KEYS.VITE_APP_GOOGLE_CLIENT_ID,{
-  //   onSuccess: async (googleDetails) => {
-  //     console.log({googleDetails});
-  //     try {
-  //       await loginWithGoogle({
-  //         variables: {
-  //           dataInput: {
-  //             ip: "103.43.77.35",
-  //             sendToken: googleDetails.credential,
-  //           },
-  //         },
-
-  //         onCompleted: async (res) => {
-  //           const [data] = res.loginWithGoogle.data;
-  //           const token = res.loginWithGoogle.token;
-  //           oauthLogin(data, token);
-  //         },
-  //       });
-  //     } catch (error: any) {
-  //       console.log('gooogle login : ', error);
-  //       const message = manageGraphqlError.handleErrorMessage(error.message);
-  //       if (message) {
-  //         errorMessage(message, 3000);
-  //       }
-  //     }
-  //   },
-  // });
-
-  // const facebookOauth = useFacebookOauth(ENV_KEYS.VITE_APP_FACEBOOk_APP_ID, {
-  //   onSuccess: async (facebookUser) => {
-  //     try {
-  //       const { first_name, last_name, picture } = facebookUser;
-  //       await loginWithFacebook({
-  //         variables: {
-  //           dataInput: {
-  //             ip: "103.43.77.35",
-  //             accountId: facebookUser.id,
-  //             firstName: first_name,
-  //             lastName: last_name,
-  //             email: facebookUser.email,
-  //             provider: "facebook",
-  //             username: `${first_name} ${last_name}`,
-  //             profile: picture.data.url,
-  //           },
-  //         },
-  //         onCompleted: async (res) => {
-  //           const [data] = res.loginWithFacebook.data;
-  //           const token = res.loginWithFacebook.token;
-  //           oauthLogin(data, token);
-  //         },
-  //       });
-  //     } catch (error: any) {
-  //       const message = manageGraphqlError.handleErrorMessage(error.message);
-  //       if (message) {
-  //         errorMessage(message, 3000);
-  //       }
-  //     }
-  //   },
-  // });
-
-  // const githubOauth = useGithubOauth(ENV_KEYS.VITE_APP_GITHUB_CLIENT_ID, {
-  //   onSuccess: async (githubUser) => {
-  //     await loginWithGithub({
-  //       variables: {
-  //         input: {
-  //           provider: "github",
-  //           accountId: githubUser.data.accountId,
-  //           username: githubUser.data.username,
-  //         },
-  //       },
-  //       onCompleted: async (res) => {
-  //         const [data] = res.socialAuth.data;
-  //         const token = res.socialAuth.token;
-  //         oauthLogin(data, token);
-  //       },
-  //     });
-  //   },
-  // });
 
   //Social media auth new 20240730 ---> Phonesai
   const SocialMediaAuths = async (str_path: string) => {
@@ -297,7 +214,7 @@ function SignIn() {
                 {showGoogle && (
                   <IconButton
                     // onClick={() => googleOauth.googleButton.click()}
-                    onClick={() => SocialMediaAuths("/google")}
+                    onClick={() => SocialMediaAuths("google")}
                     sx={{
                       border: "1px solid gray",
                       width: mobileScreen ? "30px" : "50px",
@@ -312,7 +229,7 @@ function SignIn() {
                 {showFacebook && (
                   <IconButton
                     // onClick={() => facebookOauth.signIn()}
-                    onClick={() => SocialMediaAuths("/facebook")}
+                    onClick={() => SocialMediaAuths("facebook")}
                     sx={{
                       border: "1px solid gray",
                       width: mobileScreen ? "30px" : "50px",
@@ -327,7 +244,7 @@ function SignIn() {
                 {showGithub && (
                   <IconButton
                     // onClick={() => githubOauth.handleGithubSignIn()}
-                    onClick={() => SocialMediaAuths("/github")}
+                    onClick={() => SocialMediaAuths("github")}
                     sx={{
                       border: "1px solid gray",
                       width: mobileScreen ? "30px" : "50px",

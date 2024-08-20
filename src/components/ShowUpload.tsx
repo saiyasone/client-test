@@ -78,7 +78,6 @@ export default function ShowUpload(props: Props) {
   const navigate = useNavigate();
   const { CancelToken } = axios;
   const theme = useTheme();
-  const BUNNY_URL = ENV_KEYS.VITE_APP_BUNNY_URL;
   const { user: userAuth }: any = useAuth();
   const UA = new UAParser();
   const result = UA.getResult();
@@ -275,8 +274,6 @@ export default function ShowUpload(props: Props) {
       filePath = "/" + path;
     }
 
-    // const url =
-    BUNNY_URL + user?.newName + "-" + user?._id + filePath + "/" + newName;
     const pathBunny = user?.newName + "-" + user?._id + filePath;
 
     setFileId((prev) => ({
@@ -622,6 +619,7 @@ export default function ShowUpload(props: Props) {
       const formData = new FormData();
       formData.append("partNumber", partNumber.toString());
       formData.append("uploadId", uploadId);
+      formData.append("FILENAME", file.newFilename);
 
       const headers = {
         createdBy: user?._id,
@@ -747,6 +745,7 @@ export default function ShowUpload(props: Props) {
     const formData = new FormData();
     formData.append("parts", JSON.stringify(parts));
     formData.append("uploadId", uploadId);
+    formData.append("FILENAME", file.newFileName);
 
     const headers = {
       createdBy: file.createdBy,

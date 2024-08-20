@@ -370,21 +370,6 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
       );
       if (enable2FA === 0) {
-        // checkAccessToken(token);
-        // localStorage.setItem(
-        //   ENV_KEYS.VITE_APP_USER_DATA_KEY,
-        //   JSON.stringify(data),
-        // );
-        // dispatch({
-        //   type: SIGN_IN,
-        //   payload: {
-        //     user,
-        //   },
-        // });
-        // successMessage("Login Success!!", 3000);
-        // navigate("/dashboard");
-
-        /////
         const userDataEncrypt = encryptId(
           JSON.stringify(data),
           ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,

@@ -112,7 +112,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const handleMenuAction = (action) => {
     switch (action) {
       case "file-download":
-        if (userPackage?.downLoadOption === "direct") {
+        if (
+          userPackage?.downLoadOption === "direct" ||
+          userPackage?.category !== "free"
+        ) {
           handleDownloadFile();
         } else {
           handleGetLinkAnother();
@@ -120,7 +123,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "share-download":
-        if (userPackage?.downLoadOption === "direct") {
+        if (
+          userPackage?.downLoadOption === "direct" ||
+          userPackage?.category !== "free"
+        ) {
           handleShareDownloadData();
         } else {
           handleGetLinkAnother();
@@ -128,7 +134,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "folder-download":
-        if (userPackage?.downLoadOption === "direct") {
+        if (
+          userPackage?.downLoadOption === "direct" ||
+          userPackage?.category !== "free"
+        ) {
           handleDownloadFileAndFolder();
         } else {
           handleGetLinkAnother();
@@ -136,7 +145,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "filedrop-download":
-        if (userPackage?.downLoadOption === "direct") {
+        if (
+          userPackage?.downLoadOption === "direct" ||
+          userPackage?.category !== "free"
+        ) {
           handleDownloadFileDrop();
         } else {
           handleGetLinkAnother();
@@ -148,7 +160,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "multiple-download":
-        if (userPackage?.downLoadOption === "direct") {
+        if (
+          userPackage?.downLoadOption === "direct" ||
+          userPackage?.category !== "free"
+        ) {
           handleDownloadFileAndFolder();
         } else {
           handleGetLinkAnother();

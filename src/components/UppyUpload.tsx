@@ -267,10 +267,6 @@ function UppyUpload() {
 
             const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
             const headers = {
-              REGION: "sg",
-              BASE_HOSTNAME: "storage.bunnycdn.com",
-              STORAGE_ZONE_NAME: ENV_KEYS.VITE_APP_STORAGE_ZONE,
-              ACCESS_KEY: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
               PATH: `${user?.newName}-${user?._id}`,
               FILENAME: `${file.data?.customeNewName}${fileExtension}`,
             };

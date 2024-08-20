@@ -71,11 +71,6 @@ function UploadFolderManual(props) {
     folderNames.add(folderName);
   });
 
-  // env
-  const STORAGE_ZONE = ENV_KEYS.VITE_APP_STORAGE_ZONE as string;
-  const ACCESS_KEY = ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY as string;
-  const LOAD_UPLOAD_URL = ENV_KEYS.VITE_APP_LOAD_UPLOAD_URL as string;
-
   // graphql
   const [uploadFolderAction] = useMutation(MUTATION_UPLOAD_FOLDER);
   const [cancelUploadFolder] = useMutation(MUTATION_CANCEL_UPLOAD_FOLDER);
@@ -274,10 +269,6 @@ function UploadFolderManual(props) {
 
                   const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
                   const headers = {
-                    REGION: "sg",
-                    BASE_HOSTNAME: "storage.bunnycdn.com",
-                    STORAGE_ZONE_NAME: STORAGE_ZONE,
-                    ACCESS_KEY: ACCESS_KEY,
                     PATH:
                       userData.newName + "-" + userData._id + "/" + resultPath,
                     FILENAME: resultFileName?.substring(1),
@@ -473,10 +464,6 @@ function UploadFolderManual(props) {
 
                   const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
                   const headers = {
-                    REGION: "sg",
-                    BASE_HOSTNAME: "storage.bunnycdn.com",
-                    STORAGE_ZONE_NAME: STORAGE_ZONE,
-                    ACCESS_KEY: ACCESS_KEY,
                     PATH: `${userData.newName}-${userData._id}/${resultPath}`,
                     FILENAME: resultFileName,
                   };
