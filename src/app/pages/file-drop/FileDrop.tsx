@@ -66,6 +66,7 @@ import DialogEditExpiryLinkFileDrop from "components/dialog/DialogEditExpiryLink
 import { NavLink } from "react-router-dom";
 import DialogPreviewQRcode from "components/dialog/DialogPreviewQRCode";
 import QrIcon from "@mui/icons-material/QrCode";
+import { DateTimeFormate } from "utils/date.util";
 
 const DatePickerV1Container = styled(Box)({
   width: "100%",
@@ -416,20 +417,21 @@ function FileDrop() {
         );
       },
     },
-    {
-      field: "createdAt",
-      headerName: "Created date",
-      flex: 1,
-      renderCell: (params) => {
-        return (
-          <div>
-            <span>
-              {moment(params?.row?.createdAt).format("DD-MM-YYYY h:mm:ss")}
-            </span>
-          </div>
-        );
-      },
-    },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created date",
+    //   flex: 1,
+    //   renderCell: (params) => {
+    //     return (
+    //       <div>
+    //         <span>
+    //           {/* {moment(params?.row?.createdAt).format("DD-MM-YYYY h:mm:ss")} */}
+    //           {DateTimeFormate(params?.row?.createdAt)}
+    //         </span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       field: "expiredAt",
       headerName: "Expired date",
@@ -438,7 +440,8 @@ function FileDrop() {
         return (
           <div>
             <span>
-              {moment(params?.row?.expiredAt).format("DD-MM-YYYY h:mm:ss")}
+              {/* {moment(params?.row?.expiredAt).format("DD-MM-YYYY h:mm:ss")} */}
+              {DateTimeFormate(params?.row?.expiredAt)}
             </span>
           </div>
         );
@@ -525,7 +528,7 @@ function FileDrop() {
       },
     },
   ];
-``
+  ``;
   useEffect(() => {
     const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
       ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
