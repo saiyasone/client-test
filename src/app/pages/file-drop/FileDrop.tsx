@@ -525,7 +525,7 @@ function FileDrop() {
       },
     },
   ];
-``
+  ``;
   useEffect(() => {
     const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
       ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)

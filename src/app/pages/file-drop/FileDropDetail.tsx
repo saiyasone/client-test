@@ -666,8 +666,8 @@ function FileDropDetail() {
 
                           // console.log(
                           //   data?.createdBy?._id === "0"
-                          //     ? privatePath
-                          //     : publicPath,
+                          //     ? publicPath
+                          //     : privatePath,
                           // );
 
                           return (
@@ -681,18 +681,10 @@ function FileDropDetail() {
                                 },
                               }}
                               id={data?._id}
-                              // imagePath={
-                              //   data?.isPublic === "private"
-                              //     ? privatePath
-                              //     : publicPath
-                              // }
-                              // isPublic={
-                              //   data?.isPublic === "public" ? true : false
-                              // }
                               imagePath={
-                                data?.createdBy?._id !== "0"
-                                  ? privatePath
-                                  : publicPath
+                                data?.createdBy?._id === "0"
+                                  ? publicPath
+                                  : privatePath
                               }
                               isPublic={
                                 data?.createdBy?._id === "0" ? true : false
