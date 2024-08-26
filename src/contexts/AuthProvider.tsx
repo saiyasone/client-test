@@ -494,7 +494,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error: any) {
       setAuthLoading(false);
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
-      if (cutErr === "USERNAME_OR_PASSWORD_INCORRECT") {
+      if (cutErr === "Username or password is incorrect") {
         errorMessage("Username or password incorrect!!", 3000);
       } else if (cutErr === "YOUR_STATUS_IS_DISABLED") {
         setOpenWarning(true);

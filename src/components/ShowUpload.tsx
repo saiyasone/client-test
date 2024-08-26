@@ -111,7 +111,7 @@ export default function ShowUpload(props: Props) {
   const [startUpload, setStartUpload] = useState(false);
   const [presignUploadSuccess, setPresignUploadSuccess] = useState(false);
   const [uploadComplete, setUploadComplete] = useState(false);
-  const chunkSize = 50 * 1024 * 1024; // 250 mb
+  const chunkSize = 250 * 1024 * 1024; // 50 mb
 
   const [hideFolderSelectMore, setHideFolderSelectMore] = useState(0);
   const [cancelFolderStatus, setCancelFolderStatus] = useState<any>(false);
