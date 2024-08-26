@@ -55,7 +55,7 @@ import useManageGraphqlError from "hooks/useManageGraphqlError";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { Base64 } from "js-base64";
 import moment from "moment";
-import { Fragment, useContext, useEffect, useRef, useState } from "react";
+import { act, Fragment, useContext, useEffect, useRef, useState } from "react";
 import { CSVLink } from "react-csv";
 import { BiTime } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
@@ -1055,7 +1055,7 @@ export function MyCloud() {
           setDataForEvent((prev) => {
             return {
               ...prev,
-              action: "",
+              action: action,
             };
           });
         }
