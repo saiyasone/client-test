@@ -61,6 +61,7 @@ type Props = {
   folderData: any[];
   parentComponent?: string;
   getType?: string;
+  hasNewFile?: boolean;
 };
 
 export default function ShowUpload(props: Props) {

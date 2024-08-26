@@ -189,7 +189,6 @@ const DialogCreateShare = (props) => {
             ...user,
             title: `${user.firstName} ${user.lastName}`,
             thumbnailSrc:
-              ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
               user?.newName +
               "-" +
               user?._id +
@@ -199,7 +198,6 @@ const DialogCreateShare = (props) => {
               getFilenameWithoutExtension(user?.profile) +
               `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
             src:
-              ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
               user?.newName +
               "-" +
               user?._id +
@@ -735,7 +733,6 @@ const DialogCreateShare = (props) => {
                         ...user,
                         title: `${user.firstName} ${user.lastName}`,
                         thumbnailSrc:
-                          ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
                           user?.newName +
                           "-" +
                           user?._id +
@@ -745,7 +742,6 @@ const DialogCreateShare = (props) => {
                           getFilenameWithoutExtension(user?.profile) +
                           `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
                         src:
-                          ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
                           user?.newName +
                           "-" +
                           user?._id +
