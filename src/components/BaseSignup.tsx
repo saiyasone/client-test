@@ -99,6 +99,13 @@ function BaseSignUp(props) {
               values.password,
             );
             setIsLoading(false);
+
+            /* reset captcha and button */
+            if(window.grecaptcha) {
+              window.grecaptcha?.reset();
+              setCaptcha(true);
+            }
+
           }
         } catch (error: any) {
           setIsLoading(false);

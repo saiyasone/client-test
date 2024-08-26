@@ -120,9 +120,11 @@ function ForgotPasswordUsage() {
           if (!captcha) {
             await forgetPassowrd(values.email);
             setIsLoading(false);
+            setCaptcha(true);
           }
         } catch (error: any) {
           setIsLoading(false);
+          setCaptcha(true);
           const message = error.message || "Something went wrong";
           setStatus({ success: false });
           setErrors({ submit: message });

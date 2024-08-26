@@ -117,6 +117,13 @@ function BaseSignin(props) {
             if (!captchaKey) {
               const enabled2FA = await signIn(values.username, values.password);
               setIsLoading(false);
+
+              /* reset captcha and button */
+              if(window.grecaptcha) {
+                window.grecaptcha?.reset();
+                setCaptchaKey(true);
+              }
+
               if (enabled2FA) {
                 setOpen(enabled2FA.authen);
                 setData(enabled2FA.user);
