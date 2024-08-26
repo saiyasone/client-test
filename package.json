@@ -10,6 +10,8 @@
     "start:staging": "Set VITE_APP_ENV=staging&& vite",
     "start:prod": "Set VITE_APP_ENV=production&& vite",
     "build": "tsc && vite build",
+    "build:staging": "vite build --mode staging",
+    "build:prod": "vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -51,6 +53,7 @@
     "he": "^1.2.0",
     "html-to-image": "^1.11.11",
     "html-to-text": "^9.0.5",
+    "html2canvas": "^1.4.1",
     "i18next": "^23.11.5",
     "immer": "^10.1.1",
     "js-base64": "^3.7.7",
@@ -96,6 +99,7 @@
     "swiper": "^11.1.4",
     "ua-parser-js": "^1.0.38",
     "uuid": "^10.0.0",
+    "vshareweb": "file:",
     "yup": "^1.4.0"
   },
   "devDependencies": {

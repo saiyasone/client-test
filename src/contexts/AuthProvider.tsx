@@ -111,6 +111,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const [refreshToken] = useMutation(MUTATION_REFRESH_TOKEN);
   const [openWarning, setOpenWarning] = React.useState(false);
   const [isLoading, setIsLoading] = useState<boolean | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
   const manageGraphqlError = useManageGraphqlError();
 
   const [getUsers] = useLazyQuery(QUERY_USER, {
@@ -282,6 +283,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  //  v1, v2, v3, v4
+
   const fetchPermission = (id) => {
     if (id) {
       getPermission({
@@ -367,11 +370,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
       );
       if (enable2FA === 0) {
-        checkAccessToken(token);
-        localStorage.setItem(
-          ENV_KEYS.VITE_APP_USER_DATA_KEY,
+        const userDataEncrypt = encryptId(
           JSON.stringify(data),
+          ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
         );
+        checkAccessToken(checkRole);
+        localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
+
         dispatch({
           type: SIGN_IN,
           payload: {
@@ -435,6 +440,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (username, password) => {
+    setAuthLoading(!authLoading);
     try {
       const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
       const signInUser = await userLogin({
@@ -443,7 +449,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             username: username ?? "",
             password: password ?? "",
             ip: responseIp.data ?? "",
-            captcha: window.__reCaptcha
+            captcha: window.__reCaptcha!,
           },
         },
       });
@@ -473,18 +479,20 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         checkAccessToken(checkRole);
         localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
 
+        successMessage("Login Success!!", 3000);
         dispatch({
           type: SIGN_IN,
           payload: {
             user,
           },
         });
-        successMessage("Login Success!!", 3000);
+        setAuthLoading(false);
         navigate("/dashboard");
       } else {
         return { authen, user, checkRole, refreshId: tokenData.refreshID };
       }
     } catch (error: any) {
+      setAuthLoading(false);
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       if (cutErr === "USERNAME_OR_PASSWORD_INCORRECT") {
         errorMessage("Username or password incorrect!!", 3000);
@@ -495,7 +503,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (cutErr === "ACCOUNT_LOCKED_UNTIL:ວັນທີເດືອນປີ") {
         warningMessage("You account was locked until tomorrow!", 3000);
       } else {
-        warningMessage(error.message);
+        //errorMessage(error.message, 3000);
+        warningMessage(error.message, 3000);
       }
     }
   };
@@ -554,6 +563,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (firstName, lastName, username, email, password) => {
+    setAuthLoading(true);
     const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
     try {
       const signUpUser = await register({
@@ -565,15 +575,17 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             password: password,
             email: email,
             ip: responseIp.data,
-            captcha: window.__reCaptcha,
+            captcha: window.__reCaptcha!
           },
         },
       });
       if (signUpUser?.data?.signup?._id) {
         successMessage("Register successful!", 3000);
+        setAuthLoading(false);
         navigate("/auth/sign-in");
       }
     } catch (error: any) {
+      setAuthLoading(false);
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(manageGraphqlError.handleErrorMessage(cutErr) || "", 3000);
     }
@@ -593,7 +605,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             successMessage("Reset Password success.", 1000);
             setTimeout(() => {
               navigate("/auth/sign-in");
-            }, 1200);
+            }, 2000);
           }
         },
       });
@@ -639,15 +651,14 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleForgetPassword = async (email) => {
+    /* reset captcha */
+    window.grecaptcha?.reset();
+
     try {
-
-      /* reset captcha */
-      grecaptcha.reset();
-
       await userForgotPasword({
         variables: {
           email: email,
-          captcha: window.__reCaptcha
+          captcha: window.__reCaptcha!,
         },
         onCompleted: (data) => {
           if (data?.forgotPassword?.token) {
@@ -689,6 +700,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     <AuthContext.Provider
       value={{
         ...state,
+        // authLoading,
         method: "jwt",
         generateNewToken,
         logIn,

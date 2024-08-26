@@ -221,4 +221,11 @@ export function DateOfNumber(dateTime: string) {
   }
 }
 
+// datetime: 01 Jun 2024 12:00
+export function DateTimeFormate(dateTime: string): string | undefined {
+  if (dateTime) {
+    return moment(dateTime).format("DD MMM YYYY HH:mm");
+  }
+}
+
 export default moment;

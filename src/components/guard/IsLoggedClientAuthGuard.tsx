@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 function TokenValidation({ children, tokenCheck }) {
   const navigate = useNavigate();
   const [tokenValidation] = useMutation(MUTATION_TOKEN_VALIDATION);
+
   useEffect(() => {
     (async () => {
       try {

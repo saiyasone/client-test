@@ -241,7 +241,7 @@ function RecentFile() {
       variables: {
         where: {
           status: "active",
-          createdBy: user._id,
+          createdBy: user?._id,
           ...(actionStatus !== "all" && {
             actionStatus,
           }),
@@ -346,7 +346,7 @@ function RecentFile() {
       variables: {
         where: {
           status: "active",
-          createdBy: user._id,
+          createdBy: user?._id,
         },
         orderBy: "actionDate_DESC",
         limit: 100,
@@ -531,7 +531,7 @@ function RecentFile() {
       await fileAction({
         variables: {
           fileInput: {
-            createdBy: parseInt(user._id),
+            createdBy: parseInt(user?._id),
             fileId: parseInt(dataForEvent.data._id),
             actionStatus: val,
           },
@@ -543,35 +543,37 @@ function RecentFile() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-    await manageFile.handleDownloadFile(
+    const newFileData = [
       {
-        id: dataForEvent.data._id,
-        newPath: dataForEvent.data.newPath,
-        newFilename: dataForEvent.data.newFilename,
-        filename: dataForEvent.data.filename,
-      },
-      {
-        onProcess: async (countPercentage) => {
-          setProgressing(countPercentage);
+        id: dataForEvent.data?._id,
+        checkType: "file",
+        newPath: dataForEvent.data?.newPath || "",
+        newFilename: dataForEvent.data?.newFilename || "",
+        createdBy: {
+          _id: dataForEvent.data?.createdBy._id,
+          newName: dataForEvent.data?.createdBy?.newName,
         },
-        onSuccess: async () => {
-          successMessage("Download successful", 2000);
+      },
+    ];
 
-          setDataForEvent((state) => ({
-            ...state,
-            action: null,
-            data: {
-              ...state.data,
-              totalDownload: dataForEvent.data.totalDownload + 1,
-            },
-          }));
+    await manageFile.handleDownloadSingleFile(
+      { multipleData: newFileData },
+      {
+        onSuccess: () => {
+          successMessage("Download successful", 3000);
+          setDataForEvent((prev) => {
+            return {
+              ...prev,
+              totalDownload: parseInt(dataForEvent.data?.totalDownload + 1),
+            };
+          });
+
           recentFileRefetch();
         },
-        onFailed: async (error) => {
-          errorMessage(error, 2000);
+        onFailed: (error) => {
+          errorMessage(error, 3000);
         },
+
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
@@ -587,7 +589,7 @@ function RecentFile() {
       onSuccess: () => {
         setDeleteDialogOpen(false);
         successMessage("Delete file successful!!", 2000);
-        recentFileRefetch();
+        customGetRecentFiles();
         resetDataForEvents();
         setIsAutoClose(true);
       },
@@ -663,7 +665,7 @@ function RecentFile() {
       variables: {
         where: {
           path: link,
-          createdBy: user._id,
+          createdBy: user?._id,
         },
       },
     });
@@ -778,9 +780,9 @@ function RecentFile() {
             setFileDetailsDialog(false);
           }}
           imagePath={
-            user.newName +
+            user?.newName +
             "-" +
-            user._id +
+            user?._id +
             "/" +
             (dataForEvent?.data?.newPath
               ? removeFileNameOutOfPath(dataForEvent.data?.newPath)
@@ -827,7 +829,7 @@ function RecentFile() {
           fileType={dataForEvent.data.fileType}
           path={dataForEvent.data.newPath}
           user={user}
-          userId={user._id}
+          userId={user?._id}
         />
       )}
 
@@ -901,8 +903,8 @@ function RecentFile() {
             }}
             onPressLockData={handleOpenMultiplePassword}
             onPressSuccess={() => {
+              customGetRecentFiles();
               handleClearFileAndFolderData();
-              recentFileRefetch();
             }}
           />
         ) : (
@@ -1046,9 +1048,9 @@ function RecentFile() {
                                 return (
                                   <FileCardItem
                                     imagePath={
-                                      user.newName +
+                                      user?.newName +
                                       "-" +
-                                      user._id +
+                                      user?._id +
                                       "/" +
                                       (data.newPath
                                         ? removeFileNameOutOfPath(data.newPath)

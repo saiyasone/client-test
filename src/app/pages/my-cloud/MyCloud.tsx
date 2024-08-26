@@ -11,7 +11,6 @@ import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
 import {
   MUTATION_ACTION_FILE,
-  MUTATION_UPDATE_FILE_PUBLIC,
   QUERY_FILE,
   QUERY_FILE_CATEGORY,
 } from "api/graphql/file.graphql";
@@ -52,7 +51,7 @@ import useBreadcrumbData from "hooks/useBreadcrumbData";
 import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
-import useScroll from "hooks/useScroll";
+// import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { Base64 } from "js-base64";
 import moment from "moment";
@@ -79,7 +78,7 @@ import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 
-const ITEM_PER_PAGE_GRID = 20;
+// const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
   const { user }: any = useAuth();
@@ -99,8 +98,9 @@ export function MyCloud() {
     },
   );
 
-  const [createFileDropLink] = useMutation(MUTATION_CREATE_FILE_DROP_URL_PRIVATE);
-  const [updateFileDrop] = useMutation(MUTATION_UPDATE_FILE_PUBLIC);
+  const [createFileDropLink] = useMutation(
+    MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
+  );
 
   const [fileAction] = useMutation(MUTATION_ACTION_FILE);
   const [deleteFolder] = useMutation(MUTATION_UPDATE_FOLDER);
@@ -126,6 +126,7 @@ export function MyCloud() {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [userPackage, setUserPackage] = useState<any>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+
   // slice in redux
   const dispatch = useDispatch();
   const dataSelector = useSelector(
@@ -178,6 +179,7 @@ export function MyCloud() {
   const [_optionsValue, setOptionsValue] = useState(false);
   const [getValue, setGetValue] = useState<any>(null);
   const [viewMore, setViewMore] = useState(20);
+  const [fileViewMore, setFileViewMore] = useState(20);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { setIsAutoClose, isAutoClose } = useMenuDropdownState();
   const [total, setTotal] = useState(0);
@@ -186,10 +188,10 @@ export function MyCloud() {
   const location = useLocation();
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
-  const { limitScroll, addMoreLimit } = useScroll({
-    total,
-    limitData: ITEM_PER_PAGE_GRID,
-  });
+  // const { limitScroll, addMoreLimit } = useScroll({
+  //   total,
+  //   limitData: ITEM_PER_PAGE_GRID,
+  // });
   const { setFolderId, handleTriggerFolder }: any = useContext(FolderContext);
   const [dataGetUrl, setDataGetUrl] = useState(null);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
@@ -435,6 +437,7 @@ export function MyCloud() {
     setFolderId(value?._id);
     handleClose();
     const url = value?.url;
+
     const base64URL = Base64.encodeURI(url);
     navigate(`/folder/${base64URL}`);
   };
@@ -457,7 +460,7 @@ export function MyCloud() {
               source: "default",
             },
             orderBy: "updatedAt_DESC",
-            limit: limitScroll,
+            limit: fileViewMore,
           },
           onCompleted: (data) => {
             if (data) {
@@ -480,7 +483,7 @@ export function MyCloud() {
         await getFile({
           variables: {
             where: {
-              createdBy: user._id,
+              createdBy: user?._id,
               checkFile: "main",
               status: "active",
               source: "default",
@@ -509,7 +512,7 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFileGrid();
-  }, [limitScroll, toggle]);
+  }, [fileViewMore, toggle]);
 
   //query all files count and separate base on file type
   const queryCategory = async () => {
@@ -559,7 +562,7 @@ export function MyCloud() {
             where: {
               checkFolder: "main",
               restore: "show",
-              createdBy: user._id,
+              createdBy: user?._id,
             },
             orderBy: "pin_DESC",
             limit: viewMore,
@@ -604,25 +607,30 @@ export function MyCloud() {
   };
 
   const handleViewMoreFile = () => {
-    addMoreLimit();
+    // addMoreLimit();
+    setFileViewMore((prev) => prev + 10);
   };
 
   const handleDownloadFile = async (inputData) => {
     const data = inputData || getValue;
-    setShowProgressing(true);
-    setProcesing(true);
-    await manageFile.handleDownloadFile(
+
+    const newFileData = [
       {
-        id: data._id,
-        newPath: data.newPath,
-        newFilename: data.newFilename,
-        filename: data.filename,
-      },
-      {
-        onProcess: async (countPercentage) => {
-          setProgressing(countPercentage);
+        id: data?._id,
+        checkType: "file",
+        newPath: data?.newPath ? data.newPath : "",
+        newFilename: data?.newFilename || "",
+        createdBy: {
+          _id: data?.createdBy._id,
+          newName: data?.createdBy?.newName,
         },
-        onSuccess: async () => {
+      },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData: newFileData },
+      {
+        onSuccess: () => {
           successMessage("Download successful", 3000);
           setGetValue((prev) => {
             return {
@@ -636,9 +644,10 @@ export function MyCloud() {
             queryFileGrid();
           }
         },
-        onFailed: async (error) => {
+        onFailed: (error) => {
           errorMessage(error, 3000);
         },
+
         onClosure: () => {
           setIsAutoClose(true);
           setFileDetailsDialog(false);
@@ -660,14 +669,21 @@ export function MyCloud() {
   };
 
   const handleDownloadFolder = async (data) => {
-    setShowProgressing(true);
-    setProcesing(true);
-    await manageFolder.handleDownloadFolder(
+    const multipleData = [
       {
-        id: data._id,
-        folderName: data.folder_name,
-        newPath: data.newPath,
+        id: data?._id,
+        checkType: "folder",
+        newPath: data?.newPath ? data.newPath : "",
+        newFilename: data?.newFolder_name || "",
+        createdBy: {
+          _id: data?.createdBy._id,
+          newName: data?.createdBy?.newName,
+        },
       },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData },
       {
         onFailed: async (error) => {
           errorMessage(error, 3000);
@@ -756,7 +772,7 @@ export function MyCloud() {
       await fileAction({
         variables: {
           fileInput: {
-            createdBy: parseInt(user._id),
+            createdBy: parseInt(user?._id),
             fileId: parseInt(data?._id ? data?._id : getValue?._id),
             actionStatus: val,
           },
@@ -778,10 +794,10 @@ export function MyCloud() {
           id: optionValue?._id,
           name: optionValue?.folder_name,
           checkType: "folder",
-          newPath: optionValue?.newPath ?? "",
+          newPath: optionValue?.newPath || "",
           totalSize: parseInt(optionValue?.total_size),
-          newFilename: optionValue?.newFolder_name ?? "",
-          dataPassword: optionValue?.access_password ?? "",
+          newFilename: optionValue?.newFolder_name || "",
+          dataPassword: optionValue?.access_password || "",
           shortLink: optionValue?.shortUrl,
           createdBy: {
             _id: optionValue?.createdBy?._id,
@@ -801,11 +817,11 @@ export function MyCloud() {
         data: {
           id: optionValue?._id,
           name: optionValue?.filename,
-          newPath: optionValue?.newPath ?? "",
-          newFilename: optionValue?.newFilename ?? "",
+          newPath: optionValue?.newPath || "",
+          newFilename: optionValue?.newFilename || "",
           totalDownload: optionValue?.totalDownload || 0,
           checkType: "file",
-          dataPassword: optionValue?.filePassword ?? "",
+          dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
           createdBy: {
             _id: optionValue?.createdBy?._id,
@@ -828,7 +844,7 @@ export function MyCloud() {
       variables: {
         where: {
           path: link,
-          createdBy: user._id,
+          createdBy: user?._id,
         },
       },
     });
@@ -859,15 +875,17 @@ export function MyCloud() {
   ) => {
     try {
       if (activePrivateFileDrop) {
-        const fileDropLink = await updateFileDrop({
+        const fileDropLink = await createFileDropLink({
           variables: {
-            id: activePrivateFileDrop._id,
             input: convertObjectEmptyStringToNull({
               url: link,
               expiredAt: date,
               title: values?.title,
               description: values?.description || null,
               folderId: folderDropId,
+              allowDownload: values.allowDownload,
+              allowMultiples: values.allowMultiples,
+              allowUpload: values.allowUpload,
             }),
           },
         });
@@ -883,6 +901,9 @@ export function MyCloud() {
               title: values?.title,
               description: values?.description || null,
               folderId: folderDropId,
+              allowDownload: values.allowDownload,
+              allowMultiples: values.allowMultiples,
+              allowUpload: values.allowUpload,
             }),
           },
         });
@@ -891,6 +912,7 @@ export function MyCloud() {
         }
       }
     } catch (error) {
+      console.log(error);
       errorMessage("Something went wrong!", 3000);
     }
   };
@@ -1581,9 +1603,9 @@ export function MyCloud() {
                               <Fragment key={index}>
                                 <FileCardItem
                                   imagePath={
-                                    user.newName +
+                                    user?.newName +
                                     "-" +
-                                    user._id +
+                                    user?._id +
                                     (item?.path
                                       ? removeFileNameOutOfPath(item?.path)
                                       : "") +
@@ -1666,11 +1688,11 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    limitScroll < total &&
+                    fileViewMore < total &&
                     toggle === "grid" && (
                       <Box
                         sx={{
-                          mt: 3,
+                          my: 3,
                           display: "flex",
                           justifyContent: "center",
                           alignItems: "center",
@@ -1685,7 +1707,6 @@ export function MyCloud() {
                           <Button
                             endIcon={<ExpandMore />}
                             sx={{ mt: 2 }}
-                            // disabled={loading === "loading"}
                             size="small"
                             variant="outlined"
                             onClick={handleViewMoreFile}
@@ -1786,9 +1807,9 @@ export function MyCloud() {
                     resetDataForEvent();
                   }}
                   imagePath={
-                    user.newName +
+                    user?.newName +
                     "-" +
-                    user._id +
+                    user?._id +
                     "/" +
                     (getValue?.newPath
                       ? removeFileNameOutOfPath(getValue?.newPath)
@@ -1914,7 +1935,7 @@ export function MyCloud() {
 
       <DialogValidateFilePassword
         isOpen={showEncryptPassword}
-        filename={dataForEvent.data?.filename ?? dataForEvent.data?.folder_name}
+        filename={dataForEvent.data?.filename || dataForEvent.data?.folder_name}
         newFilename={dataForEvent.data?.newFilename}
         filePassword={
           dataForEvent.data?.folder_type === "folder"

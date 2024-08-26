@@ -44,7 +44,7 @@ function Pricing() {
       getPayment({
         variables: {
           where: {
-            payerId: user._id,
+            payerId: user?._id,
             packageId: user.packageId.packageId,
           },
         },

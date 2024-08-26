@@ -34,6 +34,8 @@ import ReplyTicket from "./pages/ticket/ReplyTicket";
 import Ticket from "./pages/ticket/Ticket";
 import Trash from "./pages/trash/Trash";
 import UppyUpload from "components/UppyUpload";
+import ConfirmPayment from "./pages/confirm-payment/Confirmpayment";
+import ResetPassword from "./pages/reset-password/ResetPassword";
 
 const routes: RouteObject[] = [
   {
@@ -62,6 +64,10 @@ const routes: RouteObject[] = [
           {
             path: "forgot-password",
             element: <ForgotPassword />,
+          },
+          {
+            path: "reset-password/:token",
+            element: <ResetPassword />,
           },
         ],
       },
@@ -179,6 +185,10 @@ const routes: RouteObject[] = [
   //   path: "uppy",
   //   element: <UppyUpload />,
   // },
+  {
+    path: "confirm",
+    element: <ConfirmPayment />,
+  },
   {
     path: "*",
     element: (

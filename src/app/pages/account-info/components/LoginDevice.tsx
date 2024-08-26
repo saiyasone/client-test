@@ -21,7 +21,7 @@ import Vivalid from "assets/images/browsers/vivaldi.svg?react";
 import useAuth from "hooks/useAuth";
 import moment from "moment";
 import { Fragment, useEffect, useState } from "react";
-import * as MUI from "./styles/accountInfo.styles";
+import * as MUI from "../styles/accountInfo.styles";
 
 const Icons = [
   {

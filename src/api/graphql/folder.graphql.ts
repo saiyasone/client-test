@@ -101,24 +101,6 @@ export const MUTATION_UPDATE_FOLDER = gql`
   mutation UpdateFolders($data: FoldersInput!, $where: FoldersWhereInputOne!) {
     updateFolders(data: $data, where: $where) {
       _id
-      folder_type
-      folder_name
-      newFolder_name
-      total_size
-      is_public
-      checkFolder
-      restore
-      access_password
-      show_download_link
-      status
-      path
-      url
-      expired
-      permissionSharePublic
-      aproveDownloadPublic
-      pin
-      createdAt
-      updatedAt
     }
   }
 `;

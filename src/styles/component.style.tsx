@@ -120,8 +120,6 @@ export const FolderCardContent = styled(CardContent)({
   display: "flex",
   alignItems: "center",
   justifyContent: "space-between",
-
-  // border: "1px solid red",
   [theme.breakpoints.down("sm")]: {
     padding: "0",
   },

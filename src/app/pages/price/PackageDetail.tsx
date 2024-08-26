@@ -1,9 +1,10 @@
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { useSelector } from "react-redux";
-import { paymentState } from "stores/features/paymentSlice";
+import { paymentState, PAYMENT_METHOD, COUNTRIES } from "stores/features/paymentSlice";
 import PackagePlan from "./PackagePlan";
 import PricingDetail from "./PricingDetail";
+import { func_exchange_calc } from "utils/exchange.calc";
 
 const PackageDetailsContainer = styled("div")({
   borderRadius: "4px",
@@ -24,11 +25,16 @@ const PackageDetailsContentItem = styled("div")(({ theme }) => ({
 }));
 
 const PackageDetails = (props) => {
-  const { currencySymbol, addressData, ...paymentSelector }: any =
+  const { currencySymbol, exchangeRate, country, activePaymentMethod, addressData, ...paymentSelector }: any =
     useSelector(paymentState);
+
   const totalPrice = `${currencySymbol}${(
-    paymentSelector.total - paymentSelector.couponAmount
+    country === COUNTRIES.LAOS && activePaymentMethod === PAYMENT_METHOD.bcelOne ? 
+      (func_exchange_calc(currencySymbol,paymentSelector.total, exchangeRate) - func_exchange_calc(currencySymbol,paymentSelector.couponAmount, exchangeRate))
+    : 
+    (paymentSelector.total - paymentSelector.couponAmount)
   ).toLocaleString()}`;
+
   return (
     <PackageDetailsContainer>
       <PackageDetailsItem>
@@ -49,18 +55,17 @@ const PackageDetails = (props) => {
         </PackageDetailsContentItem>
         {props.isPayment && (
           <>
-            <PackageDetailsContentItem>
+            <PackageDetailsContentItem sx={{justifyContent: 'space-between !important', gap: "5px !important"}}>
               <Typography
                 variant="h6"
                 className="title"
                 sx={{
-                  mr: 20,
                   fontWeight: 600,
                 }}
               >
                 Total
               </Typography>
-              <Typography component="div" className="context" variant="h6">
+              <Typography component="div" className="context" variant="h6" >
                 {totalPrice}
               </Typography>
             </PackageDetailsContentItem>

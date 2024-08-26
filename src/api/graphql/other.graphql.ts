@@ -41,7 +41,6 @@ export const QUERY_DELETED_SUB_FOLDER_FILE = gql`
         newName
         path
         newPath
-        is_publicFolder
         access_passwordFolder
         expiredFile
         downloadByFile

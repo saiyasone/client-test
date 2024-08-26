@@ -55,7 +55,7 @@ const CheckoutForm = () => {
             paymentSelector.activePackageType === PACKAGE_TYPE.annual
               ? paymentSelector.activePackageData.annualPrice
               : paymentSelector.activePackageData.monthlyPrice,
-          payerId: user._id,
+          payerId: user?._id,
           paymentMethod: "credit_card",
           couponCode: null,
           status: "success",
@@ -78,7 +78,7 @@ const CheckoutForm = () => {
           status: "success",
           packageId: paymentSelector.activePackageData.packageId,
           type: paymentSelector.activePackageType,
-          payerId: user._id,
+          payerId: user?._id,
         },
       },
       onCompleted: (data) => {

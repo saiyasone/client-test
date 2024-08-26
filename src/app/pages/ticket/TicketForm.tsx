@@ -7,11 +7,8 @@ import {
   MUTATION_CREATE_TICKET,
   MUTATION_CREATE_TICKET_TYPE,
 } from "api/graphql/ticket.graphql";
-import axios from "axios";
 import CircularProgressBar from "components/loading/CircularProgressBar";
-import { ENV_KEYS } from "constants/env.constant";
 import { Formik } from "formik";
-import useAuth from "hooks/useAuth";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { Fragment, useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
@@ -24,7 +21,6 @@ import { BrowseImageButton, ButtonUpload } from "./styles/ticket2.style";
 import * as MUI from "./styles/ticketForm.style";
 
 export default function TicketForm() {
-  const { user }: any = useAuth();
   const manageGraphqlError = useManageGraphqlError();
 
   const [imgLoading, setImgLoading] = useState(false);
@@ -65,8 +61,6 @@ export default function TicketForm() {
   async function onSubmitForm(values) {
     try {
       setLoading(true);
-      const bunnyUrl = ENV_KEYS.VITE_APP_BUNNY_URL;
-      const accessKey = ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY;
       const fileNames = files.map((file) => {
         let newName = "";
         if (file.name?.includes("'")) {
@@ -103,32 +97,32 @@ export default function TicketForm() {
           },
         });
         if (result?.data?.createTickets?._id) {
-          const imageAccess = (await result?.data?.createTickets?.image) || [];
+          // const imageAccess = (await result?.data?.createTickets?.image) || [];
           if (fileUploads.length) {
-            setImgLoading(true);
-            for (let i = 0; i < fileUploads.length; i++) {
-              await axios.put(
-                `${bunnyUrl}/${user.newName}-${user._id}/${imageAccess[i].newNameImage}`,
-                fileUploads[i],
-                {
-                  headers: {
-                    AccessKey: accessKey,
-                    "Content-Type": "multipart/form-data",
-                  },
-                  onUploadProgress: (progressEvent: any) => {
-                    const percentCompleted = Math.round(
-                      (progressEvent.loaded * 100) / progressEvent.total,
-                    );
-                    if (percentCompleted === 100) {
-                      setProgress(99);
-                    } else {
-                      setProgress(percentCompleted);
-                    }
-                  },
-                },
-              );
-            }
-            setImgLoading(false);
+            // setImgLoading(true);
+            // for (let i = 0; i < fileUploads.length; i++) {
+            //   await axios.put(
+            //     `${bunnyUrl}/${user?.newName}-${user?._id}/${imageAccess[i].newNameImage}`,
+            //     fileUploads[i],
+            //     {
+            //       headers: {
+            //         AccessKey: accessKey,
+            //         "Content-Type": "multipart/form-data",
+            //       },
+            //       onUploadProgress: (progressEvent: any) => {
+            //         const percentCompleted = Math.round(
+            //           (progressEvent.loaded * 100) / progressEvent.total,
+            //         );
+            //         if (percentCompleted === 100) {
+            //           setProgress(99);
+            //         } else {
+            //           setProgress(percentCompleted);
+            //         }
+            //       },
+            //     },
+            //   );
+            // }
+            // setImgLoading(false);
           }
           setProgress(0);
           setLoading(false);

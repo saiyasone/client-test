@@ -82,14 +82,18 @@ function Trash() {
   }, [dataForEvents.action]);
 
   const customGetDeletedFolderFile = () => {
-    getDeletedFoldersAndFiles({
-      variables: {
-        where: {
-          createdBy: user._id,
+    try {
+      getDeletedFoldersAndFiles({
+        variables: {
+          where: {
+            createdBy: user?._id,
+          },
+          orderBy: "updatedAt_DESC",
         },
-        orderBy: "updatedAt_DESC",
-      },
-    });
+      });
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const resetDataForEvents = () => {
@@ -265,39 +269,44 @@ function Trash() {
   }, []);
 
   useEffect(() => {
-    getDeletedFoldersAndFiles({
-      variables: {
-        where: {
-          createdBy: user._id,
-        },
-        orderBy: "updatedAt_DESC",
-      },
-    });
+    customGetDeletedFolderFile();
+    // getDeletedFoldersAndFiles({
+    //   variables: {
+    //     where: {
+    //       createdBy: user?._id,
+    //     },
+    //     orderBy: "updatedAt_DESC",
+    //   },
+    // });
   }, []);
 
   React.useEffect(() => {
-    const queryData = data?.queryDeleteSubFolderAndFile?.data;
-    setTotalItems(data?.queryDeleteSubFolderAndFile?.total);
-    setDataDeletedFoldersAndFiles(() => {
-      const result = manageFile.splitDataByDate(queryData, "updatedAt");
+    try {
+      const queryData = data?.queryDeleteSubFolderAndFile?.data;
+      setTotalItems(data?.queryDeleteSubFolderAndFile?.total);
+      setDataDeletedFoldersAndFiles(() => {
+        const result = manageFile.splitDataByDate(queryData, "updatedAt");
 
-      if (queryData !== undefined) {
-        if (queryData.length > 0) {
-          setIsDataDeletedFoldersAndFilesFound(true);
-        } else {
-          setIsDataDeletedFoldersAndFilesFound(false);
+        if (queryData !== undefined) {
+          if (queryData.length > 0) {
+            setIsDataDeletedFoldersAndFilesFound(true);
+          } else {
+            setIsDataDeletedFoldersAndFilesFound(false);
+          }
         }
-      }
-      return result.map((recentFiles) => {
-        return {
-          ...recentFiles,
-          data: recentFiles.data.splice(0, 15).map((data) => ({
-            id: data._id,
-            ...data,
-          })),
-        };
+        return result.map((recentFiles) => {
+          return {
+            ...recentFiles,
+            data: recentFiles.data.splice(0, 15).map((data) => ({
+              id: data._id,
+              ...data,
+            })),
+          };
+        });
       });
-    });
+    } catch (error) {
+      console.log({ error });
+    }
   }, [data?.queryDeleteSubFolderAndFile?.data]);
 
   return (
@@ -396,9 +405,9 @@ function Trash() {
                                       }),
                                     }}
                                     imagePath={
-                                      user.newName +
+                                      user?.newName +
                                       "-" +
-                                      user._id +
+                                      user?._id +
                                       "/" +
                                       (data.newPath
                                         ? removeFileNameOutOfPath(data.newPath)

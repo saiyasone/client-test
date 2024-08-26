@@ -41,7 +41,7 @@ const PackageCheckerProvider = ({ children }) => {
         getPayments({
           variables: {
             where: {
-              payerId: user._id,
+              payerId: user?._id,
             },
           },
         });

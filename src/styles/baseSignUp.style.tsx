@@ -1,3 +1,4 @@
+import { LoadingButton } from "@mui/lab";
 import { Box, Button, Link, createTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 const theme = createTheme();
@@ -21,7 +22,7 @@ export const DivLine = styled("div")({
 });
 
 export const divCarouselDetail = styled("div")({
-  border: "1px solid red",
+  // border: "1px solid red",
 });
 
 export const ButtonLogin = styled(Button)({
@@ -46,7 +47,7 @@ export const ButtonLoginAdmin = styled(Button)({
   },
 });
 
-export const ButtonRegister = styled(Button)({
+export const ButtonRegister = styled(LoadingButton)({
   background: "#17766B",
   padding: "0.8rem 5rem",
   borderRadius: "2rem",

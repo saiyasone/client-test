@@ -68,7 +68,7 @@ const BreadcrumbNavigate = (props) => {
         variables: {
           where: {
             path: data.path,
-            createdBy: props.user._id,
+            createdBy: props.user?._id,
           },
         },
       });

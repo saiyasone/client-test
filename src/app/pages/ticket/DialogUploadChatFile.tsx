@@ -12,7 +12,6 @@ import IconAdd from "@mui/icons-material/Add";
 import IconDel from "@mui/icons-material/Close";
 import IconEmpty from "@mui/icons-material/CreateNewFolder";
 import { LoadingButton } from "@mui/lab";
-import axios from "axios";
 import { Formik } from "formik";
 import { FileIcon, defaultStyles } from "react-file-icon";
 import { useDispatch, useSelector } from "react-redux";
@@ -20,7 +19,6 @@ import * as yup from "yup";
 
 import { MUTATION_CREATE_TICKET } from "api/graphql/ticket.graphql";
 import BaseDialogV1 from "components/BaseDialogV1";
-import { ENV_KEYS } from "constants/env.constant";
 import useAuth from "hooks/useAuth";
 import * as ChatAction from "stores/features/chatSlice";
 import { errorMessage } from "utils/alert.util";
@@ -52,8 +50,6 @@ function DialogUploadChatFile(props) {
     { percentage: 0, filename: "" },
   ]);
   const { user }: any = useAuth();
-  const bunneyUrl = ENV_KEYS.VITE_APP_BUNNY_URL;
-  const bunnyAccess = ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY;
   const [isLoading, setIsLoading] = useState(false);
   const dispatch = useDispatch();
   const schema = yup
@@ -117,50 +113,50 @@ function DialogUploadChatFile(props) {
       });
 
       if (result?.data?.createTickets?._id) {
-        if (chatSelector?.files.length) {
-          setShowProgress(true);
-          const imageAccess = (await result?.data?.createTickets?.image) || [];
+        // if (chatSelector?.files.length) {
+        //   setShowProgress(true);
+        //   const imageAccess = (await result?.data?.createTickets?.image) || [];
 
-          for (let i = 0; i < chatSelector?.files.length; i++) {
-            setProgressInfo(() => [
-              {
-                filename: chatSelector?.files[i].name,
-                percentage: 0,
-              },
-            ]);
-            await axios.put(
-              `${bunneyUrl}/${user?.newName}-${user?._id}/${imageAccess[i]?.newNameImage}`,
-              chatSelector?.files[i],
-              {
-                headers: {
-                  AccessKey: bunnyAccess,
-                  "Content-Type": "multipart/form-data",
-                },
-                onUploadProgress: (event: any) => {
-                  const percentCompleted = Math.round(
-                    (event.loaded * 100) / event.total,
-                  );
+        //   for (let i = 0; i < chatSelector?.files.length; i++) {
+        //     setProgressInfo(() => [
+        //       {
+        //         filename: chatSelector?.files[i].name,
+        //         percentage: 0,
+        //       },
+        //     ]);
+        //     await axios.put(
+        //       `${bunneyUrl}/${user?.newName}-${user?._id}/${imageAccess[i]?.newNameImage}`,
+        //       chatSelector?.files[i],
+        //       {
+        //         headers: {
+        //           AccessKey: bunnyAccess,
+        //           "Content-Type": "multipart/form-data",
+        //         },
+        //         onUploadProgress: (event: any) => {
+        //           const percentCompleted = Math.round(
+        //             (event.loaded * 100) / event.total,
+        //           );
 
-                  if (percentCompleted === 100) {
-                    setProgressInfo(() => [
-                      {
-                        filename: chatSelector?.files?.[i].name,
-                        percentage: 99,
-                      },
-                    ]);
-                  } else {
-                    setProgressInfo(() => [
-                      {
-                        filename: chatSelector?.files?.[i].name,
-                        percentage: percentCompleted,
-                      },
-                    ]);
-                  }
-                },
-              },
-            );
-          }
-        }
+        //           if (percentCompleted === 100) {
+        //             setProgressInfo(() => [
+        //               {
+        //                 filename: chatSelector?.files?.[i].name,
+        //                 percentage: 99,
+        //               },
+        //             ]);
+        //           } else {
+        //             setProgressInfo(() => [
+        //               {
+        //                 filename: chatSelector?.files?.[i].name,
+        //                 percentage: percentCompleted,
+        //               },
+        //             ]);
+        //           }
+        //         },
+        //       },
+        //     );
+        //   }
+        // }
         setIsLoading(false);
         setShowProgress(false);
         onConfirm();

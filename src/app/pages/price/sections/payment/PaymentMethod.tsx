@@ -1,7 +1,7 @@
 import { Box, useTheme } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import useBcelSubscirption from "hooks/payment/useBcelSubscription";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   PAYMENT_METHOD,
@@ -44,6 +44,10 @@ const PaymentMethod = () => {
 
     return [];
   }, []);
+
+  useEffect(()=>{
+    
+  },[paymentSelector.country, paymentSelector.currencySymbol])
 
   const bcelOnePay = useBcelSubscirption();
   const paymentMethodList = () => {

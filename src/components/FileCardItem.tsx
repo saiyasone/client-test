@@ -229,7 +229,11 @@ const FileCardItem: React.FC<any> = ({
     imagePath,
     fileType,
     user,
+    isPublic: props?.isPublic ? true : false,
+    height: 200,
+    width: 200,
   });
+
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const itemRef = useRef(null);

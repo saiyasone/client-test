@@ -21,7 +21,7 @@ import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 import { successMessage } from "utils/alert.util";
-import * as MUI from "./styles/accountInfo.styles";
+import * as MUI from "../styles/accountInfo.styles";
 
 const BpIcon = styled("span")(({ theme }) => ({
   borderRadius: 3,

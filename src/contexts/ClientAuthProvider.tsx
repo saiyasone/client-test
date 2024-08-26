@@ -48,6 +48,7 @@ function ClientAuthGuard({ children }) {
 
   const { isAuthenticated, isInitialized } = useAuth();
 
+
   if (isInitialized && !isAuthenticated) {
     // localStorage.removeItem("accessToken");
     localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);

@@ -12,7 +12,7 @@ const useFetchFileByMostDownload = ({ user = {}, dataFilter }: any) => {
       variables: {
         where: {
           isDeleted: 0,
-          createdBy: user._id,
+          createdBy: user?._id,
           ...(dataFilter.data.filename && {
             filename: dataFilter.data.filename,
           }),

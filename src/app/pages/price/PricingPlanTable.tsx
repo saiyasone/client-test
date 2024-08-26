@@ -128,7 +128,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                     <Typography variant="h6">Native Front Features</Typography>
                   </MUI.CellTableCell>
                   {data?.map((packageData) => {
-                    const { type, isCost, _price, name, _id } = packageData;
+                    const { _type, isCost, _price, name, _id } = packageData;
                     return (
                       <MUI.CellTableCell
                         sx={{ textAlign: "center", verticalAlign: "bottom" }}
@@ -148,13 +148,15 @@ const PricingPlanTable: React.FC<any> = (props) => {
                         </Typography>
                         <Typography component="div">
                           {isCost && paymentSelector.currencySymbol}
-                          {isCost
-                            ? `${_price?.toLocaleString()}${
-                                type === PACKAGE_TYPE.annual
+                          {
+                            isCost
+                              ? `${_price?.toLocaleString()}${
+                                _type === PACKAGE_TYPE.annual
                                   ? "/year"
                                   : "/month"
-                              }`
-                            : "Free"}
+                                }`
+                              : "Free"
+                          }
                         </Typography>
                       </MUI.CellTableCell>
                     );

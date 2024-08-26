@@ -100,52 +100,6 @@ export default function ChatFormReply(props) {
 
   return (
     <Fragment>
-      {/* <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          submitFormReply();
-        }}
-      >
-        <input type="file" multiple={true} hidden={true} {...getInputProps()} />
-        <OutlinedInput
-          id="labelReply"
-          type="text"
-          // name="reply"
-          size="medium"
-          placeholder="Type your message here..."
-          fullWidth={true}
-          ref={inputRef}
-          // error={Boolean(touched.reply && errors.reply)}
-          multiline={true}
-          onChange={handleTextMessage}
-          onKeyDown={handleKeyDown}
-          value={textMessage}
-          // value={values.reply}
-          // onChange={handleChange}
-          endAdornment={
-            <InputAdornment position="end">
-              <MUI.ChatReplyInput>
-                <IconButton
-                  aria-label="toggle password visibility"
-                  edge="end"
-                  type="button"
-                  sx={{ marginRight: "0.8rem" }}
-                  {...getRootProps()}
-                >
-                  {<UploadFileIcon sx={{ fontSize: "1.2rem" }} />}
-                </IconButton>
-                <LoadingButton
-                  type="submit"
-                  variant="contained"
-                  loading={isLoading}
-                >
-                  Send
-                </LoadingButton>
-              </MUI.ChatReplyInput>
-            </InputAdornment>
-          }
-        />
-      </form> */}
       <Formik
         initialValues={{
           reply: "",

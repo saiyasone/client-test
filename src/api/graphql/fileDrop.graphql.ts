@@ -20,25 +20,55 @@ export const QUERY_FILE_DROP_PUBLIC = gql`
       total
       data {
         _id
+        isPublic
         filename
         newFilename
+        filePassword
+        passwordUrlAll
+        fileType
         size
+        totalDownload
+        totalDownloadFaild
         status
         checkFile
+        path
         newPath
-        url
+        detail
         urlAll
+        url
         ip
+        favorite
         dropUrl
+        dropLink
         dropStatus
+        dropExpiredAt
+        source
+        actionStatus
+        expired
+        createdAt
         updatedAt
+        actionDate
+        createdBy {
+          _id
+          newName
+          lastName
+          email
+          firstName
+        }
+        getLinkBy
+        isDeleted
+        uploadStatus
+        downloadStatus
+        shortUrl
+        longUrl
       }
+      total
     }
   }
 `;
 
 export const QUERY_FILE_DROP_URL_PRIVATE = gql`
-  query Data(
+  query GetPrivateFileDropUrl(
     $skip: Int
     $limit: Int
     $orderBy: OrderByInput
@@ -56,7 +86,11 @@ export const QUERY_FILE_DROP_URL_PRIVATE = gql`
         createdAt
         expiredAt
         status
+        isPublic
         title
+        allowDownload
+        allowMultiples
+        allowUpload
         description
         folderId {
           _id
@@ -85,6 +119,9 @@ export const QUERY_USER_BY_FILE_DROP_URL = gql`
           path
           newPath
         }
+        allowDownload
+        allowMultiples
+        allowUpload
         title
         description
         expiredAt
@@ -106,13 +143,15 @@ export const MUTATION_CREATE_FILE_DROP_URL_PRIVATE = gql`
   mutation CreatePrivateFileDropUrl($input: PrivateFileDropUrlInput) {
     createPrivateFileDropUrl(input: $input) {
       _id
+      allowDownload
+      allowMultiples
+      allowUpload
     }
   }
 `;
 
 export const MUTATION_DELETE_FILE_DROP_URL = gql`
   mutation DeleteFileDropUrl($id: ID!) {
-    deleteFil
-    DropUrl(ID: $id)
+    deleteFileDropUrl(ID: $id)
   }
 `;

@@ -73,6 +73,16 @@ export default function DialogPreviewFile(props) {
 
   const descriptionElementRef = React.useRef(null);
   const [showNotFoundImage, setShowNotFoundImage] = useState(false);
+
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath = props?.isPublicPath
+    ? "public" + "/" + newFilename
+    : user?.newName + "-" + user?._id + "/" + real_path + newFilename;
+
+  const handleImageError = () => {
+    setShowNotFoundImage(true);
+  };
+
   React.useEffect(() => {
     if (open) {
       const { current: descriptionElement }: any = descriptionElementRef;
@@ -81,14 +91,6 @@ export default function DialogPreviewFile(props) {
       }
     }
   }, [open, newFilename]);
-  const url = ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE;
-  const publicPath = props?.isPublicPath
-    ? props?.isPublicPath + "/" + newFilename
-    : user.newName + "-" + user._id + "/" + real_path + newFilename;
-
-  const handleImageError = () => {
-    setShowNotFoundImage(true);
-  };
 
   return (
     <MUI.DivContainer>
@@ -141,7 +143,7 @@ export default function DialogPreviewFile(props) {
                 {!showNotFoundImage ? (
                   <MUI.ImagePreview
                     className="image-preview"
-                    src={url + publicPath}
+                    src={newUrl + sourcePath}
                     onError={handleImageError}
                     alt=""
                     style={{ objectFit: "contain" }}
@@ -179,13 +181,8 @@ export default function DialogPreviewFile(props) {
                 src={
                   "https://view.officeapps.live.com/op/embed.aspx?" +
                   "src=" +
-                  url +
-                  user.newName +
-                  "-" +
-                  user._id +
-                  "/" +
-                  real_path +
-                  newFilename
+                  newUrl +
+                  sourcePath
                 }
                 style={{
                   height: "600px",
@@ -207,15 +204,7 @@ export default function DialogPreviewFile(props) {
                   Audio player
                 </Typography>
                 <ReactAudioPlayer
-                  src={
-                    url +
-                    user.newName +
-                    "-" +
-                    user._id +
-                    "/" +
-                    real_path +
-                    newFilename
-                  }
+                  src={newUrl + sourcePath}
                   autoPlay
                   controls
                   preload=""
@@ -233,91 +222,22 @@ export default function DialogPreviewFile(props) {
                     justifyContent: "center",
                     position: "relative",
                   }}
-                  /* controls={{
-                    width: "40px",
-                    height: "40px",
-                    margin: "8px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    outline: "none",
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease-in-out",
-                  }} */
-                  /* playButtonStyle={{
-                    width: "40px",
-                    height: "40px",
-                    margin: "8px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    outline: "none",
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease-in-out",
-                  }} */
-                  /* volumeButtonStyle={{
-                    width: "40px",
-                    height: "40px",
-                    margin: "8px",
-                    backgroundColor: "transparent",
-                    border: "none",
-                    outline: "none",
-                    cursor: "pointer",
-                    transition: "transform 0.2s ease-in-out",
-                  }} */
-                  /* progressStyle={{
-                    width: "100%",
-                    height: "4px",
-                    backgroundColor: "#fff",
-                    borderRadius: "4px",
-                    position: "absolute",
-                    bottom: 0,
-                    left: 0,
-                  }} */
-                  /* progressBarStyle={{
-                    width: "0%",
-                    height: "4px",
-                    backgroundColor: "#ff3e00",
-                    borderRadius: "4px",
-                  }} */
                 />
               </div>
             ) : type == "video" ? (
               <ReactPlayer
                 width={"100%"}
-                url={
-                  url +
-                  user.newName +
-                  "-" +
-                  user._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                url={newUrl + sourcePath}
                 controls={true}
               />
             ) : type === "application" && getType === "pdf" ? (
               <iframe
-                src={
-                  url +
-                  user.newName +
-                  "-" +
-                  user._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                src={newUrl + sourcePath}
                 style={{ width: "100%", height: "80vh", border: "none" }}
               ></iframe>
             ) : type === "text" && getType === "txt" ? (
               <iframe
-                src={
-                  url +
-                  user.newName +
-                  "-" +
-                  user._id +
-                  "/" +
-                  real_path +
-                  newFilename
-                }
+                src={newUrl + sourcePath}
                 width="100%"
                 height="500px"
               ></iframe>

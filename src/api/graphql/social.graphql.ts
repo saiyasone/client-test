@@ -180,3 +180,76 @@ export const MUTATION_SOCIAL_AUTH = gql`
     }
   }
 `;
+
+
+///new social auth 20240730 ---> phonesai
+export const USER_SIGNUP_SUBSCRIPTION = gql`
+subscription Subscription($signupId: String) {
+  subscribeSignupWithSocial(signupId: $signupId) {
+    message
+    token
+    refreshToken
+    data {
+      _id
+      accountId
+      firstName
+      lastName
+      phone
+      email
+      username
+      newName
+      address
+      state
+      zipCode
+      country
+      ip
+      device
+      browser
+      profile
+      currentDevice
+      newDevice
+      twoFactorSecret
+      twoFactorQrCode
+      twoFactorIsEnabled
+      twoFactorIsVerified
+      createdAt
+      updatedAt
+      lastLoggedInAt
+      codeAnonymous
+      anonymousExpired
+      storage
+      packageId {
+        _id
+        packageId
+        name
+        monthlyPrice
+        annualPrice
+        discount
+        description
+        storage
+        ads
+        captcha
+        fileDrop
+        numberOfFileUpload
+        fileUploadPerDay
+        maxUploadSize
+        multipleDownload
+        batchDownload
+        unlimitedDownload
+        customExpiredLink
+        downloadFolder
+        remoteUpload
+        iosApplication
+        androidApplication
+        sort
+        totalUsed
+        textColor
+        bgColor
+        createdAt
+        updatedAt
+      }
+    }
+    signupId
+  }
+} 
+`;

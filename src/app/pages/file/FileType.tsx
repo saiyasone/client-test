@@ -200,17 +200,18 @@ function FileType() {
       checkboxAction.setFileAndFolderData({
         data: {
           id: optionValue?._id,
+          name: optionValue?.filename,
+          newPath: optionValue?.newPath || "",
+          newFilename: optionValue?.newFilename || "",
           checkType: "file",
-          name: optionValue.filename,
-          dataPassword: optionValue?.filePassword ?? "",
+          dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
+          favorite: optionValue?.favorite === 1 ? true : false,
           createdBy: {
             _id: optionValue?.createdBy?._id,
             newName: optionValue?.createdBy?.newName,
           },
-          favorite: optionValue?.favorite === 1 ? true : false,
         },
-        toggle,
       }),
     );
   };
@@ -463,7 +464,7 @@ function FileType() {
       await fileAction({
         variables: {
           fileInput: {
-            createdBy: parseInt(user._id),
+            createdBy: parseInt(user?._id),
             fileId: parseInt(dataForEvent.data._id),
             actionStatus: val,
           },
@@ -477,16 +478,25 @@ function FileType() {
   const handleDownloadFile = async () => {
     setShowProgressing(true);
     setProcesing(true);
-    await manageFile.handleDownloadFile(
+
+    const multipleData = [
       {
-        id: dataForEvent.data._id,
-        newPath: dataForEvent.data.newPath,
-        newFilename: dataForEvent.data.newFilename,
-        filename: dataForEvent.data.filename,
+        id: dataForEvent.data?._id,
+        checkType: "file",
+        newPath: dataForEvent.data?.newPath || "",
+        newFilename: dataForEvent.data?.newFilename || "",
+        createdBy: {
+          _id: dataForEvent.data?.createdBy._id,
+          newName: dataForEvent.data?.createdBy?.newName,
+        },
       },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData },
       {
-        onProcess: async (countPercentage) => {
-          setProgressing(countPercentage);
+        onFailed: async (error) => {
+          errorMessage(error, 3000);
         },
         onSuccess: async () => {
           successMessage("Download successful", 2000);
@@ -500,14 +510,7 @@ function FileType() {
           }));
           customGetFiles();
         },
-        onFailed: (error: any) => {
-          const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
-          errorMessage(
-            manageGraphqlError.handleErrorMessage(cutErr) as string,
-            3000,
-          );
-        },
-        onClosure: () => {
+        onClosure: async () => {
           setShowProgressing(false);
           setShowPreview(false);
           setProcesing(false);
@@ -674,7 +677,7 @@ function FileType() {
       variables: {
         where: {
           path: link,
-          createdBy: user._id,
+          createdBy: user?._id,
         },
       },
     });
@@ -780,9 +783,9 @@ function FileType() {
             setFileDetailsDialog(false);
           }}
           imagePath={
-            user.newName +
+            user?.newName +
             "-" +
-            user._id +
+            user?._id +
             "/" +
             (dataForEvent?.data?.newPath
               ? removeFileNameOutOfPath(dataForEvent.data?.newPath)
@@ -976,9 +979,9 @@ function FileType() {
                             id={data?._id}
                             filePassword={data?.filePassword}
                             imagePath={
-                              user.newName +
+                              user?.newName +
                               "-" +
-                              user._id +
+                              user?._id +
                               "/" +
                               (data.newPath
                                 ? removeFileNameOutOfPath(data.newPath)

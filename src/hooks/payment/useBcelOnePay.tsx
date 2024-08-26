@@ -53,7 +53,7 @@ const useBcelOnePay = () => {
                   paymentSelector.activePackageType === PACKAGE_TYPE.annual
                     ? paymentSelector.activePackageData.annualPrice
                     : paymentSelector.activePackageData.monthlyPrice,
-                payerId: user._id,
+                payerId: user?._id,
                 paymentMethod: "bcelone",
                 couponCode: null,
                 status: "success",

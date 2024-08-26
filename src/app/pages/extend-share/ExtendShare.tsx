@@ -49,8 +49,6 @@ import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { FolderContext } from "contexts/FolderProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import useManageFile from "hooks/file/useManageFile";
-import useFetchFolder from "hooks/folder/useFetchFolder";
-import useManageFolder from "hooks/folder/useManageFolder";
 import useGetUrlExtendFolder from "hooks/url/useGetUrlExtendFolder";
 import useGetUrlExtendFolderDownload from "hooks/url/useGetUrlExtendFolderDownload";
 import useBreadcrumbData from "hooks/useBreadcrumbData";
@@ -73,6 +71,7 @@ import { encryptId } from "utils/secure.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import ExtendFileDataGrid from "../extend-folder/ExtendFileDataGrid";
 import ExtendFolderDataGrid from "../extend-folder/ExtendFolderDataGrid";
+import useFetchShareFolder from "hooks/folder/useFetchShareFolder";
 
 const ITEM_PER_PAGE = 10;
 
@@ -84,8 +83,6 @@ function ExtendShare() {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState<any>(null);
   const parentFolderUrl: any = Base64.decode(params.id);
-
-  // Share to
 
   const handleToggle = (value) => {
     setToggle(value);
@@ -108,7 +105,7 @@ function ExtendShare() {
   const { setFolderId, trackingFolderData }: any = useContext(FolderContext);
   const { user: userAuth }: any = useAuth();
   const user = trackingFolderData?.createdBy || {};
-  const { data: parentFolder } = useFetchFolder({
+  const { data: parentFolder } = useFetchShareFolder({
     folderUrl: parentFolderUrl,
   });
 
@@ -117,12 +114,17 @@ function ExtendShare() {
     userAuth,
   );
 
+  useEffect(() => {
+    // if (fetchSubFoldersAndFiles.data) {
+    //   console.log(fetchSubFoldersAndFiles.data);
+    // }
+  }, [fetchSubFoldersAndFiles.data]);
+
   // for detect file password
   const [filePassword, setFilePassword] = useState<any>("");
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
   const [eventClick, setEventClick] = useState<any>(false);
 
-  const manageFolder = useManageFolder({ user });
   const manageFile = useManageFile({ user });
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
   const [progressing, setProgressing] = useState<any>(0);
@@ -511,7 +513,7 @@ function ExtendShare() {
       await fileAction({
         variables: {
           fileInput: {
-            createdBy: parseInt(user._id),
+            createdBy: parseInt(user?._id),
             fileId: parseInt(dataForEvent.data._id),
             actionStatus: val,
           },
@@ -524,28 +526,61 @@ function ExtendShare() {
 
   /* handle download folders */
   const handleDownloadFolders = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-    await manageFolder.handleDownloadFolder(
+    const newFileData = [
       {
         id: dataForEvent.data?._id,
-        folderName: dataForEvent.data?.name,
-        newPath: dataForEvent.data.newPath,
+        checkType: "folder",
+        newPath: dataForEvent.data?.newPath || "",
+        newFilename: dataForEvent.data?.newFolder_name || "",
+        createdBy: {
+          _id: dataForEvent.data?.createdBy._id,
+          newName: dataForEvent.data?.createdBy?.newName,
+        },
       },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData: newFileData },
       {
-        onFailed: async (error) => {
-          errorMessage(error, 2000);
+        onSuccess: () => {
+          successMessage("Download successful", 3000);
+          setDataForEvent((state) => ({
+            ...state,
+            action: "",
+          }));
         },
-        onSuccess: async () => {
-          successMessage("Download successful", 2000);
+        onFailed: (error) => {
+          errorMessage(error, 3000);
         },
-        onClosure: async () => {
+
+        onClosure: () => {
           setShowProgressing(false);
           setIsAutoClose(false);
           resetDataForEvents();
         },
       },
     );
+
+    // await manageFolder.handleDownloadFolder(
+    //   {
+    //     id: dataForEvent.data?._id,
+    //     folderName: dataForEvent.data?.name,
+    //     newPath: dataForEvent.data.newPath,
+    //   },
+    //   {
+    //     onFailed: async (error) => {
+    //       errorMessage(error, 2000);
+    //     },
+    //     onSuccess: async () => {
+    //       successMessage("Download successful", 2000);
+    //     },
+    //     onClosure: async () => {
+    //       setShowProgressing(false);
+    //       setIsAutoClose(false);
+    //       resetDataForEvents();
+    //     },
+    //   },
+    // );
   };
 
   const handleCreateFileDrop = async (link, date) => {
@@ -568,20 +603,23 @@ function ExtendShare() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-    await manageFile.handleDownloadFile(
+    const newFileData = [
       {
-        id: dataForEvent.data._id,
-        newPath: dataForEvent.data.newPath,
-        newFilename: dataForEvent.data.newName,
-        filename: dataForEvent.data.name,
-      },
-      {
-        onProcess: async (countPercentage) => {
-          setProgressing(countPercentage);
+        id: dataForEvent.data?._id,
+        checkType: "file",
+        newPath: dataForEvent.data?.newPath || "",
+        newFilename: dataForEvent.data?.newFilename || "",
+        createdBy: {
+          _id: dataForEvent.data?.createdBy._id,
+          newName: dataForEvent.data?.createdBy?.newName,
         },
-        onSuccess: async () => {
+      },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData: newFileData },
+      {
+        onSuccess: () => {
           successMessage("Download successful", 2000);
           setDataForEvent((state) => ({
             ...state,
@@ -593,12 +631,13 @@ function ExtendShare() {
           }));
           fetchSubFoldersAndFiles.refetch();
         },
-        onFailed: async (error) => {
-          errorMessage(error, 2000);
+        onFailed: (error) => {
+          errorMessage(error, 3000);
         },
+
         onClosure: () => {
           setIsAutoClose(false);
-          setShowPreview(false);
+          setFileDetailsDialog(false);
           setShowProgressing(false);
           setProcesing(false);
         },
@@ -611,6 +650,7 @@ function ExtendShare() {
       await deleteShareFileAndFolder({
         variables: {
           id: dataForEvent.data?.sharedId,
+          email: userAuth?.email,
         },
         onCompleted: async () => {
           if (dataForEvent.type === "folder") {
@@ -642,7 +682,7 @@ function ExtendShare() {
             data: {
               parentkey: parseInt(parentFolder?._id),
               folder_name: name,
-              updatedBy: user._id,
+              updatedBy: user?._id,
             },
           },
           onCompleted: async () => {
@@ -661,7 +701,7 @@ function ExtendShare() {
             },
             data: {
               filename: name,
-              updatedBy: user._id,
+              updatedBy: user?._id,
             },
           },
           onCompleted: async () => {
@@ -694,7 +734,7 @@ function ExtendShare() {
           },
           data: {
             pin: dataForEvent.data.pin ? 0 : 1,
-            updatedBy: user._id,
+            updatedBy: user?._id,
           },
         },
         onCompleted: async () => {
@@ -729,6 +769,7 @@ function ExtendShare() {
         await deleteShareFileAndFolder({
           variables: {
             id: item?.share?._id,
+            email: item?.toAccount?.email,
           },
 
           onCompleted: () => {
@@ -773,13 +814,16 @@ function ExtendShare() {
               _id: selectOptions?.createdBy?._id,
               newName: selectOptions?.createdBy?.newName,
             },
-            toAccount: userAuth,
+            toAccount: {
+              _id: userAuth?._id,
+              newName: userAuth?.newName,
+              email: userAuth?.email,
+            },
             share: {
               _id: selectOptions?.sharedId,
               isFromShare: selectOptions?.isShare === "yes" ? true : false,
             },
           },
-          toggle,
         }),
       );
     }
@@ -839,7 +883,7 @@ function ExtendShare() {
           },
           data: {
             favorite: dataForEvent.data.favorite ? 0 : 1,
-            updatedBy: user._id,
+            updatedBy: user?._id,
           },
         },
         onCompleted: async () => {
@@ -885,20 +929,21 @@ function ExtendShare() {
       variables: {
         where: {
           path,
-          createdBy: user._id,
+          createdBy: user?._id,
+          status: "active",
         },
       },
     });
 
     if (result) {
       const [dataById] = result.data?.folders?.data || [];
-      const base64URL = Base64.encodeURI(dataById.url);
+      const base64URL = Base64.encodeURI(dataById._id);
       navigate(`/folder/share/${base64URL}`);
     }
   };
 
   const handleDoubleClick = (data) => {
-    const base64URL = Base64.encodeURI(data.url);
+    const base64URL = Base64.encodeURI(data._id);
     navigate(`/folder/share/${base64URL}`);
   };
 
@@ -965,16 +1010,16 @@ function ExtendShare() {
             setFileDetailsDialog(false);
           }}
           imagePath={
-            user.newName +
+            dataForEvent.data?.createdBy?.newName +
             "-" +
-            user._id +
+            dataForEvent.data?.createdBy?._id +
             "/" +
             (dataForEvent?.data?.newPath
               ? removeFileNameOutOfPath(dataForEvent.data?.newPath)
               : "") +
             dataForEvent?.data?.newName
           }
-          user={user}
+          user={dataForEvent.data?.createdBy}
           {...{
             favouriteIcon: {
               isShow: true,
@@ -1016,7 +1061,7 @@ function ExtendShare() {
           newFilename={dataForEvent.data.newName}
           fileType={dataForEvent.data.type}
           path={dataForEvent.data.newPath}
-          user={user}
+          user={dataForEvent.data?.createdBy}
         />
       )}
 
@@ -1071,6 +1116,7 @@ function ExtendShare() {
                 path={breadCrumbData}
                 folderId={parentFolder?._id}
                 handleNavigate={handleFolderNavigate}
+                isShare={true}
               />
               {fetchSubFoldersAndFiles.isDataFound !== null &&
                 fetchSubFoldersAndFiles.isDataFound && (
@@ -1251,86 +1297,91 @@ function ExtendShare() {
                             {fetchSubFoldersAndFiles.data.files.data.map(
                               (data, index) => {
                                 return (
-                                  <FileCardItem
-                                    cardProps={{
-                                      onDoubleClick: () => {
-                                        setDataForEvent({
-                                          action: "preview",
-                                          data,
-                                        });
-                                      },
-                                    }}
-                                    imagePath={
-                                      user.newName +
-                                      "-" +
-                                      user._id +
-                                      "/" +
-                                      (data.newPath
-                                        ? removeFileNameOutOfPath(data.newPath)
-                                        : "") +
-                                      data.newName
-                                    }
-                                    user={user}
-                                    id={data?._id}
-                                    handleSelect={handleMultipleSelectionFile}
-                                    isCheckbox={true}
-                                    fileType={getShortFileTypeFromFileType(
-                                      data.type,
-                                    )}
-                                    filePassword={data?.filePassword}
-                                    name={data.name}
-                                    key={index}
-                                    menuItems={shareWithMeFileMenuItems.map(
-                                      (menuItem, index) => {
-                                        if (data.permission) {
-                                          return (
-                                            <MenuDropdownItem
-                                              {...((menuItem.action ===
-                                                "get link" ||
-                                                menuItem.action === "share" ||
-                                                menuItem.action ===
-                                                  "download") &&
-                                              data.permission !== "edit"
-                                                ? {
-                                                    disabled: true,
-                                                  }
-                                                : {
-                                                    onClick: () => {
-                                                      setDataForEvent({
-                                                        action: menuItem.action,
-                                                        data,
-                                                      });
-                                                    },
-                                                  })}
-                                              isFavorite={
-                                                data.favorite ? true : false
-                                              }
-                                              key={index}
-                                              title={menuItem.title}
-                                              icon={menuItem.icon}
-                                            />
-                                          );
-                                        } else {
-                                          return (
-                                            <MenuDropdownItem
-                                              isFavorite={
-                                                data.favorite ? true : false
-                                              }
-                                              onClick={() => {
-                                                setDataForEvent({
-                                                  action: menuItem.action,
-                                                  data,
-                                                });
-                                              }}
-                                              key={index}
-                                              title={menuItem.title}
-                                              icon={menuItem.icon}
-                                            />
-                                          );
-                                        }
-                                      },
-                                    )}
-                                  />
+                                  <Fragment key={index}>
+                                    <FileCardItem
+                                      cardProps={{
+                                        onDoubleClick: () => {
+                                          setDataForEvent({
+                                            action: "preview",
+                                            data,
+                                          });
+                                        },
+                                      }}
+                                      imagePath={
+                                        data?.createdBy?.newName +
+                                        "-" +
+                                        data?.createdBy?._id +
+                                        "/" +
+                                        (data?.newPath
+                                          ? removeFileNameOutOfPath(
+                                              data?.newPath,
+                                            )
+                                          : "") +
+                                        data?.newFilename
+                                      }
+                                      user={data?.createdBy}
+                                      id={data?._id}
+                                      handleSelect={handleMultipleSelectionFile}
+                                      isCheckbox={true}
+                                      fileType={getShortFileTypeFromFileType(
+                                        data?.type,
+                                      )}
+                                      filePassword={data?.filePassword}
+                                      name={data?.name}
+                                      // key={index}
+                                      menuItems={shareWithMeFileMenuItems.map(
+                                        (menuItem, index) => {
+                                          if (data?.permission) {
+                                            return (
+                                              <MenuDropdownItem
+                                                {...((menuItem.action ===
+                                                  "get link" ||
+                                                  menuItem.action === "share" ||
+                                                  menuItem.action ===
+                                                    "download") &&
+                                                data.permission !== "edit"
+                                                  ? {
+                                                      disabled: true,
+                                                    }
+                                                  : {
+                                                      onClick: () => {
+                                                        setDataForEvent({
+                                                          action:
+                                                            menuItem.action,
+                                                          data,
+                                                        });
+                                                      },
+                                                    })}
+                                                isFavorite={
+                                                  data.favorite ? true : false
+                                                }
+                                                key={index}
+                                                title={menuItem.title}
+                                                icon={menuItem.icon}
+                                              />
+                                            );
+                                          } else {
+                                            return (
+                                              <MenuDropdownItem
+                                                isFavorite={
+                                                  data.favorite ? true : false
+                                                }
+                                                onClick={() => {
+                                                  setDataForEvent({
+                                                    action: menuItem.action,
+                                                    data,
+                                                  });
+                                                }}
+                                                key={index}
+                                                title={menuItem.title}
+                                                icon={menuItem.icon}
+                                              />
+                                            );
+                                          }
+                                        },
+                                      )}
+                                    />
+                                  </Fragment>
                                 );
                               },
                             )}

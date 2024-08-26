@@ -78,6 +78,10 @@ export const QUERY_USER = gql`
         codeAnonymous
         anonymousExpired
         storage
+        countryId {
+          _id
+          name
+        }
       }
       total
     }

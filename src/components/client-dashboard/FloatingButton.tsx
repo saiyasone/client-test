@@ -3,6 +3,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import CreateNewFolderIcon from "@mui/icons-material/CreateNewFolder";
 import DriveFolderUploadIcon from "@mui/icons-material/DriveFolderUpload";
 import UploadFileIcon from "@mui/icons-material/UploadFile";
+import { LoadingButton } from "@mui/lab";
 import {
   Button,
   Dialog,
@@ -56,6 +57,7 @@ export default function FloatingButton() {
   const [getType, setGetType] = React.useState("");
   const isMobile = useMediaQuery("(max-width:600px)");
   const eventUploadTrigger = React.useContext(EventUploadTriggerContext);
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleFolderClose = () => {
     setFolderOpen(false);
@@ -149,6 +151,7 @@ export default function FloatingButton() {
 
   const handleCreateFolder = async () => {
     const newFolderName = uuidv4();
+    setIsLoading(true);
 
     try {
       const data = await todoFolder({
@@ -175,10 +178,12 @@ export default function FloatingButton() {
         setResMessage("");
         setFolderOpen(false);
         setFolder("");
+        setIsLoading(false);
         setResMessage(false);
         eventUploadTrigger.trigger();
       }
     } catch (error: any) {
+      setIsLoading(false);
       const strMsg = error.message.split(": ")[1];
       if (strMsg) {
         setResMessage(true);
@@ -326,17 +331,18 @@ export default function FloatingButton() {
               >
                 Cancel
               </Button>
-              <Button
+              <LoadingButton
                 variant="contained"
                 color="primaryTheme"
                 sx={{
                   borderRadius: "18px",
                   padding: isMobile ? "5px 20px" : "8px 30px",
                 }}
+                loading={isLoading}
                 onClick={handleCreateFolder}
               >
                 Save
-              </Button>
+              </LoadingButton>
             </Box>
           </DialogActions>
         </Box>

@@ -174,7 +174,7 @@ export const BoxLeftShowPlanDetail = styled(Box)({
   flexDirection: "column",
   h5: {
     color: "#5D596C",
-    fontWeight: "550",
+    fontWeight: "500",
     fontSize: "1rem",
     marginTop: "1rem",
   },
@@ -218,9 +218,6 @@ export const BoxShowPaymentHistoryHeader = styled(Box)({
   alignItems: "center",
   justifyContent: "space-between",
   marginTop: "1.5rem",
-  [theme.breakpoints.between("md", "lg")]: {
-    border: "1px solid red",
-  },
   [theme.breakpoints.down("sm")]: {
     flexDirection: "column",
   },
@@ -229,7 +226,7 @@ export const BoxShowPaymentHistoryHeader = styled(Box)({
 export const BoxShowLeftPaymentHistory = styled(Box)({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
+  justifyContent: "start",
   width: "30%",
   [theme.breakpoints.down("sm")]: {
     width: "100%",

@@ -27,10 +27,11 @@ const TextField = styled(MuiTextField)(spacing);
 function BaseSignUp(props) {
   const theme = createTheme();
   const { signUpCaptcha, hideSignUp, handleSignUpFailure } = props;
-  const { signUp }: any = useAuth();
+  const { signUp, authLoading }: any = useAuth();
   const [captcha, setCaptcha] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const mobileScreen = useMediaQuery(theme.breakpoints.down("sm"));
+  const [isLoading, setIsLoading] = useState(false);
 
   const captchaStyle = {
     width: "100%",
@@ -89,6 +90,7 @@ function BaseSignUp(props) {
       onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
         try {
           if (!captcha) {
+            setIsLoading(true);
             await signUp(
               values.firstName,
               values.lastName,
@@ -96,8 +98,17 @@ function BaseSignUp(props) {
               values.email,
               values.password,
             );
+            setIsLoading(false);
+
+            /* reset captcha and button */
+            if(window.grecaptcha) {
+              window.grecaptcha?.reset();
+              setCaptcha(true);
+            }
+
           }
         } catch (error: any) {
+          setIsLoading(false);
           const message = error.message || "Something went wrong";
           setStatus({ success: false });
           setErrors({ submit: message });
@@ -296,6 +307,7 @@ function BaseSignUp(props) {
               variant="contained"
               color="primary"
               disabled={captcha}
+              loading={isLoading}
               size={mobileScreen ? "small" : "medium"}
             >
               Register

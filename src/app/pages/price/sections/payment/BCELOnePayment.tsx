@@ -1,11 +1,11 @@
 import { useSubscription } from "@apollo/client";
-import { Typography, useMediaQuery } from "@mui/material";
+import { Box, Button, Skeleton, Typography, useMediaQuery } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import { SUBSCRIPTION_BCEL_ONE_SUBSCRIPTION } from "api/graphql/payment.graphql";
 import { useRef } from "react";
 import QRCode from "react-qr-code";
-import { setActiveStep } from "stores/features/paymentSlice";
-import NormalButton from "../../../../../components/NormalButton";
+import { setActiveStep, setPaymentStatus, setRecentPayment } from "stores/features/paymentSlice";
+import { useDispatch } from "react-redux";
 
 const BCELOnePaymentContainer = styled("div")({
   display: "flex",
@@ -16,17 +16,28 @@ const BCELOnePaymentContainer = styled("div")({
 const BCELOnePayment: React.FC<any> = (props) => {
   const theme = useTheme();
   const qrCodeRef = useRef<any>(null);
+  const dispatch = useDispatch();
   const isMobile = useMediaQuery("(max-width:900px)");
-
   const _bcelOneSubscription = useSubscription(
     SUBSCRIPTION_BCEL_ONE_SUBSCRIPTION,
     {
       variables: { transactionId: props.transactionId },
-      /* onComplete: () => {
+      onComplete: () => {
         console.log("test");
-      }, */
-      onData: () => {
-        setActiveStep(3);
+      },
+      onData: ({data}) => {
+        // console.log("test der => ",data);
+        if(data && data?.data?.subscribeBcelOneSubscriptionQr?.message === "SUCCESS")
+        {
+          dispatch(setPaymentStatus("Subscription is succeeded"));
+          dispatch(setRecentPayment(data?.data?.subscribeBcelOneSubscriptionQr));
+        }
+        else
+        {
+          dispatch(setPaymentStatus("Subscription is failed!"));
+        }
+        // setActiveStep(3);
+        dispatch(setActiveStep(3));
       },
     },
   );
@@ -66,8 +77,8 @@ const BCELOnePayment: React.FC<any> = (props) => {
         </>
       ) : (
         <>
-          {props.qrCode && (
-            <>
+          {props.qrCode ? (
+            <Box sx={{width: "150px", height:"150px", ml: 4}}>
               {/* <Typography
                 component="img"
                 src={props.qrCode}
@@ -79,26 +90,44 @@ const BCELOnePayment: React.FC<any> = (props) => {
               /> */}
               <QRCode
                 ref={qrCodeRef}
-                size={200}
-                style={{ float: "left" }}
+                size={170}
+                // style={{ float: "left" }}
+                style={{ width: "100%", height:"100%", border: '1px solid gray', padding: '7px', borderRadius: '7px', marginTop: 3}}
                 value={props.qrCode}
                 viewBox={`0 0 256 256`}
               />
-              <NormalButton
+              <Button
+                variant="outlined"
                 onClick={handleDownloadQrCode}
                 sx={{
                   height: "auto",
                   fontWeight: 600,
-                  width: "max-content",
-                  margin: (theme) => `${theme.spacing(2)} ${theme.spacing(4)}`,
+                  width: "100%",
+                  margin: (theme) => `${theme.spacing(3)} ${theme.spacing(0)}`,
                   borderRadius: (theme) => theme.spacing(1),
-                  color: (theme) => theme.palette.primaryTheme.main,
                 }}
               >
-                Download an image
-              </NormalButton>
-            </>
-          )}
+                Download QR
+              </Button>
+            </Box>
+          ):
+            <Box sx={{ position: 'relative', display: 'flex',height: 190, width: 190 }}>
+              <Skeleton sx={{ height: '100%', width: '100%', position:'relative' }} animation="wave" variant="rounded" />
+              <Typography
+                variant="h4"
+                sx={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  color: 'rgba(0, 0, 0, 0.6)', // Adjust color as needed
+                  fontWeight: 'bold',
+                }}
+              >
+                Loading...
+              </Typography>
+            </Box>
+          }
         </>
       )}
     </BCELOnePaymentContainer>

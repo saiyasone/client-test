@@ -35,7 +35,7 @@ const useManageFolder = ({ user }) => {
           },
           data: {
             pin,
-            updatedBy: user._id,
+            updatedBy: user?._id,
           },
         },
         onCompleted: async (data) => {
@@ -65,7 +65,7 @@ const useManageFolder = ({ user }) => {
               parentkey: parseInt(parentKey),
             }),
             folder_name: inputNewFolderName,
-            updatedBy: _user?.id || user._id,
+            updatedBy: _user?.id || user?._id,
           },
         },
         onCompleted: (data) => {
@@ -95,11 +95,9 @@ const useManageFolder = ({ user }) => {
     try {
       const headers = {
         accept: "/",
-        storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
         isFolder: true,
         path: userData.newName + "-" + userData._id + "/" + real_path,
         fileName: CryptoJS.enc.Utf8.parse(downloadedFolderName),
-        AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
         _id: _id,
         createdBy: userData?._id,
       };
@@ -163,11 +161,9 @@ const useManageFolder = ({ user }) => {
 
         return {
           accept: "/",
-          storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
           isFolder: true,
           path: `${folder.createdBy?.newName}-${folder.createdBy?._id}/${real_path}`,
           fileName: CryptoJS.enc.Utf8.parse("vsharez.zip"),
-          AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
           _id: folder.id,
           createdBy: folder.createdBy?._id,
         };

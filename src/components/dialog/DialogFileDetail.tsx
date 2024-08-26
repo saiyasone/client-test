@@ -147,6 +147,7 @@ const DialogFileDetail = (props) => {
                 fileType={props.type}
                 imagePath={props.imagePath}
                 user={props.user}
+                isPublic={props?.data?.createdBy?._id === "0" ? true : false}
                 disableName
                 disableOnHoverEffect
                 name={props.name}

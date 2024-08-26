@@ -206,12 +206,21 @@ export const RightBox = styled(Box)({
   alignItems: "center",
   justifyContent: "center",
   flexDirection: "column",
-  [theme.breakpoints.down("sm")]: {
+  [theme.breakpoints.down(900)]: {
     display: "none",
   },
   [theme.breakpoints.between("sm", "md")]: {
     justifyContent: "start",
     paddingTop: "15rem",
+  },
+
+  h2: {
+    fontSize: "3.5rem",
+    fontWeight: 700,
+
+    [theme.breakpoints.down(980)]: {
+      fontSize: "2.8rem",
+    },
   },
 });
 
@@ -221,6 +230,11 @@ export const BoxShowDetail = styled(Box)({
   h4: {
     fontSize: "1.5rem",
     lineHeight: "2",
+    fontWeight: 500,
+
+    [theme.breakpoints.down(980)]: {
+      fontSize: "1rem",
+    },
   },
 });
 

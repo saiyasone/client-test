@@ -1,7 +1,9 @@
 import { useLazyQuery } from "@apollo/client";
-import { QUERY_FILE } from "api/graphql/file.graphql";
-import { QUERY_FOLDER } from "api/graphql/folder.graphql";
-import { QUERY_SHARE } from "api/graphql/share.graphql";
+import {
+  QUERY_FILE_SHARE_PUBLIC,
+  QUERY_FOLDER_SHARE_PUBLIC,
+  QUERY_SHARE,
+} from "api/graphql/share.graphql";
 import { useEffect, useState } from "react";
 
 const useFetchSharedSubFolderAndFile = (parentId, user) => {
@@ -14,11 +16,11 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
 
   const [isDataFound, setDataFound] = useState<any>(null);
   const [mainData, setMainData] = useState<any>(null);
-  const [getFolderData] = useLazyQuery(QUERY_FOLDER, {
+  const [getFolderData] = useLazyQuery(QUERY_FOLDER_SHARE_PUBLIC, {
     fetchPolicy: "no-cache",
   });
 
-  const [getFileData] = useLazyQuery(QUERY_FILE, {
+  const [getFileData] = useLazyQuery(QUERY_FILE_SHARE_PUBLIC, {
     fetchPolicy: "no-cache",
   });
 
@@ -26,7 +28,6 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
     getShareData({
       variables: {
         where: {
-          isShare: "no",
           status: "active",
           parentKey: parentId,
           toAccount: user.email,
@@ -78,13 +79,11 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
                     (
                       await getFolderData({
                         variables: {
-                          where: {
-                            _id: data.folderId._id,
-                            createdBy: data.ownerId._id,
-                          },
+                          id: data.folderId._id,
                         },
                       })
-                    ).data?.folders?.data || [];
+                    ).data?.folderPublic?.data || [];
+
                   if (folderById) {
                     return {
                       ...folderById,
@@ -106,6 +105,37 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
             total: folderData.length,
           },
 
+          // files: {
+          //   data: await Promise.all(
+          //     fileData
+          //       .map(async (data) => {
+          //         const [fileById] =
+          //           (
+          //             await getFileData({
+          //               variables: {
+          //                 id: data.fileId._id,
+          //               },
+          //             })
+          //           ).data?.filePublic?.data || [];
+          //         if (fileById) {
+          //           return {
+          //             ...fileById,
+          //             sharedId: data._id,
+          //             name: fileById.filename,
+          //             type: fileById.fileType,
+          //             newName: fileById.newFilename,
+          //             id: fileById._id,
+          //             favorite: fileById.favorite ? 1 : 0,
+          //             totalDownload: fileById.totalDownload || 0,
+          //             checkTypeItem: "file",
+          //             permission: data.permission,
+          //           };
+          //         }
+          //       })
+          //       .filter((data) => data),
+          //   ),
+          //   total: fileData.length,
+          // },
           files: {
             data: await Promise.all(
               fileData
@@ -114,13 +144,10 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
                     (
                       await getFileData({
                         variables: {
-                          where: {
-                            _id: data.fileId._id,
-                            createdBy: data.ownerId._id,
-                          },
+                          id: [data.fileId._id],
                         },
                       })
-                    ).data?.files?.data || [];
+                    ).data?.filePublic?.data || [];
                   if (fileById) {
                     return {
                       ...fileById,

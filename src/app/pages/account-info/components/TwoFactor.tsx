@@ -25,7 +25,7 @@ import QRCode from "qrcode.react";
 import { Fragment, useState } from "react";
 import CopyToClipboard from "react-copy-to-clipboard";
 import { errorMessage, successMessage } from "utils/alert.util";
-import * as MUI from "./styles/accountInfo.styles";
+import * as MUI from "../styles/accountInfo.styles";
 const ContainerQR = styled("div")({
   minHeight: "50px",
   width: "auto",

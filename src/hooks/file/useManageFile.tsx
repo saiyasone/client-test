@@ -28,6 +28,7 @@ import {
 } from "utils/file.util";
 import { safeGetProperty } from "utils/object.util";
 import { v4 as uuidv4 } from "uuid";
+
 const useManageFile = ({ user }) => {
   const [updateFile] = useMutation(MUTATION_UPDATE_FILE);
   const [updateFiles] = useMutation(MUTATION_CREATE_FILE);
@@ -52,6 +53,18 @@ const useManageFile = ({ user }) => {
     const encryptedData = cipherText + ":" + ivText;
 
     return encryptedData;
+  };
+
+  const startDownload = ({ baseUrl }) => {
+    const iframe = document.createElement("iframe");
+    iframe.style.display = "none";
+
+    iframe.onload = () => {
+      document.body.removeChild(iframe);
+    };
+
+    iframe.src = baseUrl;
+    document.body.appendChild(iframe);
   };
 
   const splitDataByDate = (data, accessorKey) => {
@@ -119,7 +132,7 @@ const useManageFile = ({ user }) => {
           },
           data: {
             status: "deleted",
-            createdBy: user._id,
+            createdBy: user?._id,
           },
         },
         onCompleted: (data) => {
@@ -185,7 +198,7 @@ const useManageFile = ({ user }) => {
               folder_id: parentKey,
             }),
             filename: inputNewFilename,
-            updatedBy: user._id,
+            updatedBy: user?._id,
           },
         },
         onCompleted: (data) => {
@@ -213,7 +226,7 @@ const useManageFile = ({ user }) => {
           },
           data: {
             favorite: inputFavorite,
-            updatedBy: user._id,
+            updatedBy: user?._id,
           },
         },
         onCompleted: (data) => {
@@ -240,15 +253,12 @@ const useManageFile = ({ user }) => {
     try {
       const headers = {
         accept: "*/*",
-        storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
         isFolder: false,
         path:
           (isPublicPath ? "" : userData.newName + "-" + userData._id) +
           "/" +
           real_path +
           newFilename,
-        fileName: CryptoJS.enc.Utf8.parse(filename),
-        AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
         createdBy: userData?._id,
       };
 
@@ -327,6 +337,85 @@ const useManageFile = ({ user }) => {
     }
   };
 
+  // download single file
+  const handleDownloadSingleFile = async (
+    { multipleData },
+    { onSuccess, onFailed, onClosure },
+  ) => {
+    try {
+      const newModelData = multipleData.map((file) => {
+        let real_path = "";
+        if (file.newPath) {
+          real_path = removeFileNameOutOfPath(file?.newPath);
+        }
+
+        return {
+          isFolder: file.checkType === "folder" ? true : false,
+          path: `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}${file.newFilename}`,
+          _id: file.id,
+          createdBy: file.createdBy?._id,
+        };
+      });
+
+      const headers = {
+        accept: "*/*",
+        lists: newModelData,
+        createdBy: multipleData?.[0].createdBy?._id,
+        downloadBy: multipleData[0]?.toAccount?.email,
+      };
+
+      const encryptedData = dataEncrypted({ headers });
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
+
+      startDownload({ baseUrl });
+      onSuccess();
+    } catch (error) {
+      onFailed?.(error);
+    } finally {
+      onClosure?.();
+    }
+  };
+
+  const handleSingleFileDropDownload = async (
+    { multipleData },
+    { onSuccess, onFailed, onClosure },
+  ) => {
+    try {
+      const newModelData = multipleData.map((file) => {
+        let real_path = "";
+        if (file.createdBy?._id !== "0") {
+          real_path = removeFileNameOutOfPath(file?.newPath);
+          real_path = `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}${file.newFilename}`;
+        } else {
+          real_path = `public/${file.newFilename}`;
+        }
+
+        return {
+          isFolder: false,
+          path: real_path,
+          _id: file.id,
+          createdBy: file?.createdBy?._id,
+        };
+      });
+
+      const headers = {
+        accept: "*/*",
+        lists: newModelData,
+        createdBy: multipleData?.[0]?.createdBy?._id,
+      };
+
+      const encryptedData = dataEncrypted({ headers });
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
+
+      startDownload({ baseUrl });
+      onSuccess();
+    } catch (error) {
+      onFailed?.(error);
+    } finally {
+      onClosure?.();
+    }
+  };
+
   // download multiple files
   const handleMultipleDownloadFile = async (
     { multipleData },
@@ -340,24 +429,21 @@ const useManageFile = ({ user }) => {
         }
 
         return {
-          accept: "*/*",
-          storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
-          isFolder: false,
-          path: `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}/${file.newFilename}`,
-          _id: file.id,
-          fileName: CryptoJS.enc.Utf8.parse(file.name),
-          AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
+          // _id: file.id,
           createdBy: file.createdBy?._id,
+          path: `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}/${file.newFilename}`,
+          isFolder: false,
         };
       });
 
       const headers = {
         accept: "*/*",
         lists: newModelData,
+        createdBy: newModelData?.[0]?.createdBy,
       };
 
       const encryptedData = dataEncrypted({ headers });
-      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifiles?download=${encryptedData}`;
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
       startDownload({ baseUrl });
       setTimeout(() => {
@@ -377,31 +463,29 @@ const useManageFile = ({ user }) => {
     try {
       const newModelData = multipleData.map((file) => {
         let real_path = "";
-        if (file.newPath) {
-          real_path = removeFileNameOutOfPath(file.newPath);
-          real_path = `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}`;
+        if (file.createdBy?._id !== "0") {
+          real_path = removeFileNameOutOfPath(file?.newPath);
+          real_path = `${file.createdBy?.newName}-${file.createdBy?._id}/${real_path}${file.newFilename}`;
         } else {
           real_path = `public/${file.newFilename}`;
         }
 
         return {
-          accept: "*/*",
-          storageZoneName: ENV_KEYS.VITE_APP_STORAGE_ZONE,
-          isFolder: false,
-          path: real_path,
           _id: file.id,
-          fileName: CryptoJS.enc.Utf8.parse(file.name),
-          AccessKey: ENV_KEYS.VITE_APP_ACCESSKEY_BUNNY,
+          path: real_path,
+          isFolder: false,
+          createdBy: file?.createdBy?._id,
         };
       });
 
       const headers = {
         accept: "*/*",
         lists: newModelData,
+        createdBy: multipleData?.[0]?.createdBy?._id,
       };
 
       const encryptedData = dataEncrypted({ headers });
-      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifiles?download=${encryptedData}`;
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
       startDownload({ baseUrl });
       setTimeout(() => {
@@ -412,18 +496,6 @@ const useManageFile = ({ user }) => {
       console.error(error);
     }
   };
-
-  async function startDownload({ baseUrl }) {
-    const iframe = document.createElement("iframe");
-    iframe.style.display = "none";
-
-    iframe.onload = () => {
-      document.body.removeChild(iframe);
-    };
-
-    iframe.src = baseUrl;
-    document.body.appendChild(iframe);
-  }
 
   const handleMultipleDownloadFileAndFolder = async (
     { multipleData, isShare },
@@ -449,6 +521,7 @@ const useManageFile = ({ user }) => {
         accept: "*/*",
         lists: newModelData,
         downloadBy: multipleData[0]?.toAccount?.email,
+        createdBy: multipleData[0].createdBy?._id,
       };
 
       const encryptedData = dataEncrypted({ headers });
@@ -518,7 +591,7 @@ const useManageFile = ({ user }) => {
           },
         });
         if (uploading?.data?.createFiles?._id) {
-          const sourcePath = "public/" + file?.newFilename;
+          const sourcePath = file?.newFilename;
           const destinationPath =
             file?.createdBy?.newName +
             "-" +
@@ -563,6 +636,8 @@ const useManageFile = ({ user }) => {
     handleMultipleDownloadFileAndFolder,
     handleMultipleFileDropDownloadFile,
     handleMultipleSaveToClound,
+    handleDownloadSingleFile,
+    handleSingleFileDropDownload,
   };
 };
 

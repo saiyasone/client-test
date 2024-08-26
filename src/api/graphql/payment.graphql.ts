@@ -96,7 +96,28 @@ export const QUERY_PAYMENT = gql`
         updatedAt
         orderedAt
         expiredAt
+        payerId {
+          _id
+          firstName
+          lastName
+        }
       }
+      total
+    }
+  }
+`;
+
+export const QUERY_CURRENT_PAYMENT = gql`
+  query Data($id: ID!) {
+    getPayment(ID: $id) {
+      data {
+        _id
+        expiredAt
+      }
+      availableDays
+      overdueDays
+      totalDays
+      usedDays
     }
   }
 `;
@@ -199,7 +220,27 @@ export const SUBSCRIPTION_BCEL_ONE_SUBSCRIPTION = gql`
   subscription Subscription($transactionId: String) {
     subscribeBcelOneSubscriptionQr(transactionId: $transactionId) {
       message
+      error
       transactionId
+    }
+  }
+`;
+
+export const SUBSCRIPTION_TWO_CHECKOUT = gql`
+  subscription TwoCheckoutSubscription($code: String!) {
+    twoCheckoutSubscription(code: $code) {
+      message
+    }
+  }
+`;
+
+export const BCEL_EXCHANGE_RATE = gql`
+  query BceloneLoadExchangeRate {
+    bceloneLoadExchangeRate {
+      result_code
+      status
+      message
+      info
     }
   }
 `;

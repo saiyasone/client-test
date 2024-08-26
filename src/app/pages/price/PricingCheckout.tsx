@@ -81,10 +81,12 @@ function PricingCheckout() {
       ? memorizedPackages.current.filteredAnnualData || packages.annualData
       : memorizedPackages.current.filteredMonthlyData || packages.monthlyData;
 
+
   const settingKeys = {
     Strip: "SRIPETE",
     Bcel: "CELBENE",
   };
+
 
   useEffect(() => {
     memorizedPackages.current = packages;
@@ -232,6 +234,7 @@ function PricingCheckout() {
             onSubmit={(values) => {
               dispatch(setAddressData(values));
               dispatch(setActiveStep(3));
+              dispatch(resetPayment());
             }}
           />
         );
@@ -273,11 +276,11 @@ function PricingCheckout() {
     );
   };
 
-  useEffect(() => {
-    return () => {
-      dispatch(resetPayment());
-    };
-  }, [dispatch]);
+  // useEffect(() => {
+  //   return () => {
+  //     dispatch(resetPayment());
+  //   };
+  // }, [dispatch]);
 
   if (isFirstRender) {
     return null;

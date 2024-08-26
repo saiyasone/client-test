@@ -1,11 +1,13 @@
+import {useNavigate} from 'react-router-dom'
 import { Box, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import moment from "moment/moment";
 import { useEffect } from "react";
 import { BiTimeFive } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
-import { paymentState, setPaymentSteps } from "stores/features/paymentSlice";
+import { paymentState, resetPayment, setPaymentSteps } from "stores/features/paymentSlice";
 import PackagePlan from "../PackagePlan";
+import NormalButton from "components/NormalButton";
 
 const ConfirmationContainer = styled("div")({
   display: "flex",
@@ -15,6 +17,7 @@ const ConfirmationContainer = styled("div")({
 
 const ContentWrapper = styled("div")(({ theme }) => ({
   display: "flex",
+  flex: 1,
   flexDirection: "column",
   rowGap: 32,
   padding: theme.spacing(6),
@@ -22,13 +25,23 @@ const ContentWrapper = styled("div")(({ theme }) => ({
   border: "1px solid #DBDADE",
 }));
 
+const ContentWrapperRow = styled("div")(({ theme }) => ({
+  display: "flex",
+  justifyContent: 'space-between',
+  rowGap: 32,
+  padding: theme.spacing(0),
+}));
+
 const Confirmation: React.FC<any> = (_props) => {
-  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { currencySymbol, addressData, ...paymentSelector }: any =
     useSelector(paymentState);
   const totalPrice = `${currencySymbol}${(
     paymentSelector.total - paymentSelector.couponAmount
   ).toLocaleString()}`;
+  const dispatch = useDispatch();
+
+  
 
   useEffect(() => {
     dispatch(
@@ -62,24 +75,44 @@ const Confirmation: React.FC<any> = (_props) => {
         >
           Thank You! 😇
         </Typography>
-        <Typography variant="body1">
-          Your order #{paymentSelector.recentPayment?.paymentId} has been
-          placed!
-        </Typography>
         <Typography
-          variant="body1"
+          variant="h5"
           sx={{
-            textAlign: "center",
+            fontWeight: 600,
+            paddingY:2,
+            paddingX: 5,
+            marginY: 2,
+            borderRadius: 10,
+            backgroundColor: paymentSelector.paymentStatus.includes('succeeded') ? 'rgb(0, 128, 34,0.2)' : 'rgb(255,0,0,0.2)',
+            color: paymentSelector.paymentStatus.includes('succeeded') ? 'rgb(0, 128, 34,1)' : 'rgb(255,0,0,1)'
           }}
         >
-          <div>
+          {paymentSelector.paymentStatus}
+          
+        </Typography>
+        <Typography variant="body1">
+          Your order <b>#{paymentSelector.recentPayment?.paymentId || paymentSelector.recentPayment?.transactionId}</b> has been
+          placed!
+        </Typography>
+        <div>
+          <Typography
+            variant="body1"
+            sx={{
+              textAlign: "center",
+            }}
+          >
             Thank you for your purchase! Your package includes access to Vshare
-          </div>
-          <div>
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{
+              textAlign: "center",
+            }}
+          >
             detail: I have sent the payment slip and package details to your
             email. Please let me know if you have any questions or concerns.
-          </div>
-        </Typography>
+          </Typography>
+        </div>
         <Typography
           variant="body1"
           sx={{
@@ -135,23 +168,44 @@ const Confirmation: React.FC<any> = (_props) => {
           >
             Total
           </Typography>
-          <Typography component="div" className="context" variant="h6">
+          <Typography className="context" variant="h6">
             {totalPrice}
           </Typography>
         </Box>
       </ContentWrapper>
-      <ContentWrapper>
-        <Typography
-          variant="body1"
-          sx={{ display: "flex", flexDirection: "column", maxWidth: 250 }}
+      <ContentWrapperRow>
+        <ContentWrapper>
+          <Typography
+            variant="body1"
+            sx={{ display: "flex", flexDirection: "column"}}
+          >
+            <span>
+              {addressData.first_name} {addressData.last_name}
+              {addressData.tel && `, ${addressData.tel}`}
+            </span>
+            <span>{addressData.email}</span>
+          </Typography>
+        </ContentWrapper>
+        <NormalButton
+          onClick={()=>{dispatch(resetPayment()); navigate('/pricing')}}
+          sx={{
+            marginTop: 3,
+              width: "auto",
+              height: "35px",
+              padding: (theme) => `${theme.spacing(2)} ${theme.spacing(10)}`,
+              borderRadius: (theme) => theme.spacing(1),
+              backgroundColor: (theme) => theme.palette.primaryTheme.main,
+              textAlign: "center",
+              display: "block",
+              color: "white !important",
+              ml: 5,
+              mb: 5,
+              mt: 'auto'
+            }}
         >
-          <span>
-            {addressData.first_name} {addressData.last_name}
-            {addressData.tel && `, ${addressData.tel}`}
-          </span>
-          <span>{addressData.email}</span>
-        </Typography>
-      </ContentWrapper>
+            Finish
+        </NormalButton>
+      </ContentWrapperRow>
     </ConfirmationContainer>
   );
 };

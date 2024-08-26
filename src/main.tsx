@@ -38,7 +38,7 @@ export const clientMockup = new ApolloClient({
   link: from([
     authLink.concat(
       createHttpLink({
-        uri: "https://coding.vshare.net/api",
+        uri: ENV_KEYS.VITE_APP_API_URL,
       }),
     ),
   ]),
@@ -50,7 +50,7 @@ export const clientMockup = new ApolloClient({
 
 const wsLink = new GraphQLWsLink(
   createClient({
-    url: "wss://coding.vshare.net/api",
+    url: `wss://${ENV_KEYS.VITE_APP_SUBSCRIPTION_URL}`,
   }),
 );
 
@@ -79,7 +79,7 @@ const client = new ApolloClient({
 });
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <Provider store={store}>
       <ApolloProvider client={client}>
         <ThemeProvider>
@@ -89,5 +89,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </ThemeProvider>
       </ApolloProvider>
     </Provider>
-  </React.StrictMode>,
+  // </React.StrictMode>,
 );
