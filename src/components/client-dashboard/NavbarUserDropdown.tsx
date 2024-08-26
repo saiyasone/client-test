@@ -52,6 +52,9 @@ function NavbarUserDropdown() {
     imagePath: `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
     fileType: "image",
     user,
+    width: 200,
+    height: 200,
+    isPublic: false,
   });
 
   const handleGetUser = async () => {

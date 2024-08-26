@@ -91,7 +91,11 @@ function ResetFilePasswordComponent(props) {
                   size="small"
                   placeholder="New password"
                   error={Boolean(touched.newPassword && errors.newPassword)}
-                  helperText={touched.newPassword && errors.newPassword}
+                  helperText={
+                    touched.newPassword && errors.newPassword
+                      ? String(errors.newPassword)
+                      : undefined
+                  }
                   onChange={handleChange}
                   value={values.newPassword}
                   fullWidth={true}
@@ -107,7 +111,11 @@ function ResetFilePasswordComponent(props) {
                   error={Boolean(
                     touched.confirmPassword && errors.confirmPassword,
                   )}
-                  helperText={touched.confirmPassword && errors.confirmPassword}
+                  helperText={
+                    touched.confirmPassword && errors.confirmPassword
+                      ? String(errors.confirmPassword)
+                      : undefined
+                  }
                   onChange={handleChange}
                   value={values.confirmPassword}
                   fullWidth={true}

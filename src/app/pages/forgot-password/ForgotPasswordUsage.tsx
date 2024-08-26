@@ -154,7 +154,9 @@ function ForgotPasswordUsage() {
             value={values.email}
             error={Boolean(touched.email && errors.email)}
             fullWidth
-            helperText={touched.email && errors.email}
+            helperText={
+              touched.email && errors.email ? String(errors.email) : undefined
+            }
             onBlur={handleBlur}
             onChange={handleChange}
             my={3}

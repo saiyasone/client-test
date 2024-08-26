@@ -19,10 +19,13 @@ const useResizeImage = ({
   imagePath,
   user,
   fileType,
-  width = 200,
-  height = 200,
-  isPublic = false,
-}: Props) => {
+  width,
+  height,
+  isPublic,
+}: // width = 200,
+// height = 200,
+// isPublic = false,
+Props) => {
   const [imageSrc, setImageSrc] = useState<any>("");
   const [imageFound, setImageFound] = useState<any>(null);
   const location = useLocation();
