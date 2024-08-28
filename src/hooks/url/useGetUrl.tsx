@@ -4,11 +4,11 @@ import { MUTATION_UPDATE_FOLDER } from "api/graphql/folder.graphql";
 import { useState } from "react";
 import { errorMessage, successMessage } from "utils/alert.util";
 
-const useGetUrl = (data) => {
+const useGetUrl = (data: any) => {
   const [updateFile] = useMutation(MUTATION_UPDATE_RECENT_FILE);
   const [updateFolder] = useMutation(MUTATION_UPDATE_FOLDER);
 
-  async function copyTextToClipboard(text) {
+  async function copyTextToClipboard(text: string) {
     if ("clipboard" in navigator) {
       return await navigator.clipboard.writeText(text);
     } else {
@@ -18,7 +18,7 @@ const useGetUrl = (data) => {
 
   const [_copied, setCoppied] = useState(false);
   if (data) {
-    const handleGetFolderURL = async (data) => {
+    const handleGetFolderURL = async (data: any) => {
       const dataType =
         data?.folder_type || data?.folderId?._id ? "folder" : "file";
       const ownerData = data?.createdBy?._id ?? data?.ownerId?._id;

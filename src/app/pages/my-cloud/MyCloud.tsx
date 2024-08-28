@@ -77,6 +77,7 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 // const ITEM_PER_PAGE_GRID = 20;
 
@@ -445,7 +446,9 @@ export function MyCloud() {
   const handleClosePreview = () => {
     resetDataForEvent();
     setShowPreview(false);
+    setOpenPreview(false);
   };
+  console.log(isAutoClose);
 
   // query file grid
   const queryFileGrid = async () => {
@@ -508,11 +511,11 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFile();
-  }, [currentFilePage, countFilePage, toggle]);
+  }, [currentFilePage, countFilePage, toggle, isAutoClose]);
 
   useEffect(() => {
     queryFileGrid();
-  }, [fileViewMore, toggle]);
+  }, [fileViewMore, toggle, isAutoClose]);
 
   //query all files count and separate base on file type
   const queryCategory = async () => {
@@ -1718,7 +1721,7 @@ export function MyCloud() {
                     )}
                 </>
               </MUI.DivRecentFile>
-              {showPreview && (
+              {/* {showPreview && (
                 <DialogPreviewFile
                   open={openPreview}
                   handleClose={handleClosePreview}
@@ -1735,7 +1738,7 @@ export function MyCloud() {
                   path={path}
                   user={user}
                 />
-              )}
+              )} */}
 
               {/* create share popup */}
               {openShare && (
@@ -1944,6 +1947,13 @@ export function MyCloud() {
         }
         onConfirm={handleSubmitDecryptedPassword}
         onClose={handleCloseDecryptedPassword}
+      />
+
+      <DialogPreviewFileSlide
+        open={openPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
       />
     </Fragment>
   );

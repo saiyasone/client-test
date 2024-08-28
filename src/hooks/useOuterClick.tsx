@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 
-function useOuterClick(ref) {
+function useOuterClick(ref:any) {
   const [isOuterClicked, setIsOuterClicked] = useState(false);
 
-  const handleClick = (event) => {
+  const handleClick = (event:MouseEvent) => {
     setIsOuterClicked(ref.current?.contains(event.target));
   };
 

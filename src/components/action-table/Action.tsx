@@ -96,7 +96,7 @@ export default function Action(props) {
           customButton={{
             element: (
               <IconButton>
-                <MoreVertRoundedIcon />
+                <MoreVertRoundedIcon sx={{ color: props.color ?? "" }} />
               </IconButton>
             ),
           }}
@@ -105,14 +105,14 @@ export default function Action(props) {
             return (
               <MenuDropdownItem
                 isFavorite={
-                  params?.row?.favorite || params.row.fileId?.favorite
+                  params?.row?.favorite || params.row?.fileId?.favorite
                     ? true
                     : false
                 }
                 isPassword={
                   params?.row?.filePassword ||
                   params?.row?.access_password ||
-                  params?.row.access_passwordFolder
+                  params?.row?.access_passwordFolder
                     ? true
                     : false
                 }

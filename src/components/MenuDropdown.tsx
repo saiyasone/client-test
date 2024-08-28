@@ -6,6 +6,7 @@ import Menu from "@mui/material/Menu";
 import { styled } from "@mui/material/styles";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import "styles/menuDropdown.style.css";
+import { useMediaQuery } from "@mui/material";
 
 const MenuDropdownStyled = styled("div")({
   position: "relative",
@@ -41,6 +42,7 @@ const MenuListContainer = styled("div")({
 // const MenuDropdown = ({ menuAction, ...props }) => {
 const MenuDropdown = ({ ...props }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const isMobile = useMediaQuery("(max-width:600px)");
   const open = Boolean(anchorEl);
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
   const handleClick = (event) => {
@@ -105,7 +107,7 @@ const MenuDropdown = ({ ...props }) => {
             paper: {
               style: {
                 position: "relative",
-                width: "max-content",
+                width: isMobile ? "180px" : "max-content",
                 boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.05)",
               },
             },
