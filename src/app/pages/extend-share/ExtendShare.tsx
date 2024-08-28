@@ -560,27 +560,6 @@ function ExtendShare() {
         },
       },
     );
-
-    // await manageFolder.handleDownloadFolder(
-    //   {
-    //     id: dataForEvent.data?._id,
-    //     folderName: dataForEvent.data?.name,
-    //     newPath: dataForEvent.data.newPath,
-    //   },
-    //   {
-    //     onFailed: async (error) => {
-    //       errorMessage(error, 2000);
-    //     },
-    //     onSuccess: async () => {
-    //       successMessage("Download successful", 2000);
-    //     },
-    //     onClosure: async () => {
-    //       setShowProgressing(false);
-    //       setIsAutoClose(false);
-    //       resetDataForEvents();
-    //     },
-    //   },
-    // );
   };
 
   const handleCreateFileDrop = async (link, date) => {

@@ -307,21 +307,25 @@ function AccountInfo() {
 
       //delete a file
       if (selectedFile instanceof File && userAccount?.profile) {
-        const headers = {
-          PATH: `${userAccount?.newName}-${userAccount?._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}`,
-          FILENAME: userAccount?.profile,
-          createdBy: user?._id,
-        };
-
-        const encryptedData = encryptData(headers);
-        await axios.delete(LOAD_DELETE_URL, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            encryptedHeaders: encryptedData,
-          },
-        });
+        // const headers = {
+        //   PATH: `${userAccount?.newName}-${userAccount?._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}`,
+        //   FILENAME: userAccount?.profile,
+        //   createdBy: user?._id,
+        // };
+        // const encryptedData = encryptData(headers);
+        // await axios.delete(LOAD_DELETE_URL, {
+        //   headers: {
+        //     "Content-Type": "multipart/form-data",
+        //     encryptedHeaders: encryptedData,
+        //   },
+        // });
       }
 
+      console.log(
+        selectedFile instanceof File
+          ? profileName + selectedFileExtension
+          : userAccount?.profile,
+      );
       const userData = await updateUser({
         variables: {
           id: user?._id,
@@ -502,23 +506,23 @@ function AccountInfo() {
                       <>
                         {selectedSvgCode && selectedImageType === "avatar" ? (
                           <>
-                            <img
+                            {/* <img
                               src={`data:image/svg+xml;utf8,${encodeURIComponent(
-                                selectedSvgCode,
+                                selectedSvgCode || "",
                               )}`}
                               alt="user_avatar_image"
                               style={{
                                 objectFit: "fill",
                                 borderRadius: "8px",
                               }}
-                            />
+                            /> */}
                           </>
                         ) : (
                           <>
                             {userAccount?.profile ? (
                               <>
                                 <img
-                                  src={isProfileImageFound}
+                                  src={""}
                                   onError={() => setIsProfileImageFound(false)}
                                   alt="profile"
                                   style={{
@@ -530,16 +534,18 @@ function AccountInfo() {
                                 />
                               </>
                             ) : (
-                              <img
-                                src={noProfile}
-                                alt="user_no_image"
-                                style={{
-                                  objectFit: "fill",
-                                  borderRadius: "8px",
-                                  boxShadow:
-                                    "brgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
-                                }}
-                              />
+                              <>
+                                <img
+                                  src={noProfile || ""}
+                                  alt="user_no_image"
+                                  style={{
+                                    objectFit: "fill",
+                                    borderRadius: "8px",
+                                    boxShadow:
+                                      "brgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                                  }}
+                                />
+                              </>
                             )}
                           </>
                         )}

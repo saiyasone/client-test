@@ -16,18 +16,6 @@ export const SETTING_KEYS = {
     productKey: "jwewjr",
     secretKey: "How0weojrl:_SDfj",
   },
-  ACCESS_KEY_BUNNY: {
-    productKey: "bnnyky",
-    secretKey: "@4j2l3j4432;sAG3",
-  },
-  HOST_KEY_BUNNY: {
-    productKey: "lnkhbn",
-    secretKey: "jwl43l32lj5l3j4Q",
-  },
-  SECRET_KEY_BUNNY: {
-    productKey: "sckfbn",
-    secretKey: "@4j2l3j4432;sAG3",
-  },
   CAPCHA_GOOGLE: "ECPTCHP",
   OAUTH_GITHUB: "LOGVGTS",
   OAUTH_GOOGLE: "LOGVAGG",
