@@ -57,17 +57,11 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
         }
 
         const folderData = queryData?.filter(
-          (data) =>
-            data.folderId &&
-            data.folderId._id &&
-            data.fileId &&
-            !data.fileId?._id,
+          (data) => data.folderId && data.folderId._id,
         );
         const fileData = queryData?.filter(
           (data) =>
-            !data.folderId._id &&
-            data.fileId._id &&
-            data.fileId?.status === "active",
+            data.fileId && data.fileId._id && data.fileId?.status === "active",
         );
 
         const result = {
@@ -105,37 +99,6 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
             total: folderData.length,
           },
 
-          // files: {
-          //   data: await Promise.all(
-          //     fileData
-          //       .map(async (data) => {
-          //         const [fileById] =
-          //           (
-          //             await getFileData({
-          //               variables: {
-          //                 id: data.fileId._id,
-          //               },
-          //             })
-          //           ).data?.filePublic?.data || [];
-          //         if (fileById) {
-          //           return {
-          //             ...fileById,
-          //             sharedId: data._id,
-          //             name: fileById.filename,
-          //             type: fileById.fileType,
-          //             newName: fileById.newFilename,
-          //             id: fileById._id,
-          //             favorite: fileById.favorite ? 1 : 0,
-          //             totalDownload: fileById.totalDownload || 0,
-          //             checkTypeItem: "file",
-          //             permission: data.permission,
-          //           };
-          //         }
-          //       })
-          //       .filter((data) => data),
-          //   ),
-          //   total: fileData.length,
-          // },
           files: {
             data: await Promise.all(
               fileData

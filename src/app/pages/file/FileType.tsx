@@ -347,7 +347,10 @@ function FileType() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             handleDownloadFile();
@@ -626,7 +629,10 @@ function FileType() {
     switch (eventClick) {
       case "download":
         handleCloseDecryptedPassword();
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleGetDownloadLink();
         } else {
           await handleDownloadFile();
@@ -802,7 +808,10 @@ function FileType() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: async () => {
-                if (userPackage?.downLoadOption === "another") {
+                if (
+                  userPackage?.downLoadOption === "another" ||
+                  userPackage?.category === "free"
+                ) {
                   handleGetDownloadLink();
                 } else {
                   handleDownloadFile();
@@ -821,7 +830,10 @@ function FileType() {
             setShowPreview(false);
           }}
           onClick={() => {
-            if (userPackage?.downLoadOption === "another") {
+            if (
+              userPackage?.downLoadOption === "another" ||
+              userPackage?.category === "free"
+            ) {
               handleGetDownloadLink();
             } else {
               handleDownloadFile();

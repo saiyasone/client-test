@@ -465,7 +465,10 @@ function ExtendFolder() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             if (dataForEvent.type === "folder") {
@@ -618,7 +621,10 @@ function ExtendFolder() {
   async function handleSubmitDecryptedPassword() {
     switch (eventClick) {
       case "download":
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleCloseDecryptedPassword();
           await handleGetDownloadLink();
         } else {
