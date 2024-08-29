@@ -9,9 +9,10 @@
     "start:dev": "Set VITE_APP_ENV=development&& vite",
     "start:staging": "Set VITE_APP_ENV=staging&& vite",
     "start:prod": "Set VITE_APP_ENV=production&& vite",
+    "build:dev": "tsc && vite build --mode development",
     "build": "tsc && vite build",
-    "build:staging": "vite build --mode staging",
-    "build:prod": "vite build --mode production",
+    "build:staging": "tsc && vite build --mode staging",
+    "build:prod": "tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },

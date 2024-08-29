@@ -983,7 +983,6 @@ export function MyCloud() {
     }, 500);
 
     const checkPassword = isCheckPassword();
-
     switch (action) {
       case "rename": {
         setEventClick("rename");
@@ -1101,6 +1100,7 @@ export function MyCloud() {
         break;
       }
       case "password": {
+        console.log({dataEvent:dataForEvent.data, userPackage});
         if (dataForEvent.data?.folder_type) {
           if (userPackage?.lockFolder === "on") {
             handleOpenPassword();
@@ -1356,7 +1356,6 @@ export function MyCloud() {
                     countLoading={countLoading}
                   />
                 )}
-
                 <MUI.DivFolders>
                   {folder?.folders?.data?.length > 0 && (
                     <MUIFOLDER.TitleAndIcon>
