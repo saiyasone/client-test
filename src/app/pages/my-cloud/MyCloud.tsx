@@ -454,7 +454,6 @@ export function MyCloud() {
     setShowPreview(false);
     setOpenPreview(false);
   };
-  console.log(isAutoClose);
 
   // query file grid
   const queryFileGrid = async () => {
@@ -1127,7 +1126,7 @@ export function MyCloud() {
             );
           }
         } else {
-          if (userPackage?.lockFile === "on") {
+          if (userPackage?.lockFile !== "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
@@ -1733,27 +1732,6 @@ export function MyCloud() {
                     )}
                 </>
               </MUI.DivRecentFile>
-              {/* {showPreview && (
-                <DialogPreviewFile
-                  open={openPreview}
-                  handleClose={handleClosePreview}
-                  onClick={() => {
-                    if (
-                      userPackage?.downLoadOption === "another" ||
-                      userPackage?.category === "free"
-                    ) {
-                      handleGetDownloadLink();
-                    } else {
-                      handleDownloadFile(dataForEvent.data);
-                    }
-                  }}
-                  filename={name}
-                  newFilename={newName}
-                  fileType={fileType}
-                  path={path}
-                  user={user}
-                />
-              )} */}
 
               {/* create share popup */}
               {openShare && (
@@ -1972,6 +1950,7 @@ export function MyCloud() {
         handleClose={handleClosePreview}
         data={dataForEvent.data}
         user={user}
+        mainFile={mainFile}
       />
     </Fragment>
   );

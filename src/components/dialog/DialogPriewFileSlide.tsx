@@ -1,27 +1,28 @@
 import AddIcon from "@mui/icons-material/Add";
 import CloseIcon from "@mui/icons-material/Close";
+import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import RemoveIcon from "@mui/icons-material/Remove";
+import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import {
   Backdrop,
   Box,
+  Button,
   Dialog,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import Button from "@mui/material/Button";
 import { styled, useTheme } from "@mui/material/styles";
-import Action from "components/action-table/Action";
+import FileLock from "app/pages/file/FileLock";
+import FilePreviewNav from "app/pages/file/FilePreviewNav";
 import FileDetails from "components/file/FileDetails";
 import { ENV_KEYS } from "constants/env.constant";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import useManageFile from "hooks/file/useManageFile";
+import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 import useClickOutside from "hooks/useClickOutside";
 import React, { useRef } from "react";
 import { FileIcon } from "react-file-icon";
-import { FiDownload, FiEye, FiLink, FiLock, FiShare2 } from "react-icons/fi";
-import { HiOutlineTrash } from "react-icons/hi";
-import { MdFavorite } from "react-icons/md";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
 import { errorMessage, successMessage } from "utils/alert.util";
@@ -31,30 +32,10 @@ import {
   removeFileNameOutOfPath,
 } from "utils/file.util";
 import { ReturnMessage } from "utils/message";
+import { MdNavigateNext } from "react-icons/md";
+import { GrFormPrevious, GrFormNext } from "react-icons/gr";
+import { opacify } from "polished";
 
-type DialogProps = {
-  open: boolean;
-  handleClose: () => void;
-  data: IFileTypes;
-  user: IUserTypes;
-};
-
-const NavBox = styled(Box)(({ theme }) => ({
-  position: "absolute",
-  backgroundColor: theme.palette.grey[900],
-  top: 0,
-  left: 0,
-  right: 0,
-  padding: "10px 30px",
-  zIndex: theme.zIndex.modal + 1,
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "space-between",
-  opacity: 1,
-  [theme.breakpoints.down("sm")]: {
-    padding: "10px 5px",
-  },
-}));
 const CloseIconButton = styled(Box)(({ theme }) => ({
   padding: "6px",
   display: "flex",
@@ -89,6 +70,7 @@ const ContainerZoon = styled(Box)(({ theme }) => ({
   borderRadius: "20px",
   gap: "10px",
 }));
+
 const ContainerDetails = styled(Box)(({ theme }) => ({
   position: "absolute",
   backgroundColor: theme.palette.grey[900],
@@ -99,37 +81,89 @@ const ContainerDetails = styled(Box)(({ theme }) => ({
   minHeight: "88%",
   borderRadius: "10px",
   gap: "10px",
-  opacity: 0.9,
+  opacity: 1,
+  [theme.breakpoints.down("sm")]: {
+    right: "0%",
+    left: "0",
+    opacity: 1,
+    float: "right",
+    fontSize: "100%",
+    transform: "none",
+  },
+}));
+
+const SlideButton = styled(Button)(({ theme }) => ({
+  position: "absolute",
+  top: "50%",
+  transform: "translateY(-50%)",
+  zIndex: 10,
+  height: "40px",
+  minWidth: "40px",
+  borderRadius: "100%",
+  backgroundColor: theme.palette.grey[900],
+  display: "flex",
+  alignItems: "center",
+  justifyContent: "center",
+  "&:hover": {
+    backgroundColor: theme.palette.primary.main,
+  },
+}));
+
+const LeftButton = styled(SlideButton)(({ theme }) => ({
+  left: theme.spacing(2),
+}));
+
+const RightButton = styled(SlideButton)(({ theme }) => ({
+  right: theme.spacing(5),
 }));
 
 interface FileIconProps {
   color?: string;
 }
+type DialogProps = {
+  open: boolean;
+  handleClose: () => void;
+  data: IFileTypes;
+  user: IUserTypes;
+  mainFile: IUserTypes[];
+};
 export default function DialogPreviewFileSlide(props: DialogProps) {
-  const { open, handleClose, data, user } = props;
+  const { open, handleClose, data, user, mainFile } = props;
   const theme = useTheme();
   const [zoom, setZoom] = React.useState(0.5);
   const imageRef = useRef<HTMLImageElement | null>(null);
   const detailsRef = useRef<HTMLImageElement | null>(null);
   const navRef = useRef<HTMLDivElement | null>(null);
   const zoomRef = useRef<HTMLDivElement | null>(null);
+  const refSlide = useRef<HTMLDivElement | null>(null);
   const isMobile = useMediaQuery("(max-width:600px)");
-  const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
+  const [isLocked, setIsLocked] = React.useState<boolean>(false);
+  const [isCurrentImage, setIsCurrentImage] = React.useState<IFileTypes>(data);
+
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
-  const { setIsAutoClose, isAutoClose } = useMenuDropdownState();
-  const refs = [
+  const { setIsAutoClose } = useMenuDropdownState();
+  const handleGetFolderURL = useGetUrl(data);
+  const handleDownloadUrl = useGetUrlDownload(data);
+  const manageFile = useManageFile({ user });
+  const [refs, setRefs] = React.useState<React.RefObject<HTMLElement>[]>([
     imageRef,
     navRef,
     zoomRef,
-    ...(dataForEvent === "details" ? [detailsRef] : []),
-  ];
+    refSlide,
+  ]);
+
+  React.useEffect(() => {
+    if (dataForEvent === "details" || dataForEvent === "lock") {
+      setRefs((prevRefs) => [...prevRefs, detailsRef]);
+    } else {
+      setRefs((prevRefs) => prevRefs.filter((ref) => ref !== detailsRef));
+    }
+  }, [dataForEvent]);
   useClickOutside({
     refs,
     handleClose,
   });
-  const handleDownloadUrl = useGetUrlDownload(data);
 
-  const manageFile = useManageFile({ user });
   const type = getFolderName(data.fileType);
   const fileType = data.fileType as any;
   const [styles, setStyles] = React.useState<
@@ -146,7 +180,12 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
 
   const newUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}preview?path=`;
   const sourcePath = `${
-    user?.newName + "-" + user?._id + "/" + real_path + data.newFilename
+    user?.newName +
+    "-" +
+    user?._id +
+    "/" +
+    real_path +
+    (isCurrentImage?.newFilename ?? data.newFilename)
   }`;
   const handleZoomIn = () => {
     setZoom((prevZoom) => Math.min(prevZoom + 0.1, 2));
@@ -155,10 +194,14 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const handleZoomOut = () => {
     setZoom((prevZoom) => Math.max(prevZoom - 0.1, 0.2));
   };
-
   React.useEffect(() => {
     if (dataForEvent == "download") {
       handleDownloadUrl?.(data);
+      setDataForEvent("");
+    }
+    if (dataForEvent == "getlink") {
+      setDataForEvent("");
+      handleGetFolderURL?.(data);
     }
   }, [dataForEvent]);
 
@@ -166,11 +209,22 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     if (!open) {
       setZoom(0.5);
       setDataForEvent("");
+      setIsLocked(false);
     }
     if (isMobile) {
       setZoom(1);
     }
   }, [!open, isMobile]);
+
+  const handleNext = () => {
+    const currentIndex = mainFile.findIndex(
+      (fileId) => fileId._id === isCurrentImage._id,
+    );
+    const nextIndex = (currentIndex + 1) % mainFile.length;
+
+    setIsCurrentImage(mainFile[nextIndex]);
+  };
+  console.log(isCurrentImage);
 
   const handleFavorite = async () => {
     try {
@@ -181,15 +235,15 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         },
         onFailed: async () => {},
       });
-    } catch (error) {
-      console.error("An error occurred:", error);
+    } catch (error: any) {
+      errorMessage(error, 1000);
     }
   };
 
   const handleDeleteFile = async () => {
     await manageFile.handleDeleteFile(data._id, {
       onSuccess: () => {
-        successMessage("Delete file successful", 1000);
+        successMessage(ReturnMessage.DeleteFile, 1000);
         handleClose();
         setIsAutoClose(true);
       },
@@ -198,13 +252,47 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       },
     });
   };
-  const handleEvents = async (event: string) => {
+  const handleDownloadFile = async () => {
+    const newFileData = [
+      {
+        id: data?._id,
+        checkType: "file",
+        newPath: data?.newPath ? data.newPath : "",
+        newFilename: data?.newFilename || "",
+        createdBy: {
+          _id: data?.createdBy._id,
+          newName: data?.createdBy?.newName,
+        },
+      },
+    ];
+
+    await manageFile.handleDownloadSingleFile(
+      { multipleData: newFileData },
+      {
+        onSuccess: () => {
+          successMessage(ReturnMessage.DownloadFile, 1000);
+        },
+        onFailed: (error: string) => {
+          errorMessage(error, 1000);
+        },
+        onClosure: () => {},
+      },
+    );
+  };
+
+  const handleEvents = async (event: string): Promise<void> => {
+    setIsLocked(false);
     switch (event) {
       case "favorite":
         handleFavorite();
         break;
       case "lock":
-        errorMessage(`${ReturnMessage.LockedFile}`, 200);
+        if (user.packageId.lockFile !== "on") {
+          setDataForEvent(event);
+          setIsLocked(true);
+        } else {
+          errorMessage(`${ReturnMessage.LockedFile}`, 200);
+        }
         break;
       case "details":
         setDataForEvent(event);
@@ -213,12 +301,22 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         handleDeleteFile();
         break;
       case "download":
+        if (user.packageId.category === "free") {
+          setDataForEvent(event);
+        } else {
+          handleDownloadFile();
+        }
+        break;
+      case "getlink":
         setDataForEvent(event);
+        break;
+      case "share":
         break;
       default:
         return;
     }
   };
+
   return (
     <div>
       <Dialog open={open}>
@@ -231,90 +329,21 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
           open={open}
         >
           <Box>
-            <NavBox ref={navRef}>
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 2,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  pr: 10,
-                }}
-              >
-                <CloseIconButton>
-                  <CloseIcon
-                    sx={{
-                      fontSize: "18px",
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: theme.palette.primary.contrastText,
-                        transform: "scale(1.1)",
-                      },
-                    }}
-                    onClick={handleClose}
-                  />
-                </CloseIconButton>
-                <Typography
-                  component="p"
-                  fontSize={14}
-                  sx={{
-                    overflow: "hidden",
-                    textOverflow: isMobile ? "ellipsis" : "clip",
-                    whiteSpace: isMobile ? "nowrap" : "normal",
-                  }}
-                >
-                  {data.filename}
-                </Typography>
-              </Box>
-              {isMobile ? (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                  <FiDownload size={16} />
-                  <Action
-                    color="#ffffff"
-                    params={data}
-                    eventActions={{}}
-                    anchor={[menuDropdownAnchor, setMenuDropdownAnchor]}
-                  />
-                </Box>
-              ) : (
-                <Box
-                  sx={{
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 5,
-                  }}
-                >
-                  <MdFavorite
-                    fill={data.favorite ? "#17766B" : "#ffffff"}
-                    size={16}
-                    onClick={() => handleEvents("favorite")}
-                  />
-                  <FiLock size={16} onClick={() => handleEvents("lock")} />
-                  <FiEye size={16} onClick={() => handleEvents("details")} />
-                  <HiOutlineTrash
-                    size={16}
-                    onClick={() => handleEvents("trash")}
-                  />
-                  <FiDownload
-                    size={16}
-                    onClick={() => handleEvents("download")}
-                  />
-                  <FiLink size={16} onClick={() => handleEvents("getlink")} />
-                  <Button variant="contained" sx={{ fontSize: "14px" }}>
-                    <FiShare2 size={16} /> &nbsp; Share
-                  </Button>
-                </Box>
-              )}
-            </NavBox>
+            <Box ref={navRef}>
+              <FilePreviewNav
+                data={data}
+                handleEvents={handleEvents}
+                handleClose={handleClose}
+                setDataForEvent={setDataForEvent}
+              />
+            </Box>
             <ContainerImage>
               {type &&
                 (type === "image" ? (
                   <img
                     ref={imageRef}
                     src={newUrl + sourcePath}
-                    alt={data.filename}
+                    alt={isCurrentImage.filename}
                     loading="lazy"
                     style={{
                       transform: `scale(${zoom})`,
@@ -326,12 +355,20 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 ) : (
                   <Box ref={imageRef} style={{ width: "250px" }}>
                     <FileIcon
-                      extension={getFileType(data.newFilename) || ""}
+                      extension={getFileType(isCurrentImage.newFilename) || ""}
                       {...fileStyle}
                     />
                   </Box>
                 ))}
             </ContainerImage>
+            <Box ref={refSlide}>
+              <LeftButton>
+                <GrFormPrevious style={{ fontSize: 20, color: "#ffffff" }} />
+              </LeftButton>
+              <RightButton onClick={handleNext}>
+                <GrFormNext style={{ fontSize: 20, color: "#ffffff" }} />
+              </RightButton>
+            </Box>
             <ContainerZoon ref={zoomRef}>
               <RemoveIcon
                 onClick={handleZoomIn}
@@ -361,7 +398,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
               />
             </ContainerZoon>
           </Box>
-          {dataForEvent == "details" && (
+          {(dataForEvent == "details" || dataForEvent == "lock") && (
             <ContainerDetails ref={detailsRef}>
               <Box
                 sx={{
@@ -370,12 +407,12 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                   alignItems: "center",
                   justifyContent: "space-between",
                   bgcolor: "white",
-                  borderBottom: `2px solid ${theme.palette.grey[800]}`, // Example of adding a visible border
+                  borderBottom: `2px solid ${theme.palette.grey[800]}`,
                   padding: "15px 20px",
                 }}
               >
                 <Typography component="p" fontSize={14}>
-                  Details
+                  {isLocked ? "Password protect this file" : "Details"}
                 </Typography>
                 <CloseIconButton>
                   <CloseIcon
@@ -391,7 +428,11 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                   />
                 </CloseIconButton>
               </Box>
-              <FileDetails data={data} />
+              {isLocked ? (
+                <FileLock data={data} handleClose={handleClose} />
+              ) : (
+                <FileDetails data={data} />
+              )}
             </ContainerDetails>
           )}
         </Backdrop>

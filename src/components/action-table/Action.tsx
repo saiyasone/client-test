@@ -11,7 +11,6 @@ import { PiShareNetworkLight } from "react-icons/pi";
 export default function Action(props) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const { params, eventActions } = props;
-
   return (
     <div style={{ position: "relative" }}>
       {(eventActions.hover &&
@@ -73,6 +72,7 @@ export default function Action(props) {
                       : false
                   }
                   isPassword={
+                    params?.filePassword||
                     params?.row.filePassword ||
                     params?.row.password ||
                     params?.row.access_passwordFolder
@@ -110,6 +110,7 @@ export default function Action(props) {
                     : false
                 }
                 isPassword={
+                  params?.filePassword||
                   params?.row?.filePassword ||
                   params?.row?.access_password ||
                   params?.row?.access_passwordFolder

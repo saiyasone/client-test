@@ -2,6 +2,7 @@ import { Box, Typography } from "@mui/material";
 import moment from "moment";
 import { IFileTypes } from "types/filesType";
 import { useTheme } from "@mui/material/styles";
+import { convertBytetoMBandGB } from "utils/storage.util";
 type DetailsTypes = {
   data: IFileTypes;
 };
@@ -44,7 +45,7 @@ function FileDetails(props: DetailsTypes) {
             fontSize={12}
             sx={{ color: theme.palette.grey[400] }}
           >
-            {data.size}
+            {convertBytetoMBandGB(parseInt(data.size))}
           </Typography>
         </Box>
         <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5 }}>
