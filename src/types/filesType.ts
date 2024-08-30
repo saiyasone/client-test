@@ -6,7 +6,7 @@ export interface IFileTypes {
   checkFile: string;
   createdAt: Date;
   createdBy: ICreateByTypes;
-  detail: string | null;
+  detail?: string | null;
   device: string;
   downloadBy: IDownloadByTypes;
   downloadStatus: string | null;
