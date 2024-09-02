@@ -1459,7 +1459,10 @@ export function MyCloud() {
                                     handleMultipleFolderData
                                   }
                                   cardProps={{
-                                    onClick: (e) => handleClickFolder(e, item),
+                                    onClick: (e) => {
+                                      handleMultipleFolderData(item?._id);
+                                      handleClickFolder(e, item);
+                                    },
                                     onDoubleClick: () => {
                                       setDataForEvent({
                                         action: "folder double click",

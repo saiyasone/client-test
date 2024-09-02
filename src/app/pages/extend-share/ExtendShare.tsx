@@ -127,7 +127,6 @@ function ExtendShare() {
 
   const manageFile = useManageFile({ user });
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [progressing, setProgressing] = useState<any>(0);
   const [procesing, setProcesing] = useState<any>(true);
   const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
@@ -788,12 +787,12 @@ function ExtendShare() {
             dataId: selectOptions?._id,
             shareId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             newFilename: selectOptions?.newFilename,
             permission: selectOptions?.permission,
             checkType: selectOptions?.checkTypeItem,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -827,13 +826,13 @@ function ExtendShare() {
             id: selectOptions?._id,
             dataId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             checkType: selectOptions?.checkTypeItem,
-            permission: selectOptions?.permission ?? "view",
+            permission: selectOptions?.permission || "view",
             newFilename: selectOptions?.newFolder_name,
             totalSize: selectOptions?.isContainsFiles ? 1 : 0,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -1078,9 +1077,6 @@ function ExtendShare() {
           " will be deleted?"
         }
       />
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
       <MUI.ExtendContainer>
         <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>

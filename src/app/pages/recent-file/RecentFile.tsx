@@ -284,10 +284,10 @@ function RecentFile() {
           id: optionValue?._id,
           checkType: "file",
           name: optionValue.filename,
-          newPath: optionValue?.newPath ?? "",
-          newFilename: optionValue?.newFilename ?? "",
+          newPath: optionValue?.newPath || "",
+          newFilename: optionValue?.newFilename || "",
           totalDownload: optionValue?.totalDownload || 0,
-          dataPassword: optionValue?.filePassword ?? "",
+          dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
           createdBy: {
             _id: optionValue?.createdBy?._id,

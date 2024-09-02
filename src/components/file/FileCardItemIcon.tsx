@@ -67,6 +67,9 @@ const FileCardItemIcon: React.FC<any> = ({
     imagePath,
     fileType,
     user,
+    height: 200,
+    isPublic: false,
+    width: 200,
   });
 
   return (

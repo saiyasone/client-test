@@ -5,8 +5,10 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
     event.preventDefault();
     const fileName = text.title || "share-file";
     const element = qrCodeRef.current;
-    if (!element) return;
-  
+    let result: boolean = false;
+
+    if (!element) return false;
+
     try {
       const scaleFactor = 10; //image pixel scale 10 times
       const canvas = await html2canvas(element, {
@@ -21,9 +23,11 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
       if (!blob) {
         throw new Error("Failed to convert canvas to blob");
       }
+
       const file = new File([blob], `${fileName}.jpg`, { type: 'image/jpeg' });
   
       if (navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
+       
         await navigator.share({
           title: fileName,
           text: text.description,
@@ -31,20 +35,26 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
         }).then(()=>{
           console.log('Shared QR code and text successfully!');
           // successMessage('Shared QR code and text successfully!', 3000);
+          result = true;
         }).catch((err: any)=>{
           throw new Error("Error => "+ err?.message || err);
         })
       } else {
-        errorMessage('Browser to share is not support.', 3000);
+        // errorMessage('Browser to share is not support.', 3000);
+        console.log('Browser to share is not support sharing image.');
       }
+
     } catch (error) {
       console.error('Error sharing the QR code or text:', error);
       errorMessage('Failed to share the QR code or text.', 3000);
     }
+    
+    return result;
   };
   
 
 export const handleDownloadQRCode = (event: React.MouseEvent<HTMLButtonElement>, qrCodeRef: React.RefObject<HTMLElement | any>, text: {title: string, description: string}) => {
+  event.preventDefault();
   const fileName = text.title || "download-qr";
   const svgElement = qrCodeRef.current.querySelector("svg");
   if (!svgElement) return;

@@ -63,13 +63,13 @@ const columns: any = [
               variant="h5"
               sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
             >
-              {params?.row?.payerId?.firstName ?? ""}
+              {params?.row?.payerId?.firstName || ""}
             </Typography>
             <Typography
               variant="h6"
               sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
             >
-              {params?.row?.payerId?.lastName ?? ""}
+              {params?.row?.payerId?.lastName || ""}
             </Typography>
           </Box>
         </Box>

@@ -22,7 +22,7 @@ const useGetUrlDownload = (data) => {
       const dataType =
         data?.folder_type || data?.folderId?._id ? "folder" : "file";
 
-      const ownerData = data?.createdBy?._id ?? data?.ownerId?._id;
+      const ownerData = data?.createdBy?._id || data?.ownerId?._id;
 
       const dataUrl = {
         _id: data?._id,

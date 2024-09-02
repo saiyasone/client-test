@@ -146,8 +146,8 @@ function FileDropDetail() {
         data: {
           id: valueOption?._id,
           name: valueOption?.filename,
-          newFilename: valueOption?.newFilename ?? "",
-          newPath: valueOption?.newPath ?? "",
+          newFilename: valueOption?.newFilename || "",
+          newPath: valueOption?.newPath || "",
           checkType: "file",
           fileType: valueOption?.fileType,
           dataPassword: valueOption?.filePassword,
@@ -851,7 +851,7 @@ function FileDropDetail() {
           filename={dataForEvent.data.filename}
           newFilename={dataForEvent.data.newFilename}
           fileType={dataForEvent.data.fileType}
-          path={dataForEvent.data.newPath ?? "public"}
+          path={dataForEvent.data.newPath || "public"}
           user={user}
           userId={user?._id}
         />

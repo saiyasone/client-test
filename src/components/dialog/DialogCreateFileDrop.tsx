@@ -43,6 +43,7 @@ import {
 } from "utils/image.share.download";
 import { decryptId } from "utils/secure.util";
 import { DatePicker } from "@mui/x-date-pickers";
+import { ShareSocial } from "components/social-media";
 
 const DialogPreviewFileV1Boby = muiStyled("div")(({ theme }) => ({
   width: "100%",
@@ -95,6 +96,7 @@ const DialogCreateFileDrop = (props) => {
   const [isCopy, setIsCopy] = useState(false);
   const [showValid, setShowValid] = useState<boolean>(false);
   const [isShow, setIsShow] = useState(false);
+  const [isShared, setIsShared] = useState(false);
   const [selectDay, setSelectDay] = useState(1);
   const [expiredDate, setExpiredDate] = useState<any>(null);
   const [latestUrl, setLatestUrl] = useState("");
@@ -148,6 +150,10 @@ const DialogCreateFileDrop = (props) => {
     props.handleChange(genLink, expiredDate, values, activePrivateFileDrop);
   };
 
+  const handleSocialNetworkClicked = (str: string) => {
+    console.log(`${str} is clicked`);
+  }
+  
   const handleDateChange = (date: moment.Moment | null) => {
     if (date) {
       const currentDate = moment().startOf("day").utc();
@@ -239,7 +245,14 @@ const DialogCreateFileDrop = (props) => {
         PaperProps: {
           sx: {
             overflowY: "initial",
-            maxWidth: "500px",
+            maxWidth: {
+              xs: '100%',
+              md: '600px'
+            },
+            width: {
+              xs: '100%',
+              md: 'auto'
+            },
           },
         },
         sx: {
@@ -541,6 +554,7 @@ const DialogCreateFileDrop = (props) => {
                               alignItems: "start",
                               justifyContent: "start",
                               flexDirection: "column",
+                              ml: 2
                             }}
                           >
                             <Typography
@@ -615,9 +629,10 @@ const DialogCreateFileDrop = (props) => {
                               display: "flex",
                               justifyContent: {
                                 xs: "center",
-                                md: "space-between",
+                                // md: "space-between",
                               },
                               mt: 7,
+                              ml: 2
                             }}
                           >
                             <Button
@@ -633,24 +648,67 @@ const DialogCreateFileDrop = (props) => {
                               <DownloadSharpIcon sx={{ mr: 3 }} />
                               Download
                             </Button>
-                            <Button
-                              variant="contained"
-                              onClick={(e) =>
-                                handleShareQR(e, qrCodeRef, {
-                                  title: values.title,
-                                  description: values.description,
-                                })
-                              }
-                              sx={{ ml: 5, width: "130px" }}
-                            >
-                              Share
-                              <ReplyAllSharpIcon
-                                sx={{
-                                  ml: 3,
-                                  transform: "rotate(180deg) scale(1,-1)",
+                            <Box sx={{ ml: {xs: 2, md: 5}, paddingX:'7px', position:'relative' }}>
+                              <Button
+                                variant="contained"
+                                onClick={ async (e) => {
+                                  if(isShared){
+                                    setIsShared(false);
+                                  }
+                                  else{
+                                    const result = await handleShareQR(e, qrCodeRef, {
+                                      title: values.title,
+                                      description: values.description
+                                    });
+                                    // console.log({result});
+                                    if(!result){
+                                      setIsShared(!isShared)
+                                    }
+                                  }
                                 }}
-                              />
-                            </Button>
+                                sx={{ ml: 5, width: "130px" }}
+                              >
+                                Share
+                                <ReplyAllSharpIcon
+                                  sx={{
+                                    ml: 3,
+                                    transform: "rotate(180deg) scale(1,-1)",
+                                  }}
+                                />
+                              </Button>
+                              {
+                                isShared && value &&
+                                <Typography component={'div'} 
+                                  sx={{
+                                    position: 'absolute',
+                                    left: '50%',
+                                    top: 50,
+                                    zIndex: 9999,
+                                    transform: {
+                                      xs: 'translateX(-60%)',
+                                      md: 'none',
+                                    },
+                                    '@media (max-width: 600px)': {
+                                      maxWidth: '90vw',
+                                    },
+                                  }}
+
+                                    onClick={(e)=>{
+                                      e.stopPropagation();
+                                      setIsShared(!isShared);
+                                    }}
+                                  >
+                                    <ShareSocial
+                                      socialTypes={['copy','facebook', 'twitter', 'line', 'linkedin', 'whatsapp', 'viber', 'telegram', 'reddit', 'instapaper', 'livejournal', 'mailru', 'ok', 'hatena','email', 'workspace']}
+                                      url={value}
+                                      onSocialButtonClicked={(buttonName: string) => {
+                                        handleSocialNetworkClicked(buttonName);
+                                      }}
+                                      title="Social Media"
+                                    />
+                                  </Typography>
+                                }
+                            </Box>
                           </Box>
                         </Box>
                       </Box>

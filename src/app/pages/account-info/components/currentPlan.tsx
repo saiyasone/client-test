@@ -55,7 +55,7 @@ const CurrentPlan: React.FC<CurrentPlanProps> = ({ paymentState }) => {
           <Typography variant="h5">
             Active until:{" "}
             <span style={{ color: "#17766B" }}>
-              {DateTimeFormate(paymentState?.currentPlanInfo?.expiredAt) ?? ""}
+              {DateTimeFormate(paymentState?.currentPlanInfo?.expiredAt) || ""}
             </span>
           </Typography>
           <Typography variant="h6">

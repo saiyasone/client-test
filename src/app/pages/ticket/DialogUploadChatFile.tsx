@@ -83,7 +83,7 @@ function DialogUploadChatFile(props) {
 
   const submitDialogFormReply = async (values) => {
     try {
-      const fileNames = chatSelector?.files.map((file) => file.name) ?? [];
+      const fileNames = chatSelector?.files.map((file) => file.name) || [];
       const _firstProgressInfos: any[] = [];
       for (let i = 0; i < chatSelector?.files.length; i++) {
         _firstProgressInfos.push({

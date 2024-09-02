@@ -10,8 +10,8 @@
     "start:staging": "Set VITE_APP_ENV=staging&& vite",
     "start:prod": "Set VITE_APP_ENV=production&& vite",
     "build": "tsc && vite build",
-    "build:staging": "vite build --mode staging",
-    "build:prod": "vite build --mode production",
+    "build:staging": "tsc && vite build --mode staging",
+    "build:production": "tsc && vite build --mode production",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview"
   },
@@ -94,6 +94,7 @@
     "react-responsive-pagination": "^2.5.0",
     "react-router-dom": "^6.23.1",
     "react-select": "^5.8.0",
+    "react-share-social": "^0.1.60",
     "react-type-animation": "^3.2.0",
     "socket.io-client": "^4.7.5",
     "swiper": "^11.1.4",

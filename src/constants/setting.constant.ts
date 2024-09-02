@@ -1,8 +1,6 @@
 export const SETTING_KEYS = {
   PUBLIC_STRIPE: "stpkys",
   PRIVATE_STRIPE: "jwewjr",
-  ACCESS_BUNNY: "bnnyky",
-  HOST_BUNNY: "lnkhbn",
   CAPCHA_GOOGLE: "ECPTCHP",
   OAUTH_GITHUB: "LOGVGTS",
   OAUTH_GOOGLE: "LOGVAGG",

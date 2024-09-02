@@ -238,8 +238,8 @@ const DialogCreateShare = (props) => {
 
     const dataType =
       data?.folder_type || data?.folderId?._id ? "folder" : "file";
-    const ownerData = data?.createdBy?._id ?? data?.ownerId?._id;
-    const newNameData = data?.createdBy?.newName ?? data?.ownerId?.newName;
+    const ownerData = data?.createdBy?._id || data?.ownerId?._id;
+    const newNameData = data?.createdBy?.newName || data?.ownerId?.newName;
 
     fileId = base64Encode(
       {

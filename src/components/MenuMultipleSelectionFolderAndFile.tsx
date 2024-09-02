@@ -25,7 +25,13 @@ import { FolderContext } from "contexts/FolderProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useAuth from "hooks/useAuth";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
-import { Fragment, useContext, useEffect, useState } from "react";
+import {
+  Fragment,
+  KeyboardEvent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
@@ -582,6 +588,24 @@ function MenuMultipleSelectionFolderAndFile(props) {
       );
     }
   };
+
+  // Function to handle Escape key press
+  const handleEscKey = (event: KeyboardEvent): void => {
+    if (event.key === "Escape") {
+      handleClearFile();
+    }
+  };
+
+  const handleKeyDown = (event: Event) =>
+    handleEscKey(event as unknown as KeyboardEvent);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   useEffect(() => {
     function handleMultipleMenu() {

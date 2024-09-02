@@ -66,6 +66,7 @@ import DialogEditExpiryLinkFileDrop from "components/dialog/DialogEditExpiryLink
 import { NavLink } from "react-router-dom";
 import DialogPreviewQRcode from "components/dialog/DialogPreviewQRCode";
 import QrIcon from "@mui/icons-material/QrCode";
+import { ShareSocial } from "components/social-media";
 
 const DatePickerV1Container = styled(Box)({
   width: "100%",
@@ -101,6 +102,7 @@ function FileDrop() {
   const [isEmptyTitle, setIsEmptyTitle] = useState("");
   const [isCopy, setIsCopy] = useState<any>(false);
   const [isCopied, setIsCopied] = useState<any>({});
+  const [isShared, setIsShared] = useState(false);
   const [selectDay, setSelectDay] = useState<any>(1);
   const [expiredDate, setExpiredDate] = useState<any>(null);
   const [isShow, setIsShow] = useState<any>(false);
@@ -525,7 +527,7 @@ function FileDrop() {
       },
     },
   ];
-  ``;
+
   useEffect(() => {
     const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
       ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
@@ -881,16 +883,63 @@ function FileDrop() {
                       <DownloadSharpIcon sx={{ mr: 3 }} />
                       Download
                     </Button>
-                    <Button
-                      variant="contained"
-                      onClick={(e) => handleShareQR(e, qrCodeRef, headerData)}
-                      sx={{ ml: 5, width: "130px" }}
-                    >
-                      Share
-                      <ReplyAllSharpIcon
-                        sx={{ ml: 3, transform: "rotate(180deg) scale(1,-1)" }}
-                      />
-                    </Button>
+                    <Box sx={{ ml: 5, width: "130px", position:'relative' }}>
+                      <Button
+                        sx={{position:'relative'}}
+                        variant="contained"
+                        onClick={async(e) => {
+                          if(isShared){
+                            setIsShared(false);
+                          }
+                          else{
+                            const result = await handleShareQR(e, qrCodeRef, headerData);
+                            // console.log({result});
+                            if(!result){
+                              setIsShared(!isShared)
+                            }
+                          }
+                        }}
+                        // onClick={()=>setIsShared(!isShared)}
+                      >
+                        Share
+                        <ReplyAllSharpIcon
+                          sx={{ ml: 3, transform: "rotate(180deg) scale(1,-1)" }}
+                        />
+                      </Button>
+                      
+                      {
+                        isShared && value &&
+                        <Typography component={'div'} 
+                        sx={{
+                          position: 'absolute',
+                          left: '50%',
+                          top: 50,
+                          zIndex: 9999,
+                          transform: {
+                            xs: 'translateX(-60%)',
+                            md: 'none',
+                          },
+                          '@media (max-width: 600px)': {
+                            maxWidth: '90vw',
+                          },
+                        }}
+
+                          onClick={(e)=>{
+                            e.stopPropagation();
+                            setIsShared(!isShared);
+                          }}
+                        >
+                          <ShareSocial
+                            socialTypes={['copy','facebook', 'twitter', 'line', 'linkedin', 'whatsapp', 'viber', 'telegram', 'reddit', 'instapaper', 'livejournal', 'mailru', 'ok', 'hatena','email', 'workspace']}
+                            url={value}
+                            onSocialButtonClicked={(buttonName: string) => {
+                              console.log(`${buttonName} clicked`)
+                            }}
+                            title="Social Media"
+                          />
+                        </Typography>
+                      }
+                    </Box>
                   </Box>
                 </Box>
               </Grid>
