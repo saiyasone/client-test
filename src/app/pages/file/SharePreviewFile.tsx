@@ -102,18 +102,15 @@ export default function SharePrevieFile({
   const [copied, setCoppied] = React.useState(false);
   const [createShare] = useMutation(MUTATION_CREATE_SHARE);
   const isSmallMobile = useMediaQuery("(max-width:350px)");
+  const profileUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath =
+    user?.newName + "-" + user?._id + `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
+
   const handleStatus = async (data: string) => {
     setStatusShare(data);
     setIsAutoClose(true);
   };
-  //   const resizeImage = useResizeImage({
-  //     imagePath: `${data.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
-  //     fileType: "image",
-  //     user,
-  //     height: 200,
-  //     isPublic: false,
-  //     width: 200,
-  //   });
+
   React.useEffect(() => {
     let createdById = "";
     let fileId = "";
@@ -343,12 +340,11 @@ export default function SharePrevieFile({
           <Box sx={{ display: "flex", mt: 3 }}>
             <AvatarGroup max={4}>
               {sharedUserList.map((shared, index) => {
-                const image = `${shared.toAccount.newName}-${shared.toAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${shared.toAccount.profile}`;
                 return (
                   <Avatar
                     key={index}
                     alt={shared.toAccount.firstName}
-                    src={image}
+                    src={profileUrl + sourcePath + shared.toAccount.profile}
                   />
                 );
               })}

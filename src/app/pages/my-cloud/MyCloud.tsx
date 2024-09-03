@@ -522,15 +522,7 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFileGrid();
-<<<<<<< HEAD
-  }, [fileViewMore, toggle, isAutoClose]);
-=======
-  }, [
-    limitScroll,
-    // fileViewMore,
-    toggle,
-  ]);
->>>>>>> 99192f1383325ea157a32bc63a914f66f67eada9
+  }, [limitScroll, isAutoClose, toggle]);
 
   //query all files count and separate base on file type
   const queryCategory = async () => {

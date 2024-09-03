@@ -97,6 +97,7 @@ function NavbarUserDropdown() {
     return _.toUpper(`${userAccount.firstName} ${userAccount.lastName}`);
   }, [userAccount]);
 
+
   return (
     <React.Fragment>
       <Grid
