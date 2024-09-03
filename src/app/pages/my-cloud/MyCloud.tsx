@@ -77,9 +77,10 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
+import useScroll from "hooks/useScroll";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
-// const ITEM_PER_PAGE_GRID = 20;
+const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
   const { user }: any = useAuth();
@@ -180,7 +181,7 @@ export function MyCloud() {
   const [_optionsValue, setOptionsValue] = useState(false);
   const [getValue, setGetValue] = useState<any>(null);
   const [viewMore, setViewMore] = useState(20);
-  const [fileViewMore, setFileViewMore] = useState(20);
+  // const [fileViewMore, setFileViewMore] = useState(20);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { setIsAutoClose, isAutoClose } = useMenuDropdownState();
   const [total, setTotal] = useState(0);
@@ -189,10 +190,10 @@ export function MyCloud() {
   const location = useLocation();
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
-  // const { limitScroll, addMoreLimit } = useScroll({
-  //   total,
-  //   limitData: ITEM_PER_PAGE_GRID,
-  // });
+  const { limitScroll, addMoreLimit } = useScroll({
+    total,
+    limitData: ITEM_PER_PAGE_GRID,
+  });
   const { setFolderId, handleTriggerFolder }: any = useContext(FolderContext);
   const [dataGetUrl, setDataGetUrl] = useState(null);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
@@ -468,7 +469,8 @@ export function MyCloud() {
               source: "default",
             },
             orderBy: "updatedAt_DESC",
-            limit: fileViewMore,
+            limit: limitScroll,
+            // limit: fileViewMore,
           },
           onCompleted: (data) => {
             if (data) {
@@ -520,7 +522,15 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFileGrid();
+<<<<<<< HEAD
   }, [fileViewMore, toggle, isAutoClose]);
+=======
+  }, [
+    limitScroll,
+    // fileViewMore,
+    toggle,
+  ]);
+>>>>>>> 99192f1383325ea157a32bc63a914f66f67eada9
 
   //query all files count and separate base on file type
   const queryCategory = async () => {
@@ -615,8 +625,8 @@ export function MyCloud() {
   };
 
   const handleViewMoreFile = () => {
-    // addMoreLimit();
-    setFileViewMore((prev) => prev + 10);
+    addMoreLimit();
+    // setFileViewMore((prev) => prev + 20);
   };
 
   const handleDownloadFile = async (inputData) => {
@@ -1434,132 +1444,129 @@ export function MyCloud() {
                     </Box>
                   ) : (
                     <Fragment>
-                      <Box>
-                        <MUIFOLDER.FolderGrid>
-                          {folder?.folders?.data?.map((item, index) => {
-                            return (
-                              <Fragment key={index}>
-                                <FolderGridItem
-                                  open={open}
-                                  file_id={
-                                    parseInt(item?.total_size) > 0
-                                      ? true
-                                      : false
-                                  }
-                                  id={item?._id}
-                                  folder_name={item?.folder_name}
-                                  setIsOpenMenu={setIsOpenMenu}
-                                  isOpenMenu={isOpenMenu}
-                                  isPinned={item.pin ? true : false}
-                                  onOuterClick={() => {
-                                    setMultiChecked(multiChecked);
-                                    setChecked({});
-                                  }}
-                                  handleSelectionFolder={
-                                    handleMultipleFolderData
-                                  }
-                                  cardProps={{
-                                    onClick: (e) => {
-                                      handleMultipleFolderData(item?._id);
-                                      handleClickFolder(e, item);
-                                    },
-                                    onDoubleClick: () => {
-                                      setDataForEvent({
-                                        action: "folder double click",
-                                        data: item,
-                                      });
-                                    },
+                      <MUIFOLDER.FolderGrid>
+                        {folder?.folders?.data?.map((item, index) => {
+                          return (
+                            <Fragment key={index}>
+                              <FolderGridItem
+                                open={open}
+                                file_id={
+                                  parseInt(item?.total_size) > 0 ? true : false
+                                }
+                                id={item?._id}
+                                folder_name={item?.folder_name}
+                                selectType={"folder"}
+                                setIsOpenMenu={setIsOpenMenu}
+                                isOpenMenu={isOpenMenu}
+                                isPinned={item.pin ? true : false}
+                                onOuterClick={() => {
+                                  setMultiChecked(multiChecked);
+                                  setChecked({});
+                                }}
+                                handleSelectionFolder={handleMultipleFolderData}
+                                cardProps={{
+                                  onClick: (e) => {
+                                    handleMultipleFolderData(item?._id);
+                                    handleClickFolder(e, item);
+                                  },
+                                  onDoubleClick: () => {
+                                    setDataForEvent({
+                                      action: "folder double click",
+                                      data: item,
+                                    });
+                                  },
 
-                                    ...(multiChecked.find(
-                                      (id) => id === item?._id,
-                                    ) && {
-                                      ischecked: true,
-                                    }),
-                                    ...(dataSelector?.selectionFileAndFolderData?.find(
-                                      (el) => el?.id === item?._id,
-                                    ) && {
-                                      ishas: "true",
-                                    }),
-                                  }}
-                                  menuItem={favouriteMenuItems?.map(
-                                    (menuItems, index) => {
-                                      return (
-                                        <MenuDropdownItem
-                                          key={index}
-                                          disabled={
-                                            item.file_id[0]?._id ||
-                                            item.parentkey[0]?._id
-                                              ? false
-                                              : menuItems.disabled
-                                          }
-                                          className="menu-item"
-                                          isPinned={item.pin ? true : false}
-                                          isPassword={
-                                            item.filePassword ||
-                                            item.access_password
-                                              ? true
-                                              : false
-                                          }
-                                          title={menuItems.title}
-                                          icon={menuItems.icon}
-                                          onClick={() => {
-                                            setDataForEvent({
-                                              data: item,
-                                              action: menuItems.action,
-                                            });
-                                            setGetValue(item);
-                                          }}
-                                        />
-                                      );
-                                    },
-                                  )}
-                                />
-                              </Fragment>
-                            );
-                          })}
-                        </MUIFOLDER.FolderGrid>
+                                  ...(multiChecked.find(
+                                    (id) => id === item?._id,
+                                  ) && {
+                                    ischecked: true,
+                                  }),
+                                  ...(dataSelector?.selectionFileAndFolderData?.find(
+                                    (el) =>
+                                      el?.id === item?._id &&
+                                      el?.checkType === "folder",
+                                  ) && {
+                                    ishas: "true",
+                                  }),
+                                }}
+                                menuItem={favouriteMenuItems?.map(
+                                  (menuItems, index) => {
+                                    return (
+                                      <MenuDropdownItem
+                                        key={index}
+                                        disabled={
+                                          item.file_id[0]?._id ||
+                                          item.parentkey[0]?._id
+                                            ? false
+                                            : menuItems.disabled
+                                        }
+                                        className="menu-item"
+                                        isPinned={item.pin ? true : false}
+                                        isPassword={
+                                          item.filePassword ||
+                                          item.access_password
+                                            ? true
+                                            : false
+                                        }
+                                        title={menuItems.title}
+                                        icon={menuItems.icon}
+                                        onClick={() => {
+                                          setDataForEvent({
+                                            data: item,
+                                            action: menuItems.action,
+                                          });
+                                          setGetValue(item);
+                                        }}
+                                      />
+                                    );
+                                  },
+                                )}
+                              />
+                            </Fragment>
+                          );
+                        })}
+                      </MUIFOLDER.FolderGrid>
 
-                        <Box
-                          sx={{
-                            mt: 4,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          {totalPages > folder?.folders?.data?.length && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                position: "relative",
-                              }}
+                      <Box
+                        sx={{
+                          mt: 4,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {totalPages > folder?.folders?.data?.length && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              position: "relative",
+                            }}
+                          >
+                            <Button
+                              endIcon={<ExpandMoreIcon />}
+                              sx={{ mt: 2 }}
+                              disabled={loading === true}
+                              size="small"
+                              variant="outlined"
+                              onClick={handleViewMoreFolder}
                             >
-                              <Button
-                                endIcon={<ExpandMoreIcon />}
-                                sx={{ mt: 2 }}
-                                disabled={loading === true}
-                                size="small"
-                                variant="outlined"
-                                onClick={handleViewMoreFolder}
-                              >
-                                Load more
-                              </Button>
-                              {loading && (
-                                <CircularProgress
-                                  size={24}
-                                  sx={{
-                                    color: green[500],
-                                    position: "absolute",
-                                    top: "50%",
-                                    left: "50%",
-                                    marginTop: "-12px",
-                                    marginLeft: "-12px",
-                                  }}
-                                />
-                              )}
-                            </Box>
-                          )}
-                        </Box>
+                              Load more
+                            </Button>
+                            {loading && (
+                              <CircularProgress
+                                size={24}
+                                sx={{
+                                  color: green[500],
+                                  position: "absolute",
+                                  top: "50%",
+                                  left: "50%",
+                                  marginTop: "-12px",
+                                  marginLeft: "-12px",
+                                }}
+                              />
+                            )}
+                          </Box>
+                        )}
                       </Box>
                     </Fragment>
                   )}
@@ -1630,6 +1637,7 @@ export function MyCloud() {
                                     item?.newFilename
                                   }
                                   user={user}
+                                  selectType={"file"}
                                   path={item?.path}
                                   isCheckbox={true}
                                   filePassword={item?.filePassword}
@@ -1705,7 +1713,8 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    fileViewMore < total &&
+                    // fileViewMore < total &&
+                    limitScroll < total &&
                     toggle === "grid" && (
                       <Box
                         sx={{

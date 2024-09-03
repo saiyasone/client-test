@@ -1,12 +1,10 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 import fileLogo from "assets/images/logo-1.svg";
 import axios from "axios";
-import CryptoJS from "crypto-js";
 import * as React from "react";
 import { useDropzone } from "react-dropzone";
 import * as MUI from "styles/showUpload.style";
 import { UAParser } from "ua-parser-js";
-// component and functions
 
 // material ui component or icons
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
@@ -891,30 +889,13 @@ export default function ShowUpload(props: Props) {
                   const resultPath = path.newPath?.substring(0, lastIndex);
                   const resultFileName = path?.newPath?.substring(lastIndex);
 
-                  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
                   const headers = {
                     createdBy: user?._id,
                     PATH: user?.newName + "-" + user?._id + "/" + resultPath,
                     FILENAME: resultFileName?.substring(1),
                   };
 
-                  const key = CryptoJS.enc.Utf8.parse(secretKey);
-                  const iv = CryptoJS.lib.WordArray.random(16);
-                  const encrypted = CryptoJS.AES.encrypt(
-                    JSON.stringify(headers),
-                    key,
-                    {
-                      iv: iv,
-                      mode: CryptoJS.mode.CBC,
-                      padding: CryptoJS.pad.Pkcs7,
-                    },
-                  );
-                  const cipherText = encrypted.ciphertext.toString(
-                    CryptoJS.enc.Base64,
-                  );
-                  const ivText = iv.toString(CryptoJS.enc.Base64);
-                  const encryptedData = cipherText + ":" + ivText;
-
+                  const encryptedData = encryptData(headers);
                   const formData = new FormData();
                   formData.append("file", newFile);
 
@@ -964,7 +945,7 @@ export default function ShowUpload(props: Props) {
                         progressArray.reduce((acc, p) => acc + p, 0) /
                           progressArray.length,
                       );
-                      console.log({ folderKey });
+
                       setFolderProgressMap((prev) => ({
                         ...prev,
                         [folderKey]: totalProgress,
@@ -1003,6 +984,7 @@ export default function ShowUpload(props: Props) {
         } finally {
           folderStartTime = new Date();
           setCanClose(false);
+
           if (successFolderCount === totalFolders) {
             setHideFolderSelectMore(2);
           }
@@ -1013,10 +995,10 @@ export default function ShowUpload(props: Props) {
       setCanClose(false);
 
       const cutError = error.message.replace(/(ApolloError: )?Error: /, "");
-      if (cutError == "LOGIN_IS_REQUIRED") {
+      if (cutError === "LOGIN_IS_REQUIRED") {
         errorMessage("Your token is expired!!", 3000);
       } else if (
-        cutError ==
+        cutError ===
         "NOT_ENOUGH_SIZE,SPACEPACKAGE:ຄວາມຈຸຂອງUSER, TOTALSIZEALL:ຄວາມຈຸທີ່USERໃຊ້,SIZENOW:ຄວາມຈຸປັດຈຸບັນ"
       ) {
         errorMessage(
@@ -1027,7 +1009,7 @@ export default function ShowUpload(props: Props) {
         errorMessage("Something went wrong, please try again later!", 3000);
       }
     } finally {
-      // setHideFolderSelectMore(0);
+      setHideFolderSelectMore(0);
       setHideSelectMore(2);
       setCanClose(false);
     }
@@ -1188,7 +1170,6 @@ export default function ShowUpload(props: Props) {
             !fileState?.cancel &&
             uploadComplete
           ) {
-            // console.log("start complete:: ", fileIndex, { fileState });
             await tryCompleteMultipartUpload(
               fileIndex,
               [...(fileState?.parts || [])],

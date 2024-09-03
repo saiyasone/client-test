@@ -3,60 +3,78 @@ import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import CardHeadMobile from "./CardHeadMobile";
 import cardNumber from "./cardNumber";
+import { useEffect, useRef } from "react";
 
 function FileCardSlider({ ...props }) {
-  let application = 0;
-  let image = 0;
-  let video = 0;
-  let audio = 0;
-  let text = 0;
-  let other = 0;
+  const applicationRef = useRef<number>(0);
+  const imageRef = useRef<number>(0);
+  const videoRef = useRef<number>(0);
+  const audioRef = useRef<number>(0);
+  const textRef = useRef<number>(0);
+  const otherRef = useRef<number>(0);
 
-  for (
-    let i = 0;
-    i < props?.getCount?.getFileCategoryDetails?.data?.length;
-    i++
-  ) {
-    if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "application"
+  useEffect(() => {
+    for (
+      let i = 0;
+      i < props?.getCount?.getFileCategoryDetails?.data?.length;
+      i++
     ) {
-      application = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "image"
-    ) {
-      image = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "video"
-    ) {
-      video = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "audio"
-    ) {
-      audio = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "text"
-    ) {
-      text = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "" ||
-      null
-    ) {
-      other = props.getCount.getFileCategoryDetails?.data[i]?.size;
+      if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "application"
+      ) {
+        applicationRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "image"
+      ) {
+        imageRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "video"
+      ) {
+        videoRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "audio"
+      ) {
+        audioRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "text"
+      ) {
+        textRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        props?.getCount?.getFileCategoryDetails?.data[i]?.fileType?.split(
+          "/",
+        )?.[0] === "" ||
+        null
+      ) {
+        otherRef.current =
+          props?.getCount?.getFileCategoryDetails?.data[i]?.size;
+      }
     }
-  }
-  const obj = { application, image, video, audio, text, other };
+  }, [props?.getCount?.getFileCategoryDetails?.data]);
+
+  const objV1 = {
+    application: applicationRef.current,
+    image: imageRef.current,
+    video: videoRef.current,
+    audio: audioRef.current,
+    text: textRef.current,
+    other: otherRef.current,
+  };
+
   return (
     <div>
       <Box>
@@ -64,7 +82,7 @@ function FileCardSlider({ ...props }) {
           {cardNumber.map((card, index) => (
             <SwiperSlide key={index}>
               <CardHeadMobile
-                data={obj}
+                data={objV1}
                 icon={card.icon}
                 title={card.title}
                 type={card.type}

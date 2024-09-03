@@ -47,6 +47,8 @@ const useManageUserFromShare = ({
             },
           })
         ).data?.getShare.data;
+
+        console.log({ currentSharedUserList });
         setSharedUserList(currentSharedUserList);
       }
     };

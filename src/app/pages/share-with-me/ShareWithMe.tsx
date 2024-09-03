@@ -1018,6 +1018,7 @@ function ShareWithMe() {
                                         }
                                         id={data?._id}
                                         folder_name={data?.folderId.folder_name}
+                                        selectType={"folder"}
                                         setIsOpenMenu={setIsOpenMenu}
                                         isOpenMenu={isOpenMenu}
                                         isPinned={
@@ -1166,6 +1167,7 @@ function ShareWithMe() {
                                         key={index}
                                         id={data?._id}
                                         path={data?.fileId?.path}
+                                        selectType={"file"}
                                         name={data?.fileId?.filename}
                                         filePassword={
                                           data?.fileId?.filePassword

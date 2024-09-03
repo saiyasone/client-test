@@ -65,8 +65,6 @@ const Item = styled(Paper)(({ theme, ...props }: any) => ({
     cursor: "pointer",
   },
 
-  // ...(props.ischecked ? { backgroundColor: "#A5D4CE" } : ""),
-  // C7E3E0
   ...(props?.ishas ? { backgroundColor: "#DCEAE9" } : ""),
 }));
 
@@ -157,7 +155,9 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               sx={{
                 display:
                   !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) => el?.id === props?.id,
+                    (el) =>
+                      el?.id === props?.id &&
+                      el.checkType === props?.selectType,
                   ) && true
                     ? "block"
                     : "none",
@@ -166,7 +166,8 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               aria-label={"check-" + props?.id}
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) => el?.id === props?.id,
+                  (el) =>
+                    el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
             />

@@ -38,7 +38,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import { ENV_KEYS } from "constants/env.constant";
 import {
   shareWithMeFileMenuItems,
@@ -127,8 +126,6 @@ function ExtendShare() {
 
   const manageFile = useManageFile({ user });
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
@@ -559,7 +556,6 @@ function ExtendShare() {
         },
 
         onClosure: () => {
-          setShowProgressing(false);
           setIsAutoClose(false);
           resetDataForEvents();
         },
@@ -622,8 +618,6 @@ function ExtendShare() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -1156,6 +1150,7 @@ function ExtendShare() {
                                         }),
                                       }}
                                       id={data?._id}
+                                      selectType={"folder"}
                                       handleSelect={
                                         handleMultipleSelectionFolder
                                       }
@@ -1300,6 +1295,7 @@ function ExtendShare() {
                                           : "") +
                                         data?.newFilename
                                       }
+                                      selectType={"file"}
                                       user={data?.createdBy}
                                       id={data?._id}
                                       handleSelect={handleMultipleSelectionFile}

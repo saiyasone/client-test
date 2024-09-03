@@ -97,7 +97,8 @@ function AccountInfo() {
   };
 
   const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
-  const sourcePath = user?.newName + "-" + user?._id + "/user_profile/";
+  const sourcePath =
+    user?.newName + "-" + user?._id + `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
 
   function findDataSetting(productKey) {
     const dataSetting = useDataSetting.data?.find(
@@ -261,8 +262,6 @@ function AccountInfo() {
         createdBy: user?._id,
       };
 
-      console.log({ headers });
-
       const encryptedData = encryptData(headers);
 
       const source = axios.CancelToken.source();
@@ -364,7 +363,6 @@ function AccountInfo() {
         ];
 
         if (selectedFile instanceof File) {
-          // upload profile to bunny
           const filesArray = Array.from([selectedFile]);
           if (filesArray.length > 0) {
             try {

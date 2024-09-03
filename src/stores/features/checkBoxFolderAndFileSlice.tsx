@@ -14,7 +14,8 @@ const checkboxFileAndFolderSlice = createSlice({
     setFileAndFolderData: (state, action) => {
       const { data } = action.payload;
       const index = state.selectionFileAndFolderData.findIndex(
-        (item: any) => item?.id === data?.id,
+        (item: any) =>
+          item?.id === data?.id && item.checkType === data?.checkType,
       );
       if (index !== -1) {
         const updateValue = state.selectionFileAndFolderData.filter(

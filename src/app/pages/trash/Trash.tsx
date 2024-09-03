@@ -240,7 +240,6 @@ function Trash() {
           checkType: item?.checkTypeItem,
           check: item?.check,
         },
-        toggle,
       }),
     );
   };
@@ -396,14 +395,14 @@ function Trash() {
                               {dataDeletedFile.data.map((data, index) => {
                                 return (
                                   <FileCardItem
-                                    cardProps={{
-                                      onClick: () => {},
-                                      ...(dataSelector?.selectionFileAndFolderData?.find(
-                                        (el) => el?.id === data?._id,
-                                      ) && {
-                                        ishas: "true",
-                                      }),
-                                    }}
+                                    // cardProps={{
+                                    //   onClick: () => {},
+                                    //   ...(dataSelector?.selectionFileAndFolderData?.find(
+                                    //     (el) => el?.id === data?._id,
+                                    //   ) && {
+                                    //     ishas: "true",
+                                    //   }),
+                                    // }}
                                     imagePath={
                                       user?.newName +
                                       "-" +
@@ -415,6 +414,7 @@ function Trash() {
                                       data.newName
                                     }
                                     user={user}
+                                    selectType={data?.checkTypeItem}
                                     filePassword={data?.filePassword}
                                     id={data?._id}
                                     isCheckbox={true}

@@ -322,7 +322,9 @@ const FileCardItem: React.FC<any> = ({
               sx={{
                 display:
                   !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) => el?.id === props?.id,
+                    (el) =>
+                      el?.id === props?.id &&
+                      el.checkType === props?.selectType,
                   ) && true
                     ? "block"
                     : "none",
@@ -330,7 +332,8 @@ const FileCardItem: React.FC<any> = ({
               className="checkbox-selected"
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) => el?.id === props?.id,
+                  (el) =>
+                    el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
               icon={
@@ -339,6 +342,7 @@ const FileCardItem: React.FC<any> = ({
                 />
               }
               aria-label={"checkbox" + props?.id}
+              onClick={handleItemClick}
             />
           </SelectionContainer>
         )}

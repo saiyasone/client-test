@@ -105,17 +105,6 @@ export const MUTATION_UPDATE_FOLDER = gql`
   }
 `;
 
-export const MUTATION_UPDATE_EXPORT_LINK = gql`
-  mutation UpdateStatusFolderExportLink(
-    $data: FoldersInput!
-    $where: WhereExport!
-  ) {
-    updateStatusFolderExportLink(data: $data, where: $where) {
-      status
-    }
-  }
-`;
-
 export const QUERY_FOLDER_PUBLIC = gql`
   query QueryFolderPublic($where: FoldersWhereInput) {
     queryFolderPublic(where: $where) {

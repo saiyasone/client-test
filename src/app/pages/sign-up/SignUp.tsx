@@ -61,56 +61,6 @@ function SignUp() {
     );
   };
 
-  // const facebookOauth = useFacebookOauth(ENV_KEYS.VITE_APP_FACEBOOk_APP_ID, {
-  //   onSuccess: async (facebookUser) => {
-  //     try {
-  //       const { first_name, last_name, picture } = facebookUser;
-  //       await signUpWithFacebook({
-  //         variables: {
-  //           dataInput: {
-  //             ip: "103.43.77.35",
-  //             accountId: facebookUser.id,
-  //             firstName: first_name,
-  //             lastName: last_name,
-  //             email: facebookUser.email,
-  //             provider: "facebook",
-  //             username: `${first_name} ${last_name}`,
-  //             profile: picture.data.url,
-  //           },
-  //         },
-  //         onCompleted: async (res) => {
-  //           const [data] = res.loginWithFacebook.data;
-  //           const token = res.loginWithFacebook.token;
-  //           oauthLogin(data, token);
-  //         },
-  //       });
-  //     } catch (error: any) {
-  //       const message = manageGraphqlError.handleErrorMessage(error.message);
-  //       if (message) {
-  //         errorMessage(message, 3000);
-  //       }
-  //     }
-  //   },
-  // });
-
-  // const githubOauth = useGithubOauth(ENV_KEYS.VITE_APP_GITHUB_CLIENT_ID, {
-  //   onSuccess: async (githubUser) => {
-  //     await loginWithGithub({
-  //       variables: {
-  //         where: {
-  //           accountId: githubUser.accountId,
-  //           email: githubUser.username,
-  //         },
-  //       },
-  //       onCompleted: async (res) => {
-  //         const [data] = res.socialAuth.data;
-  //         const token = res.socialAuth.token;
-  //         oauthLogin(data, token);
-  //       },
-  //     });
-  //   },
-  // });
-
   const { data, error } = useSubscription(USER_SIGNUP_SUBSCRIPTION, {
     variables: {
       signupId: clientIdRef.current,

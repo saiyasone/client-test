@@ -34,7 +34,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import { ENV_KEYS } from "constants/env.constant";
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -145,10 +144,6 @@ function FavouriteFile() {
     total: dataFilesAndFoldersForGrid?.total || 0,
     limitData: ITEM_PER_PAGE_GRID,
   });
-
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
     action: null,
@@ -676,8 +671,6 @@ function FavouriteFile() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -1131,9 +1124,6 @@ function FavouriteFile() {
         }
       />
 
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <MUI.TitleAndSwitch sx={{ my: 2 }}>
           {dataSelector?.selectionFileAndFolderData?.length ? (
@@ -1261,6 +1251,7 @@ function FavouriteFile() {
                                           }
                                           user={user}
                                           id={data?._id}
+                                          selectType={"file"}
                                           filePassword={data?.filePassword}
                                           isCheckbox={true}
                                           favouriteIcon={{
