@@ -21,6 +21,7 @@ function FileDetails(props: DetailsTypes) {
             display: "flex",
             justifyContent: "space-between",
             mt: 5,
+            mr:"10px",
             color: theme.palette.grey[700],
           }}
         >
@@ -35,7 +36,7 @@ function FileDetails(props: DetailsTypes) {
             {data.fileType}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5, mr:"10px", }}>
           <Typography component="p" fontSize={12}>
             Size
           </Typography>
@@ -43,7 +44,7 @@ function FileDetails(props: DetailsTypes) {
             {convertBytetoMBandGB(parseInt(data.size))}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5, mr:"10px", }}>
           <Typography component="p" fontSize={12}>
             Date added
           </Typography>
@@ -51,7 +52,7 @@ function FileDetails(props: DetailsTypes) {
             {moment(data.updatedAt).format("YYYY-MM-DD h:mm:ss")}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5, mr:"10px", }}>
           <Typography component="p" fontSize={12}>
             Last modified
           </Typography>
@@ -59,7 +60,7 @@ function FileDetails(props: DetailsTypes) {
             {moment(data.actionDate).format("YYYY-MM-DD h:mm:ss")}
           </Typography>
         </Box>
-        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mt: 5, mr:"10px", }}>
           <Typography component="p" fontSize={12}>
             Total download
           </Typography>

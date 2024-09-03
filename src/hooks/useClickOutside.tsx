@@ -3,9 +3,8 @@ import React, { RefObject } from "react";
 interface clickTypes {
   refs: RefObject<HTMLElement>[];
   handleClose: () => void;
-  setIsClose: React.Dispatch<React.SetStateAction<boolean>>;
 }
-function useClickOutside({ refs, handleClose, setIsClose }: clickTypes) {
+function useClickOutside({ refs, handleClose }: clickTypes) {
   const timeoutRef = React.useRef<number | undefined>(undefined);
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -14,13 +13,11 @@ function useClickOutside({ refs, handleClose, setIsClose }: clickTypes) {
       );
 
       if (isOutside) {
-        setIsClose(true);
         if (timeoutRef.current) {
           clearTimeout(timeoutRef.current);
         }
         timeoutRef.current = window.setTimeout(() => {
           handleClose();
-          setIsClose(false);
         }, 200);
       }
     };

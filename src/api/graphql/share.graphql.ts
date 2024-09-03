@@ -80,6 +80,8 @@ export const QUERY_SHARE = gql`
           username
           firstName
           lastName
+          newName
+          profile
         }
         accessKey
         isPublic

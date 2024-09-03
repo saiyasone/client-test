@@ -11,3 +11,10 @@ export enum ReturnFileLockedMessage {
   LockedFileExits = "This file has an existing password.",
   LockedFileError = "An error occurred while locking the file",
 }
+
+
+export enum RenameFileMessage {
+  UpdateSuccess = "Update file successful",
+  UpdateFailed = "Update file failed",
+
+}

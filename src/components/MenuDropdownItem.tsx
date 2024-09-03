@@ -13,7 +13,6 @@ const MenuDropdownItem: React.FC<any> = ({
 }) => {
   let result;
   const { isglobals, statusshare } = props;
-  console.log(isPassword);
 
   switch (true) {
     case title === "Favourite":

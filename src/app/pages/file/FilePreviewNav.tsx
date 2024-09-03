@@ -1,14 +1,15 @@
+import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, Typography, useMediaQuery } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
-import CloseIcon from "@mui/icons-material/Close";
-import { FiDownload, FiEye, FiLink, FiLock, FiShare2 } from "react-icons/fi";
 import Action from "components/action-table/Action";
-import { MdFavorite } from "react-icons/md";
-import { HiOutlineTrash } from "react-icons/hi";
-import { IFileTypes } from "types/filesType";
-import React, { RefObject } from "react";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import React from "react";
 import { FaLock } from "react-icons/fa";
+import { FiDownload, FiEye, FiLink, FiLock, FiShare2 } from "react-icons/fi";
+import { HiOutlineTrash } from "react-icons/hi";
+import { MdFavorite } from "react-icons/md";
+import { IFileTypes } from "types/filesType";
+
 const NavBox = styled(Box)(({ theme }) => ({
   position: "absolute",
   backgroundColor: theme.palette.grey[900],
@@ -40,12 +41,14 @@ const CloseIconButton = styled(Box)(({ theme }) => ({
 
 interface PreviewType {
   data: IFileTypes;
+  filename?: string;
   handleEvents: (event: string) => Promise<void>;
   handleClose: () => void;
   setDataForEvent: (value: string) => void;
 }
 export default function FilePreviewNav({
   data,
+  filename,
   handleEvents,
   handleClose,
   setDataForEvent,
@@ -54,6 +57,7 @@ export default function FilePreviewNav({
   const isMobile = useMediaQuery("(max-width:600px)");
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
   const { setIsAutoClose } = useMenuDropdownState();
+
   return (
     <>
       <Box>
@@ -90,7 +94,7 @@ export default function FilePreviewNav({
                 whiteSpace: isMobile ? "nowrap" : "normal",
               }}
             >
-              {data.filename}
+              {filename || data.filename}
             </Typography>
           </Box>
           {isMobile ? (
@@ -102,7 +106,7 @@ export default function FilePreviewNav({
                 eventActions={{
                   handleEvent: (action: string) => {
                     setIsAutoClose(true);
-                    setDataForEvent("details"), handleEvents(action);
+                    setDataForEvent(action), handleEvents(action);
                   },
                 }}
                 anchor={[menuDropdownAnchor, setMenuDropdownAnchor]}
@@ -120,20 +124,23 @@ export default function FilePreviewNav({
               <MdFavorite
                 fill={data.favorite ? "#17766B" : "#ffffff"}
                 size={16}
-                onClick={() => handleEvents("favorite")}
+                onClick={() => handleEvents("favourite")}
               />
               {data.filePassword ? (
                 <FaLock
                   fill={theme.palette.primary.main}
-                  onClick={() => handleEvents("lock")}
+                  onClick={() => handleEvents("password")}
                 />
               ) : (
-                <FiLock size={16} onClick={() => handleEvents("lock")} />
+                <FiLock size={16} onClick={() => handleEvents("password")} />
               )}
-              <FiEye size={16} onClick={() => handleEvents("details")} />
-              <HiOutlineTrash size={16} onClick={() => handleEvents("trash")} />
+              <FiEye size={16} onClick={() => handleEvents("detail")} />
+              <HiOutlineTrash
+                size={16}
+                onClick={() => handleEvents("delete")}
+              />
               <FiDownload size={16} onClick={() => handleEvents("download")} />
-              <FiLink size={16} onClick={() => handleEvents("getlink")} />
+              <FiLink size={16} onClick={() => handleEvents("get link")} />
               <Button
                 variant="contained"
                 sx={{ fontSize: "14px" }}

@@ -22,7 +22,6 @@ import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 import useClickOutside from "hooks/useClickOutside";
 import React, { useRef } from "react";
 import { FileIcon } from "react-file-icon";
-import { GrFormNext, GrFormPrevious } from "react-icons/gr";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
 import { errorMessage, successMessage } from "utils/alert.util";
@@ -34,8 +33,12 @@ import {
 import { ReturnMessage } from "utils/message";
 
 import LockedFilePreview from "app/pages/file/LockedFilePreview";
-import { useAllowKey } from "hooks/file/useAllowKey";
+import FileRename from "components/file/FileRename";
 import FileSlideButton from "components/file/FileSlideButton";
+import { useAllowKey } from "hooks/file/useAllowKey";
+import useManageUserFromShare from "hooks/user/useManageUserFromShare";
+import DialogCreateShare from "./DialogCreateShare";
+import SharePrevieFile from "app/pages/file/SharePreviewFile";
 
 const CloseIconButton = styled(Box)(({ theme }) => ({
   padding: "6px",
@@ -56,7 +59,6 @@ const ContainerImage = styled(Box)(({ theme }) => ({
   borderRadius: theme.shape.borderRadius,
   height: "100vh",
   overflow: "auto",
-  margin: "auto",
 }));
 const ContainerZoon = styled(Box)(({ theme }) => ({
   position: "absolute",
@@ -75,74 +77,26 @@ const ContainerZoon = styled(Box)(({ theme }) => ({
 const ContainerDetails = styled(Box)(({ theme }) => ({
   position: "absolute",
   backgroundColor: theme.palette.grey[100],
-  top: "10%",
-  right: "10%",
+  top: "0",
+  right: "11%",
+  zIndex: theme.zIndex.modal + 1,
   transform: "translateX(50%)",
-  minWidth: "300px",
+  minWidth: "350px",
   minHeight: "100%",
   borderRadius: "10px",
   gap: "10px",
   color: theme.palette.grey[700],
   opacity: 1,
   [theme.breakpoints.down("sm")]: {
-    right: "0%",
+    top: "30%",
+    right: "0",
     left: "0",
     opacity: 1,
+    minWidth: "100%",
     float: "right",
     fontSize: "100%",
     transform: "none",
   },
-}));
-
-const SlideButton = styled(Button)(({ theme }) => ({
-  position: "absolute",
-  top: "50%",
-  transform: "translateY(-50%)",
-  zIndex: 10,
-  height: "40px",
-  minWidth: "40px",
-  borderRadius: "100%",
-  backgroundColor: theme.palette.grey[900],
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-  "&:hover": {
-    backgroundColor: theme.palette.primary.main,
-  },
-}));
-const LeftButton = styled(SlideButton)(({ theme }) => ({
-  left: theme.spacing(2),
-  [theme.breakpoints.down("sm")]: {
-    left: theme.spacing(1),
-  },
-}));
-
-const RightButton = styled(SlideButton)(({ theme }) => ({
-  right: theme.spacing(5),
-  [theme.breakpoints.down("sm")]: {
-    right: theme.spacing(1),
-  },
-}));
-
-const MobileSlideButton = styled(Box)(() => ({
-  position: "absolute",
-  top: "50%",
-  transform: "translateY(-50%)",
-  zIndex: 10,
-  height: "20px",
-  minWidth: "20px",
-  borderRadius: "100%",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-}));
-
-const LeftMobileButton = styled(MobileSlideButton)(({ theme }) => ({
-  left: theme.spacing(1),
-}));
-
-const RighMobiletButton = styled(MobileSlideButton)(({ theme }) => ({
-  right: theme.spacing(1),
 }));
 
 interface FileIconProps {
@@ -163,28 +117,63 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const detailsRef = useRef<HTMLImageElement | null>(null);
   const navRef = useRef<HTMLDivElement | null>(null);
   const zoomRef = useRef<HTMLDivElement | null>(null);
+  const refShare = useRef<HTMLDivElement | null>(null);
   const refSlide = useRef<HTMLDivElement | null>(null);
   const isMobile = useMediaQuery("(max-width:600px)");
-  const [isLocked, setIsLocked] = React.useState<boolean>(false);
   const [isCurrentImage, setIsCurrentImage] = React.useState<IFileTypes>(data);
-  const [isClose, setIsClose] = React.useState<boolean>(false);
   const [type, setType] = React.useState<string>("");
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
-  const { setIsAutoClose } = useMenuDropdownState();
+  const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
+  const [filename, setFilename] = React.useState<string>();
+  const [isOpen, setIsOpen] = React.useState<boolean>(false);
+
   const handleGetFolderURL = useGetUrl(data);
   const handleDownloadUrl = useGetUrlDownload(data);
   const manageFile = useManageFile({ user });
   const { handleNext, handlePrev } = useHandlePreNext();
-
   const [refs, setRefs] = React.useState<React.RefObject<HTMLElement>[]>([
     imageRef,
     navRef,
     zoomRef,
     refSlide,
   ]);
+  const manageUserFromShare = useManageUserFromShare({
+    inputFileOrFolder: data,
+    inputType: data.fileType,
+    user,
+  });
+  const handleChangedUserPermissionFromShareSave = async (sharedData: any) => {
+    await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
+      onSuccess: () => {
+        successMessage("Changed user permission of share successful!!", 3000);
+      },
+      onFailed: (error: any) => {
+        errorMessage(error, 3000);
+      },
+    });
+  };
+  const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
+    await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
+      onSuccess: () => {
+        successMessage("Deleted user out of share successful!!", 3000);
+      },
+      onFailed: (error: any) => {
+        errorMessage(error, 3000);
+      },
+    });
+  };
 
+  const handleShareClose = () => {
+    setIsOpen(false);
+  };
   React.useEffect(() => {
-    if (dataForEvent === "details" || dataForEvent === "lock") {
+    if (
+      open &&
+      (dataForEvent === "details" ||
+        dataForEvent === "password" ||
+        dataForEvent === "rename" ||
+        dataForEvent === "share")
+    ) {
       setRefs((prevRefs) => [...prevRefs, detailsRef]);
     } else {
       setRefs((prevRefs) => prevRefs.filter((ref) => ref !== detailsRef));
@@ -193,9 +182,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   useClickOutside({
     refs,
     handleClose,
-    setIsClose,
   });
-
   const fileType = isCurrentImage.fileType;
   const [styles, setStyles] = React.useState<
     Record<string, Partial<FileIconProps>>
@@ -219,6 +206,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     real_path +
     (isCurrentImage?.newFilename ?? data.newFilename)
   }`;
+
   const handleZoomIn = () => {
     setZoom((prevZoom) => Math.min(prevZoom + 0.1, 2));
   };
@@ -226,12 +214,13 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const handleZoomOut = () => {
     setZoom((prevZoom) => Math.max(prevZoom - 0.1, 0.2));
   };
+
   React.useEffect(() => {
     if (dataForEvent == "download") {
       handleDownloadUrl?.(data);
       setDataForEvent("");
     }
-    if (dataForEvent == "getlink") {
+    if (dataForEvent == "get link") {
       setDataForEvent("");
       handleGetFolderURL?.(data);
     }
@@ -241,37 +230,43 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       setIsCurrentImage(data);
       setType(getFolderName(data.fileType));
     }
-  }, [data]);
+  }, [data, isAutoClose]);
   React.useEffect(() => {
-    if (isClose) {
+    if (!open) {
       setZoom(0.5);
       setDataForEvent("");
-      setIsLocked(false);
       setType("");
+      setFilename("");
+      handleShareClose();
+      setIsOpen(false);
     }
     if (isMobile) {
       setZoom(1);
     }
-  }, [isClose, isMobile]);
+  }, [!open, isMobile]);
 
   const handleNextView = () => {
-    const newImage = handleNext({
-      currentFile: isCurrentImage ?? data,
-      mainFile,
-    });
-    if (newImage) {
-      setIsCurrentImage(newImage ?? isCurrentImage);
-      setType(getFolderName(newImage.fileType));
+    if (!dataForEvent) {
+      const newImage = handleNext({
+        currentFile: isCurrentImage ?? data,
+        mainFile,
+      });
+      if (newImage) {
+        setIsCurrentImage(newImage ?? isCurrentImage);
+        setType(getFolderName(newImage.fileType));
+      }
     }
   };
   const handlePrevView = () => {
-    const prevImage = handlePrev({
-      currentFile: isCurrentImage ?? data,
-      mainFile,
-    });
-    if (prevImage) {
-      setIsCurrentImage(prevImage ?? isCurrentImage);
-      setType(getFolderName(prevImage.fileType));
+    if (!dataForEvent) {
+      const prevImage = handlePrev({
+        currentFile: isCurrentImage ?? data,
+        mainFile,
+      });
+      if (prevImage) {
+        setIsCurrentImage(prevImage ?? isCurrentImage);
+        setType(getFolderName(prevImage.fileType));
+      }
     }
   };
   useAllowKey({
@@ -335,23 +330,22 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   };
 
   const handleEvents = async (event: string): Promise<void> => {
-    setIsLocked(false);
     switch (event) {
-      case "favorite":
+      case "favourite":
         handleFavorite();
         break;
-      case "lock":
-        if (user.packageId.lockFile !== "on") {
+      case "password":
+        if (user.packageId.lockFile === "on") {
           setDataForEvent(event);
-          setIsLocked(true);
         } else {
+          setDataForEvent("");
           errorMessage(`${ReturnMessage.LockedFile}`, 200);
         }
         break;
-      case "details":
+      case "detail":
         setDataForEvent(event);
         break;
-      case "trash":
+      case "delete":
         handleDeleteFile();
         break;
       case "download":
@@ -361,10 +355,15 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
           handleDownloadFile();
         }
         break;
-      case "getlink":
+      case "get link":
         setDataForEvent(event);
         break;
+      case "rename":
+        setFilename(isCurrentImage.filename);
+        break;
       case "share":
+        setIsOpen(true);
+        setDataForEvent(event);
         break;
       default:
         return;
@@ -385,6 +384,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
           <Box>
             <Box ref={navRef}>
               <FilePreviewNav
+                filename={filename}
                 data={data}
                 handleEvents={handleEvents}
                 handleClose={handleClose}
@@ -418,7 +418,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 </Box>
               ) : null}
             </ContainerImage>
-            {dataForEvent !== "details" && dataForEvent !== "lock" && (
+            {dataForEvent !== "detail" && dataForEvent !== "lock" && (
               <Box ref={refSlide}>
                 <FileSlideButton
                   handlePrevView={handlePrevView}
@@ -455,7 +455,10 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
               />
             </ContainerZoon>
           </Box>
-          {(dataForEvent == "details" || dataForEvent == "lock") && (
+          {(dataForEvent == "detail" ||
+            dataForEvent == "password" ||
+            dataForEvent === "rename" ||
+            dataForEvent === "share") && (
             <ContainerDetails ref={detailsRef}>
               <Box
                 sx={{
@@ -469,24 +472,46 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 }}
               >
                 <Typography component="p" fontSize={14}>
-                  {isLocked ? "Password protect this file" : "Details"}
+                  {dataForEvent === "password"
+                    ? "Password protect this file"
+                    : dataForEvent === "detail"
+                    ? "Details"
+                    : "Share"}
                 </Typography>
-                <CloseIconButton>
+                <CloseIconButton
+                  onClick={() => setDataForEvent("")}
+                  sx={{
+                    "&:hover": {
+                      color: theme.palette.primary.contrastText,
+                      transform: "scale(1.1)",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
                   <CloseIcon
                     sx={{
                       fontSize: "18px",
-                      cursor: "pointer",
-                      "&:hover": {
-                        color: theme.palette.primary.contrastText,
-                        transform: "scale(1.1)",
-                      },
                     }}
-                    onClick={() => setDataForEvent("")}
                   />
                 </CloseIconButton>
               </Box>
-              {isLocked ? (
+              {dataForEvent === "password" ? (
                 <FileLock data={isCurrentImage} handleClose={handleClose} />
+              ) : dataForEvent === "rename" ? (
+                <FileRename
+                  data={isCurrentImage}
+                  filename={filename}
+                  setFilename={setFilename}
+                  user={user}
+                  setDataForEvent={setDataForEvent}
+                />
+              ) : dataForEvent === "share" ? (
+                <SharePrevieFile
+                  user={user}
+                  data={isCurrentImage}
+                  sharedUserList={manageUserFromShare.sharedUserList}
+                  handleClose={handleClose}
+                />
               ) : (
                 <FileDetails data={isCurrentImage} />
               )}

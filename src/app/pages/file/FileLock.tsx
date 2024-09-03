@@ -30,7 +30,7 @@ interface fileTypes {
   handleClose: () => void;
 }
 
-export default function ({ data, handleClose }: fileTypes) {
+export default function FileLock ({ data, handleClose }: fileTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [lockPassword, setLockPassword] = React.useState<string>("");
   const [showPassword, setShowPassword] = React.useState<boolean>(false);
@@ -66,17 +66,17 @@ export default function ({ data, handleClose }: fileTypes) {
 
   return (
     <>
-      <Box sx={{ py: 4, m: 4 }}>
+      <Box sx={{ py: 4, margin:"30px 20px 20px 20px" }}>
         <FormLabel htmlFor="passwordLink">Enter password</FormLabel>
         <OutlinedInput
           id="outlined-adornment-password"
           type={showPassword ? "text" : "password"}
           fullWidth
-          size="small"
+          defaultValue="Normal"
           required
           onChange={(e) => setLockPassword(e.target.value)}
           value={lockPassword}
-          sx={{ bgcolor: theme.palette.grey[400] }}
+          sx={{ bgcolor: theme.palette.grey[200] }}
           endAdornment={
             <InputAdornment position="end">
               <IconButton
