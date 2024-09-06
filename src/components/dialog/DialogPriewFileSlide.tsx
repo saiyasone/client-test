@@ -37,7 +37,6 @@ import FileRename from "components/file/FileRename";
 import FileSlideButton from "components/file/FileSlideButton";
 import { useAllowKey } from "hooks/file/useAllowKey";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
-import DialogCreateShare from "./DialogCreateShare";
 import SharePrevieFile from "app/pages/file/SharePreviewFile";
 
 const CloseIconButton = styled(Box)(({ theme }) => ({
@@ -117,7 +116,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const detailsRef = useRef<HTMLImageElement | null>(null);
   const navRef = useRef<HTMLDivElement | null>(null);
   const zoomRef = useRef<HTMLDivElement | null>(null);
-  const refShare = useRef<HTMLDivElement | null>(null);
   const refSlide = useRef<HTMLDivElement | null>(null);
   const isMobile = useMediaQuery("(max-width:600px)");
   const [isCurrentImage, setIsCurrentImage] = React.useState<IFileTypes>(data);
@@ -125,7 +123,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
   const [filename, setFilename] = React.useState<string>();
-  const [isOpen, setIsOpen] = React.useState<boolean>(false);
 
   const handleGetFolderURL = useGetUrl(data);
   const handleDownloadUrl = useGetUrlDownload(data);
@@ -142,30 +139,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     inputType: data.fileType,
     user,
   });
-  const handleChangedUserPermissionFromShareSave = async (sharedData: any) => {
-    await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
-      onSuccess: () => {
-        successMessage("Changed user permission of share successful!!", 3000);
-      },
-      onFailed: (error: any) => {
-        errorMessage(error, 3000);
-      },
-    });
-  };
-  const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
-    await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
-      onSuccess: () => {
-        successMessage("Deleted user out of share successful!!", 3000);
-      },
-      onFailed: (error: any) => {
-        errorMessage(error, 3000);
-      },
-    });
-  };
 
-  const handleShareClose = () => {
-    setIsOpen(false);
-  };
   React.useEffect(() => {
     if (
       open &&
@@ -179,9 +153,11 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       setRefs((prevRefs) => prevRefs.filter((ref) => ref !== detailsRef));
     }
   }, [dataForEvent]);
+
   useClickOutside({
     refs,
     handleClose,
+    enabled: dataForEvent !== "share",
   });
   const fileType = isCurrentImage.fileType;
   const [styles, setStyles] = React.useState<
@@ -237,8 +213,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       setDataForEvent("");
       setType("");
       setFilename("");
-      handleShareClose();
-      setIsOpen(false);
     }
     if (isMobile) {
       setZoom(1);
@@ -362,7 +336,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         setFilename(isCurrentImage.filename);
         break;
       case "share":
-        setIsOpen(true);
         setDataForEvent(event);
         break;
       default:
@@ -462,13 +435,13 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
             <ContainerDetails ref={detailsRef}>
               <Box
                 sx={{
-                  width: "100%",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   bgcolor: "white",
                   borderBottom: `1px solid ${theme.palette.grey[400]}`,
                   padding: "15px 20px",
+                  height: "100%",
                 }}
               >
                 <Typography component="p" fontSize={14}>
@@ -506,12 +479,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                   setDataForEvent={setDataForEvent}
                 />
               ) : dataForEvent === "share" ? (
-                <SharePrevieFile
-                  user={user}
-                  data={isCurrentImage}
-                  sharedUserList={manageUserFromShare.sharedUserList}
-                  handleClose={handleClose}
-                />
+                <SharePrevieFile user={user} data={isCurrentImage} />
               ) : (
                 <FileDetails data={isCurrentImage} />
               )}

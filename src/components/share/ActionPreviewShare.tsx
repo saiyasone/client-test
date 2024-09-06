@@ -1,40 +1,33 @@
-import { Box, Button, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Chip,
+  createTheme,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import MenuDropdown from "components/MenuDropdown";
 import MenuDropdownItem from "components/MenuDropdownItem";
 import { roleShareMenu } from "constants/menuItem.constant";
 
-import { MdOutlineExpandMore } from "react-icons/md";
-export default function ActionCreateShare(props) {
+interface ActionPreviewTypes {
+  accessStatusShare: string;
+  statusshare: string;
+  handleStatus: (value: string) => void;
+}
+export default function ActionPreviewCreateShare(props: ActionPreviewTypes) {
+  const theme = createTheme();
+
   const { statusshare, handleStatus } = props;
-  const isSmallMobile = useMediaQuery("(max-width:768px)");
   return (
     <MenuDropdown
       customButton={{
         element: (
-          <Box
-            sx={{
-              margin: isSmallMobile ? "10px 0px 0 0" : "0px 0 0 10px",
-              height: "100%",
-            }}
-          >
-            <Button
-              fullWidth
-              variant="outlined"
-              sx={{
-                height: "100%",
-                width:  "120px",
-              }}
-              endIcon={<MdOutlineExpandMore />}
-              {...{
-                ...(props.accessStatusShare === "private"
-                  ? {}
-                  : {
-                      disabled: true,
-                    }),
-              }}
-            >
-              {statusshare === "view" ? "Can view" : "Can edit"}
-            </Button>
+          <Box>
+            <Chip
+              size="small"
+              sx={{ cursor: "pointer" }}
+              label={`${statusshare === "view" ? "Can view" : "Can edit"}`}
+            />
           </Box>
         ),
       }}

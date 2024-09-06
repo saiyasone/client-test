@@ -24,4 +24,5 @@ export interface IUserToAccountTypes {
     profile: string;
     newName: string;
   };
+  _permission?: string | null;
 }

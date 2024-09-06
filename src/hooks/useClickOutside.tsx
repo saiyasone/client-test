@@ -3,10 +3,13 @@ import React, { RefObject } from "react";
 interface clickTypes {
   refs: RefObject<HTMLElement>[];
   handleClose: () => void;
+  enabled: boolean;
 }
-function useClickOutside({ refs, handleClose }: clickTypes) {
+function useClickOutside({ refs, handleClose, enabled }: clickTypes) {
   const timeoutRef = React.useRef<number | undefined>(undefined);
+
   React.useEffect(() => {
+    if (!enabled) return; 
     const handleClickOutside = (event: MouseEvent) => {
       const isOutside = refs.every(
         (ref) => ref.current && !ref.current.contains(event.target as Node),

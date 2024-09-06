@@ -1107,7 +1107,7 @@ export default function ShowUpload(props: Props) {
       errorMessage(error, 3000);
     }
   }
-
+  
   const handleCancelUploadPresign = async (fileIndex: number) => {
     const xhr = fileStates[fileIndex]?.xhr;
     if (xhr) {

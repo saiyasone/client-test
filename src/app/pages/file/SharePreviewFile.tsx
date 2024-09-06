@@ -1,49 +1,42 @@
 import { useMutation } from "@apollo/client";
-import { Label, Visibility, VisibilityOff } from "@mui/icons-material";
+import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import {
-  Avatar,
   AvatarGroup,
   Box,
   Button,
+  CardActions,
   createTheme,
   Divider,
   IconButton,
-  InputAdornment,
-  InputLabel,
-  OutlinedInput,
   styled,
   TextField,
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
-import { MUTATION_UPDATE_FILE } from "api/graphql/file.graphql";
+import Avatar from "@mui/material/Avatar";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import { MUTATION_CREATE_SHARE } from "api/graphql/share.graphql";
+import Loader from "components/Loader";
+import ActionCreateShare from "components/share/ActionCreateShare";
+import ActionShareStatus from "components/share/ActionShareStatus";
+import { ENV_KEYS } from "constants/env.constant";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import { useLockedFile } from "hooks/file/useLockedFile";
-import React from "react";
-import { IFileTypes } from "types/filesType";
-import { errorMessage, successMessage } from "utils/alert.util";
-import Loader from "components/Loader";
-import ActionShareStatus from "components/share/ActionShareStatus";
 import useGetUrl from "hooks/url/useGetUrl";
-import { base64Encode } from "utils/base64.util";
-import { ENV_KEYS } from "constants/env.constant";
-import { IUserTypes } from "types/userType";
-import ActionCreateShare from "components/share/ActionCreateShare";
-import { isValidEmail } from "utils/validateEmail";
-import useManageGraphqlError from "hooks/useManageGraphqlError";
-import { MUTATION_CREATE_SHARE } from "api/graphql/share.graphql";
-import { set } from "lodash";
+import React from "react";
+import { HiOutlineTrash } from "react-icons/hi";
+import { IFileTypes } from "types/filesType";
 import { IUserToAccountTypes } from "types/shareTypes";
-import useResizeImage from "hooks/useResizeImage";
+import { IUserTypes } from "types/userType";
+import { errorMessage, successMessage } from "utils/alert.util";
+import { base64Encode } from "utils/base64.util";
+import { cutStringWithEllipsis } from "utils/string.util";
+import { isValidEmail } from "utils/validateEmail";
+import ActionPreviewCreateShare from "components/share/ActionPreviewShare";
+import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 const theme = createTheme();
 
-const ActionContainer = styled("div")({
-  display: "flex",
-  justifyContent: "space-between",
-  margin: "50px 0px 30px 0px",
-});
 const TextInputdShare = styled("div")(({ theme }) => ({
   display: "flex",
   justifyContent: "space-between",
@@ -54,45 +47,25 @@ const TextInputdShare = styled("div")(({ theme }) => ({
   },
 }));
 
-const BoxImage = styled("div")({
-  width: "45px",
-  height: "45px",
-  borderRadius: "50%",
-  marginLeft: "-0.8rem",
-  border: "3px solid #fff",
-  background: "#F6F6F7",
-  display: "flex",
-  alignItems: "center",
-  justifyContent: "center",
-
-  h2: {
-    fontSize: "1.2rem",
-    fontWeight: "bold",
-    color: "#454554",
-  },
-});
 interface fileTypes {
   data: IFileTypes;
-  handleClose: () => void;
   user: IUserTypes;
-  sharedUserList: IUserToAccountTypes[];
 }
 
-export default function SharePrevieFile({
-  user,
-  data,
-  handleClose,
-  sharedUserList,
-}: fileTypes) {
+export default function SharePrevieFile({ user, data }: fileTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [message, setMessage] = React.useState<string>("");
   const [statusShare, setStatusShare] = React.useState("view");
   const [shareAccount, setShareAccount] = React.useState<string>("");
-  const [showPassword, setShowPassword] = React.useState<boolean>(false);
+  const [shareAccountList, setShareAccountList] = React.useState<
+    IUserToAccountTypes[]
+  >([]);
   const [loading, setLoading] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const { createLockFile } = useLockedFile();
   const { setIsAutoClose } = useMenuDropdownState();
+
+  const [isVisibleAccount, setIsVisibleAccount] =
+    React.useState<boolean>(false);
   const totalHandleUrl = useGetUrl(data);
   const encodeKey = ENV_KEYS.VITE_APP_ENCODE_KEY;
 
@@ -103,8 +76,6 @@ export default function SharePrevieFile({
   const [createShare] = useMutation(MUTATION_CREATE_SHARE);
   const isSmallMobile = useMediaQuery("(max-width:350px)");
   const profileUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
-  const sourcePath =
-    user?.newName + "-" + user?._id + `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
 
   const handleStatus = async (data: string) => {
     setStatusShare(data);
@@ -173,13 +144,13 @@ export default function SharePrevieFile({
       setTimeout(() => {
         setMessage("");
       }, 2000);
-      return; // Return early if no email is provided
+      return;
     }
 
     const isInvalidEmail = isValidEmail(shareAccount);
     if (!isInvalidEmail) {
       errorMessage("Email is invalid", 2000);
-      return; // Return early if the email is invalid
+      return;
     }
 
     try {
@@ -194,24 +165,93 @@ export default function SharePrevieFile({
           },
         },
       });
+      setIsAutoClose(true);
       setShareAccount("");
       setIsSubmitting(false);
       successMessage("Shared file successful", 3000);
     } catch (error: any) {
-      setIsSubmitting(true);
+      setIsSubmitting(false);
       errorMessage("Share someting wrong", 1000);
     }
   };
 
-  console.log(sharedUserList);
+  const manageUserFromShare = useManageUserFromShare({
+    inputFileOrFolder: data,
+    inputType: data.fileType,
+    user,
+  });
+
+  React.useEffect(() => {
+    setShareAccountList(manageUserFromShare.sharedUserList);
+  }, [manageUserFromShare.sharedUserList]);
+
+  const handleChangeUserPermissionFromShare = async (
+    id: string,
+    permission: string,
+  ) => {
+    const seletedAccount = shareAccountList.filter((data) => data._id == id);
+
+    if (seletedAccount) {
+      seletedAccount[0]._permission = permission;
+      await manageUserFromShare.handleChangedUserFromShareOnSave(
+        seletedAccount,
+        {
+          onSuccess: () => {
+            successMessage(
+              "Changed user permission of share successful!!",
+              3000,
+            );
+          },
+          onFailed: (error: any) => {
+            errorMessage(error, 3000);
+          },
+        },
+      );
+      setShareAccountList((prevList) =>
+        prevList.map((item) =>
+          item._id === id ? { ...item, permission: permission } : item,
+        ),
+      );
+    }
+  };
+
+  const handleDeletedUserFromShareOnSave = async (id: string) => {
+    const seletedAccount = shareAccountList.filter((data) => data._id == id);
+    if (seletedAccount) {
+      await manageUserFromShare.handleDeletedUserFromShareOnSave(
+        seletedAccount,
+        {
+          onSuccess: () => {
+            successMessage("Deleted user out of share successful!!", 3000);
+            setShareAccountList((prevList) =>
+              prevList.filter((item) => item._id !== id),
+            );
+          },
+          onFailed: (error: any) => {
+            errorMessage(error, 3000);
+          },
+        },
+      );
+    }
+  };
 
   return (
-    <>
+    <Box
+      sx={{
+        overflowY: "scroll",
+        maxHeight: "90vh",
+        paddingBottom: "2rem",
+        [theme.breakpoints.down("sm")]: {
+          paddingBottom: "4rem",
+          maxHeight: "60vh",
+        },
+      }}
+    >
       <Box
         sx={{
           margin: "30px 30px 20px 20px",
           [theme.breakpoints.down("sm")]: {
-            margin: "30px 20px 20px 20px",
+            margin: "30px 20px 10px 20px",
           },
         }}
       >
@@ -222,7 +262,7 @@ export default function SharePrevieFile({
           fontSize={isMobile ? "0.8rem" : "1rem"}
           variant="h6"
         >
-          Share "{data.filename}"
+          Share {cutStringWithEllipsis(data.filename, isMobile ? 35 : 30)}"
         </Typography>
 
         <Box sx={{ mt: 5 }}>
@@ -337,21 +377,119 @@ export default function SharePrevieFile({
           <Typography variant="h6">Who has access</Typography>
           <Typography component="p">By {data.createdBy?.email}</Typography>
 
-          <Box sx={{ display: "flex", mt: 3 }}>
-            <AvatarGroup max={4}>
-              {sharedUserList.map((shared, index) => {
-                return (
-                  <Avatar
-                    key={index}
-                    alt={shared.toAccount.firstName}
-                    src={profileUrl + sourcePath + shared.toAccount.profile}
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              mt: 3,
+            }}
+          >
+            {isVisibleAccount ? (
+              "See Less..."
+            ) : (
+              <AvatarGroup max={4}>
+                {shareAccountList.map((shared, index) => {
+                  const sourcePath =
+                    shared.toAccount.newName +
+                    "-" +
+                    shared.toAccount._id +
+                    `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
+                  return (
+                    <Avatar
+                      sx={{ cursor: "pointer" }}
+                      key={index}
+                      alt={shared.toAccount.firstName}
+                      src={profileUrl + sourcePath + shared.toAccount.profile}
+                      onClick={() => setIsVisibleAccount(!isVisibleAccount)}
+                    />
+                  );
+                })}
+              </AvatarGroup>
+            )}
+
+            {shareAccountList.length > 0 && (
+              <Box>
+                {isVisibleAccount ? (
+                  <ExpandLessIcon
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setIsVisibleAccount(!isVisibleAccount)}
                   />
-                );
-              })}
-            </AvatarGroup>
+                ) : (
+                  <ExpandMoreIcon
+                    style={{ cursor: "pointer" }}
+                    onClick={() => setIsVisibleAccount(!isVisibleAccount)}
+                  />
+                )}
+              </Box>
+            )}
           </Box>
         </Box>
+        {isVisibleAccount && (
+          <Box>
+            {shareAccountList.map((user) => {
+              return (
+                <Box
+                  key={user.toAccount._id}
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      display: "flex",
+                      gap: 1.5,
+                      alignItems: "center",
+                      mb: 2,
+                    }}
+                  >
+                    <Avatar
+                      sx={{ cursor: "pointer" }}
+                      alt={user.toAccount.firstName}
+                      src={
+                        profileUrl +
+                        user.toAccount.newName +
+                        "-" +
+                        user.toAccount._id +
+                        `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/` +
+                        user.toAccount.profile
+                      }
+                    />
+                    <Typography>
+                      {cutStringWithEllipsis(user.toAccount.email, 20)}
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 1,
+                    }}
+                  >
+                    <ActionPreviewCreateShare
+                      accessStatusShare={"private"}
+                      statusshare={user.permission}
+                      handleStatus={(val) => {
+                        setIsAutoClose(true);
+                        handleChangeUserPermissionFromShare(user._id, val);
+                      }}
+                    />
+
+                    <HiOutlineTrash
+                      size={18}
+                      style={{ cursor: "pointer" }}
+                      onClick={() => handleDeletedUserFromShareOnSave(user._id)}
+                    />
+                  </Box>
+                </Box>
+              );
+            })}
+          </Box>
+        )}
       </Box>
-    </>
+    </Box>
   );
 }
