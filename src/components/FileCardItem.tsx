@@ -100,14 +100,14 @@ const Image = muiStyled("img")({
 });
 
 const LockImage = muiStyled("img")(({ theme }) => ({
-  width: "70px",
-  height: "70px",
+  width: "60px",
+  height: "60px",
   textAlign: "center",
   objectFit: "cover",
 
   [theme.breakpoints.down("md")]: {
-    width: "60px",
-    height: "60px",
+    width: "50px",
+    height: "50px",
   },
 }));
 
@@ -419,14 +419,26 @@ const FileCardItem: React.FC<any> = ({
 
                 <Fragment>
                   {fileType !== "folder" && (
-                    <FileIconContainer>
-                      <FileIcon
-                        extension={getFileType(props.name)}
-                        {...{
-                          ...defaultStyles[getFileType(props.name) as string],
-                        }}
-                      />
-                    </FileIconContainer>
+                    <Fragment>
+                      {props?.filePassword ? (
+                        <LockImage
+                          className="lock-icon-preview"
+                          src={lockIcon}
+                          alt={props.name}
+                        />
+                      ) : (
+                        <FileIconContainer>
+                          <FileIcon
+                            extension={getFileType(props.name)}
+                            {...{
+                              ...defaultStyles[
+                                getFileType(props.name) as string
+                              ],
+                            }}
+                          />
+                        </FileIconContainer>
+                      )}
+                    </Fragment>
                   )}
                 </Fragment>
                 {/* {fileType === "video" ? (

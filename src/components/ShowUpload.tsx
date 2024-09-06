@@ -1221,13 +1221,13 @@ export default function ShowUpload(props: Props) {
   }, [fileStates, data, presignUploadSuccess]);
 
   React.useEffect(() => {
-    // window.addEventListener("online", retryFailedParts);
+    window.addEventListener("online", retryFailedParts);
     window.addEventListener("offline", () =>
       console.log("Network connection lost"),
     );
 
     return () => {
-      // window.removeEventListener("online", retryFailedParts);
+      window.removeEventListener("online", retryFailedParts);
       window.removeEventListener("offline", () =>
         console.log("Network connection lost"),
       );

@@ -4,6 +4,7 @@ import {
   IconButton,
   Typography,
   styled,
+  useMediaQuery,
 } from "@mui/material";
 import {
   MUTATION_DELETE_FILE_FOREVER,
@@ -105,6 +106,8 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const [restoreFile] = useMutation(MUTATION_UPDATE_FILE);
   const [deleteFolder] = useMutation(MUTATION_DELETE_FOLDER_TRASH);
   const [deleteFile] = useMutation(MUTATION_DELETE_FILE_FOREVER);
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // redux store
   const dispatch = useDispatch();
@@ -642,7 +645,8 @@ function MenuMultipleSelectionFolderAndFile(props) {
                 onClick={handleClearFile}
               />
               <Typography variant="h2">
-                {dataSelector?.selectionFileAndFolderData?.length} Selected
+                {dataSelector?.selectionFileAndFolderData?.length}{" "}
+                {!isMobile && "Selected"}
               </Typography>
             </SelectBoxContainer>
           </SelectBoxLeft>

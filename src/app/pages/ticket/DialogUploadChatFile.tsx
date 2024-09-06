@@ -1,5 +1,6 @@
 import {
   Box,
+  Dialog,
   DialogContent,
   InputAdornment,
   OutlinedInput,
@@ -18,7 +19,6 @@ import { useDispatch, useSelector } from "react-redux";
 import * as yup from "yup";
 
 import { MUTATION_CREATE_TICKET } from "api/graphql/ticket.graphql";
-import BaseDialogV1 from "components/BaseDialogV1";
 import useAuth from "hooks/useAuth";
 import * as ChatAction from "stores/features/chatSlice";
 import { errorMessage } from "utils/alert.util";
@@ -112,7 +112,7 @@ function DialogUploadChatFile(props) {
             async (file, index) => {
               const headers = {
                 PATH: `${user?.newName}-${user?._id}/${imageAccess[index]?.newNameImage}`,
-                FILENAME: "",
+                FILENAME: `${imageAccess[index]?.newNameImage}`,
                 createdBy: user?._id,
               };
 
@@ -145,11 +145,7 @@ function DialogUploadChatFile(props) {
           );
 
           await Promise.all(uploadPromises);
-
-          setIsLoading(false);
-          setShowUpload(false);
-          onConfirm();
-          dispatch(ChatAction.setChatMessageEMPTY());
+          handleClose();
         }
       }
     } catch (error) {
@@ -159,26 +155,27 @@ function DialogUploadChatFile(props) {
     }
   };
 
+  const handleClose = () => {
+    setIsLoading(false);
+    setShowUpload(false);
+    dispatch(ChatAction.setChatMessageEMPTY());
+    setShowProgress({});
+    onConfirm();
+  };
+
   return (
     <Fragment>
-      <BaseDialogV1
-        {...props}
-        dialogProps={{
-          PaperProps: {
-            sx: {
-              overflowY: "initial",
-              maxWidth: "600px",
-            },
-          },
+      <Dialog
+        open={props?.isOpen || false}
+        fullWidth={true}
+        maxWidth="sm"
+        onClose={() => {
+          if (showUpload) {
+            return;
+          }
+
+          handleClose();
         }}
-        dialogContentProps={{
-          sx: {
-            backgroundColor: "white !important",
-            borderRadius: "6px",
-            padding: (theme) => `${theme.spacing(8)} ${theme.spacing(6)}`,
-          },
-        }}
-        disableBackdropClick={true}
       >
         <DialogContent>
           {/* Preview Header file name */}
@@ -301,10 +298,10 @@ function DialogUploadChatFile(props) {
                             >
                               <FileIcon
                                 color="white"
-                                extension={getFileType(file.filename)}
+                                extension={getFileType(file.path)}
                                 {...{
                                   ...defaultStyles[
-                                    getFileType(file.filename) as string
+                                    getFileType(file.path) as string
                                   ],
                                 }}
                               />
@@ -312,7 +309,7 @@ function DialogUploadChatFile(props) {
 
                             <BoxProgressText>
                               <Typography component="span" color="initial">
-                                {file.filename}
+                                {file?.path}
                               </Typography>
                               <BoxProgressItem>
                                 <BoxProgressItemLine
@@ -320,10 +317,6 @@ function DialogUploadChatFile(props) {
                                     width: progress + "%",
                                   }}
                                 ></BoxProgressItemLine>
-
-                                <Typography component="p">
-                                  {progress} %
-                                </Typography>
                               </BoxProgressItem>
                             </BoxProgressText>
                           </BoxPreviewFileInnerV1>
@@ -384,7 +377,7 @@ function DialogUploadChatFile(props) {
             </BoxPreviewFileContainer>
           </ChatShowUploadFileContainer>
         </DialogContent>
-      </BaseDialogV1>
+      </Dialog>
     </Fragment>
   );
 }
