@@ -17,9 +17,6 @@ export const QUERY_FILE = gql`
     ) {
       data {
         _id
-        type_id {
-          _id
-        }
         folder_id {
           _id
         }
@@ -54,7 +51,6 @@ export const QUERY_FILE = gql`
         dropLink
         dropStatus
         dropExpiredAt
-        source
         device
         actionStatus
         expired

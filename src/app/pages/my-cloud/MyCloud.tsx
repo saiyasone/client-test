@@ -52,6 +52,7 @@ import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 // import useScroll from "hooks/useScroll";
+import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { Base64 } from "js-base64";
 import moment from "moment";
@@ -77,7 +78,6 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
-import useScroll from "hooks/useScroll";
 
 const ITEM_PER_PAGE_GRID = 20;
 
@@ -146,13 +146,14 @@ export function MyCloud() {
   }, [dataDownloadURL]);
 
   const handleGetDownloadLink = async () => {
-    setDataDownloadURL(dataForEvent.data);
-    setDataForEvent((prev) => {
-      return {
-        ...prev,
-        action: "",
-      };
-    });
+    console.log(dataForEvent.data);
+    // setDataDownloadURL(dataForEvent.data);
+    // setDataForEvent((prev) => {
+    //   return {
+    //     ...prev,
+    //     action: "",
+    //   };
+    // });
   };
 
   const handleCloseRenameDialog = () => {

@@ -174,9 +174,6 @@ export const QUERY_FILE_SHARE_PUBLIC = gql`
     filePublic(ID: $id) {
       data {
         _id
-        type_id {
-          _id
-        }
         folder_id {
           _id
         }
