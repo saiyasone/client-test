@@ -24,6 +24,7 @@ export const QUERY_SHARE = gql`
           _id
           email
           newName
+          profile
           firstName
           lastName
         }
@@ -70,16 +71,16 @@ export const QUERY_SHARE = gql`
         createdAt
         fromAccount {
           _id
-          username
           email
           newName
         }
         toAccount {
           _id
           email
-          username
+          newName
           firstName
           lastName
+          profile
         }
         accessKey
         isPublic

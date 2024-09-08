@@ -13,6 +13,7 @@ import {
   Chip,
   FormControl,
   IconButton,
+  styled,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -23,177 +24,203 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 // hooks
 import useFilter from "hooks/payment/useFilter";
 import useManagePayment from "hooks/payment/useManage";
+import { ENV_KEYS } from "constants/env.constant";
+import useAuth from "hooks/useAuth";
+import { useState } from "react";
 
-const columns: any = [
-  {
-    field: "id",
-    headerName: "ID",
-    width: 100,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      return (
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-          >
-            {params?.row?.no}
-          </Typography>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "firstName",
-    headerName: "CLIENT",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "start",
-          }}
-        >
-          <Avatar />
-          <Box sx={{ marginLeft: "0.5rem" }}>
-            <Typography
-              variant="h5"
-              sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
-            >
-              {params?.row?.payerId?.firstName || ""}
-            </Typography>
-            <Typography
-              variant="h6"
-              sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
-            >
-              {params?.row?.payerId?.lastName || ""}
-            </Typography>
-          </Box>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "paymentMethod",
-    headerName: "PaymentMethod",
-    width: 100,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      return (
-        <Box>
-          <Typography
-            variant="h5"
-            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-          >
-            {params?.row?.paymentMethod}
-          </Typography>
-        </Box>
-      );
-    },
-  },
-  {
-    field: "amount",
-    headerName: "TOTAL",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Typography
-          variant="h5"
-          sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-        >
-          ${params?.row?.amount}
-        </Typography>
-      );
-    },
-  },
-  {
-    field: "expiredAt",
-    headerName: "ISSUED DATE",
-    flex: 1,
-    renderCell: (params) => {
-      return (
-        <Typography
-          variant="h5"
-          sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
-        >
-          {params?.row?.expiredAt}
-        </Typography>
-      );
-    },
-  },
-  {
-    field: "fullName",
-    headerName: "BALANCE",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    renderCell: (params) => {
-      const status = params?.row?.status;
-      return (
-        <Chip
-          label={status}
-          sx={{
-            background:
-              status === "refunded"
-                ? "#FFD9B4"
-                : status === "failed" ||
-                  status === "cancelled" ||
-                  status === "expired"
-                ? "#FBDDDD"
-                : status === "success"
-                ? "#D4F4E2"
-                : "",
-            color:
-              status === "refunded"
-                ? "#FF9F43"
-                : status === "failed" ||
-                  status === "cancelled" ||
-                  status === "expired"
-                ? "#EA5455"
-                : status === "success"
-                ? "#209F59"
-                : "",
-            fontWeight: "600",
-          }}
-        />
-      );
-    },
-  },
-  {
-    field: "actions",
-    headerName: "ACTIONS",
-    flex: 1,
-    headerAlign: "center",
-    align: "center",
-    renderCell: () => {
-      return (
-        <Box>
-          <IconButton>
-            <EmailOutlinedIcon />
-          </IconButton>
-          <IconButton>
-            <RemoveRedEyeOutlinedIcon />
-          </IconButton>
-          <IconButton>
-            <MoreVertOutlinedIcon />
-          </IconButton>
-        </Box>
-      );
-    },
-  },
-];
+const ImageIcon = styled("img")({
+  width: "35px",
+  height: "35px",
+  objectFit: "cover",
+  borderRadius: "100%",
+});
 
 function PaymentHistory() {
+  const [isPreview, setIsPreview] = useState(true);
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
+
   const filterPayment = useFilter();
+  const { user }: any = useAuth();
   const managePayment: any = useManagePayment({
     filter: filterPayment.data,
   });
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath =
+    user?.newName + "-" + user?._id + `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
+
+  const columns: any = [
+    {
+      field: "id",
+      headerName: "ID",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        return (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+            >
+              {params?.row?.no}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "firstName",
+      headerName: "CLIENT",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "start",
+            }}
+          >
+            {isPreview ? (
+              <ImageIcon
+                src={newUrl + sourcePath + user?.profile}
+                onError={() => {
+                  setIsPreview(false);
+                }}
+              />
+            ) : (
+              <Avatar sx={{ width: 35, height: 35 }} />
+            )}
+            <Box sx={{ marginLeft: "0.5rem" }}>
+              <Typography
+                variant="h5"
+                sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
+              >
+                {params?.row?.payerId?.firstName || ""}
+              </Typography>
+              <Typography
+                variant="h6"
+                sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
+              >
+                {params?.row?.payerId?.lastName || ""}
+              </Typography>
+            </Box>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "paymentMethod",
+      headerName: "PaymentMethod",
+      width: 100,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        return (
+          <Box>
+            <Typography
+              variant="h5"
+              sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+            >
+              {params?.row?.paymentMethod}
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "amount",
+      headerName: "TOTAL",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Typography
+            variant="h5"
+            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+          >
+            ${params?.row?.amount}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "expiredAt",
+      headerName: "ISSUED DATE",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Typography
+            variant="h5"
+            sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
+          >
+            {params?.row?.expiredAt}
+          </Typography>
+        );
+      },
+    },
+    {
+      field: "fullName",
+      headerName: "BALANCE",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      renderCell: (params) => {
+        const status = params?.row?.status;
+        return (
+          <Chip
+            label={status}
+            sx={{
+              background:
+                status === "refunded"
+                  ? "#FFD9B4"
+                  : status === "failed" ||
+                    status === "cancelled" ||
+                    status === "expired"
+                  ? "#FBDDDD"
+                  : status === "success"
+                  ? "#D4F4E2"
+                  : "",
+              color:
+                status === "refunded"
+                  ? "#FF9F43"
+                  : status === "failed" ||
+                    status === "cancelled" ||
+                    status === "expired"
+                  ? "#EA5455"
+                  : status === "success"
+                  ? "#209F59"
+                  : "",
+              fontWeight: "600",
+            }}
+          />
+        );
+      },
+    },
+    {
+      field: "actions",
+      headerName: "ACTIONS",
+      flex: 1,
+      headerAlign: "center",
+      align: "center",
+      renderCell: () => {
+        return (
+          <Box>
+            <IconButton>
+              <EmailOutlinedIcon />
+            </IconButton>
+            <IconButton>
+              <RemoveRedEyeOutlinedIcon />
+            </IconButton>
+            <IconButton>
+              <MoreVertOutlinedIcon />
+            </IconButton>
+          </Box>
+        );
+      },
+    },
+  ];
+
   return (
     <>
       <Typography variant="h5" sx={{ color: "#4B465C" }}>

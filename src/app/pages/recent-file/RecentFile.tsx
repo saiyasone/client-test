@@ -106,8 +106,6 @@ function RecentFile() {
 
   const [userPackage, setUserPackage] = useState<any>(null);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
     action: null,
@@ -581,8 +579,6 @@ function RecentFile() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -1064,6 +1060,7 @@ function RecentFile() {
                                       data.newFilename
                                     }
                                     user={user}
+                                    selectType={"file"}
                                     data={data}
                                     filePassword={data?.filePassword}
                                     cardProps={{

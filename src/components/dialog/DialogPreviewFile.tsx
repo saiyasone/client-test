@@ -225,11 +225,13 @@ export default function DialogPreviewFile(props) {
                 />
               </div>
             ) : type == "video" ? (
-              <ReactPlayer
-                width={"100%"}
-                url={newUrl + sourcePath}
-                controls={true}
-              />
+              <React.Fragment>
+                <ReactPlayer
+                  width={"100%"}
+                  url={newUrl + sourcePath}
+                  controls={true}
+                />
+              </React.Fragment>
             ) : type === "application" && getType === "pdf" ? (
               <iframe
                 src={newUrl + sourcePath}

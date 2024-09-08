@@ -100,14 +100,14 @@ const Image = muiStyled("img")({
 });
 
 const LockImage = muiStyled("img")(({ theme }) => ({
-  width: "70px",
-  height: "70px",
+  width: "60px",
+  height: "60px",
   textAlign: "center",
   objectFit: "cover",
 
   [theme.breakpoints.down("md")]: {
-    width: "60px",
-    height: "60px",
+    width: "50px",
+    height: "50px",
   },
 }));
 
@@ -322,7 +322,9 @@ const FileCardItem: React.FC<any> = ({
               sx={{
                 display:
                   !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) => el?.id === props?.id,
+                    (el) =>
+                      el?.id === props?.id &&
+                      el.checkType === props?.selectType,
                   ) && true
                     ? "block"
                     : "none",
@@ -330,7 +332,8 @@ const FileCardItem: React.FC<any> = ({
               className="checkbox-selected"
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) => el?.id === props?.id,
+                  (el) =>
+                    el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
               icon={
@@ -339,6 +342,7 @@ const FileCardItem: React.FC<any> = ({
                 />
               }
               aria-label={"checkbox" + props?.id}
+              onClick={handleItemClick}
             />
           </SelectionContainer>
         )}
@@ -412,16 +416,47 @@ const FileCardItem: React.FC<any> = ({
                     )}
                   </Box>
                 )}
-                {fileType !== "folder" && (
-                  <FileIconContainer>
-                    <FileIcon
-                      extension={getFileType(props.name)}
-                      {...{
-                        ...defaultStyles[getFileType(props.name) as string],
-                      }}
-                    />
-                  </FileIconContainer>
-                )}
+
+                <Fragment>
+                  {fileType !== "folder" && (
+                    <Fragment>
+                      {props?.filePassword ? (
+                        <LockImage
+                          className="lock-icon-preview"
+                          src={lockIcon}
+                          alt={props.name}
+                        />
+                      ) : (
+                        <FileIconContainer>
+                          <FileIcon
+                            extension={getFileType(props.name)}
+                            {...{
+                              ...defaultStyles[
+                                getFileType(props.name) as string
+                              ],
+                            }}
+                          />
+                        </FileIconContainer>
+                      )}
+                    </Fragment>
+                  )}
+                </Fragment>
+                {/* {fileType === "video" ? (
+                  <VideoThumbnail videoSrc={newUrl + imagePath} />
+                ) : (
+                  <Fragment>
+                    {fileType !== "folder" && (
+                      <FileIconContainer>
+                        <FileIcon
+                          extension={getFileType(props.name)}
+                          {...{
+                            ...defaultStyles[getFileType(props.name) as string],
+                          }}
+                        />
+                      </FileIconContainer>
+                    )}
+                  </Fragment>
+                )} */}
               </React.Fragment>
             )}
             {!props.disableName && (

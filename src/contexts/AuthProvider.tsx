@@ -503,8 +503,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (cutErr === "ACCOUNT_LOCKED_UNTIL:ວັນທີເດືອນປີ") {
         warningMessage("You account was locked until tomorrow!", 3000);
       } else {
-        //errorMessage(error.message, 3000);
-        warningMessage(error.message, 3000);
+        errorMessage(error.message, 3000);
       }
     }
   };
@@ -575,7 +574,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             password: password,
             email: email,
             ip: responseIp.data,
-            captcha: window.__reCaptcha!
+            captcha: window.__reCaptcha!,
           },
         },
       });

@@ -55,10 +55,6 @@ export default function ChatFormReply(props) {
 
   // values, action
   const submitFormReply = async (values, action) => {
-    // if (!textMessage) {
-    //   return;
-    // }
-
     try {
       setIsLoading(true);
       const result = await createReplyMessage({

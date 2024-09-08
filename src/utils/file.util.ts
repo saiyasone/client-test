@@ -89,7 +89,7 @@ export const readBlob = (blobURL, callback) => {
   xhr.send();
 };
 
-export function getFolderName(path) {
+export function getFolderName(path: string) {
   if (!path) {
     return null;
   }

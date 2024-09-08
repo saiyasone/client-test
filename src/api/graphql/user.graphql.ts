@@ -24,12 +24,9 @@ export const QUERY_USER = gql`
           packageId
           name
           category
-          annualPrice
-          monthlyPrice
           discount
           description
           storage
-          ads
           captcha
           multipleUpload
           numberOfFileUpload
@@ -37,13 +34,7 @@ export const QUERY_USER = gql`
           fileUploadPerDay
           maxUploadSize
           multipleDownload
-          downLoadOption
-          support
-          sort
-          type
-          totalUsed
-          textColor
-          bgColor
+          downLoadOption        
           status
           createdAt
           updatedAt

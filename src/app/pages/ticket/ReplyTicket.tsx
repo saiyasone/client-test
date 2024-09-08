@@ -219,7 +219,6 @@ function ReplyTicket() {
               <MUI.ChatHeaderWrapper>
                 <MUI.ChatHeaderLeft>
                   <Box className="admin-logo">
-                    {/* <img src={iconPerson} alt="icon-person" /> */}
                     <Typography variant="h4">V</Typography>
                   </Box>
 

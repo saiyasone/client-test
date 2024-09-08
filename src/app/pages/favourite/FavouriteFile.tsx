@@ -17,11 +17,10 @@ import {
   QUERY_FOLDER,
 } from "api/graphql/folder.graphql";
 import FavouriteEmpty from "assets/images/empty/favourite-empty.svg?react";
-import CardSkeleton from "components/CardSkeleton";
+1;
 import Empty from "components/Empty";
 import FileCardContainer from "components/FileCardContainer";
 import FileCardItem from "components/FileCardItem";
-import ListSkeleton from "components/ListSkeleton";
 import MenuDropdownItem from "components/MenuDropdownItem";
 import MenuMultipleSelectionFolderAndFile from "components/MenuMultipleSelectionFolderAndFile";
 import SwitchPages from "components/SwitchPage";
@@ -34,7 +33,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import { ENV_KEYS } from "constants/env.constant";
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -77,24 +75,16 @@ function FavouriteFile() {
   const [dataFilesAndFoldersForGrid, setDataFilesAndFoldersForGrid] =
     useState<any>([null]);
   const isFirstRender = useFirstRender();
-  const [
-    getFiles,
+  const [getFiles, { data: dataFiles, refetch: filesRefetch }] = useLazyQuery(
+    QUERY_FILE,
     {
-      data: dataFiles,
-      refetch: filesRefetch,
-      loading: dataFilesLoadingForList,
+      fetchPolicy: "no-cache",
     },
-  ] = useLazyQuery(QUERY_FILE, {
-    fetchPolicy: "no-cache",
-  });
+  );
 
   const [
     getFilesForGrid,
-    {
-      data: dataFilesForGrid,
-      refetch: filesRefetchForGrid,
-      loading: dataFilesLoadingForGrid,
-    },
+    { data: dataFilesForGrid, refetch: filesRefetchForGrid },
   ] = useLazyQuery(QUERY_FILE, {
     fetchPolicy: "no-cache",
   });
@@ -145,10 +135,6 @@ function FavouriteFile() {
     total: dataFilesAndFoldersForGrid?.total || 0,
     limitData: ITEM_PER_PAGE_GRID,
   });
-
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
     action: null,
@@ -483,7 +469,10 @@ function FavouriteFile() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             await handleDownloadFiles();
@@ -562,7 +551,10 @@ function FavouriteFile() {
     switch (eventClick) {
       case "download":
         handleCloseDecryptedPassword();
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleGetDownloadLink();
         } else {
           await handleDownloadFiles();
@@ -676,8 +668,6 @@ function FavouriteFile() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -1068,7 +1058,10 @@ function FavouriteFile() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: () => {
-                if (userPackage?.downLoadOption === "another") {
+                if (
+                  userPackage?.downLoadOption === "another" ||
+                  userPackage?.category === "free"
+                ) {
                   handleGetDownloadLink();
                 } else {
                   handleDownloadFiles();
@@ -1087,7 +1080,10 @@ function FavouriteFile() {
             setShowPreview(false);
           }}
           onClick={() => {
-            if (userPackage?.downLoadOption === "another") {
+            if (
+              userPackage?.downLoadOption === "another" ||
+              userPackage?.category === "free"
+            ) {
               handleGetDownloadLink();
             } else {
               handleDownloadFiles();
@@ -1131,9 +1127,6 @@ function FavouriteFile() {
         }
       />
 
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
       <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
         <MUI.TitleAndSwitch sx={{ my: 2 }}>
           {dataSelector?.selectionFileAndFolderData?.length ? (
@@ -1208,146 +1201,107 @@ function FavouriteFile() {
                         Files
                       </Typography>
 
-                      {/* <Checkbox
-                        checked={isCheckAll}
-                        icon={<CheckBoxOutlineBlankSharpIcon />}
-                        checkedIcon={
-                          dataFilesAndFoldersForGrid?.data?.length ===
-                          dataSelector?.selectionFileAndFolderData?.length ? (
-                            <CheckBoxSharpIcon sx={{ color: "#17766B" }} />
-                          ) : (
-                            <CheckboxMinus sx={{ color: "#17766B" }} />
-                          )
-                        } 
-                        onChange={(e) => {
-                          const { checked } = e.target;
-                          setIsCheckAll(checked);
-                          handleCheckAll(checked);
-                        }}
-                      /> */}
-
                       <React.Fragment>
                         {toggle === "grid" && (
-                          <Box>
-                            {dataFilesLoadingForGrid &&
-                            dataFilesAndFoldersForGrid?.data?.length ? (
-                              <CardSkeleton />
-                            ) : (
-                              <FileCardContainer>
-                                <>
-                                  {dataFilesAndFoldersForGrid?.data?.map(
-                                    (data, index) => {
-                                      return (
-                                        <FileCardItem
-                                          cardProps={{
-                                            onDoubleClick: () => {
+                          <FileCardContainer>
+                            {dataFilesAndFoldersForGrid?.data?.map(
+                              (data, index) => {
+                                return (
+                                  <FileCardItem
+                                    cardProps={{
+                                      onDoubleClick: () => {
+                                        setDataForEvent({
+                                          action: "preview",
+                                          data,
+                                        });
+                                      },
+                                    }}
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      "/" +
+                                      (data?.newPath
+                                        ? removeFileNameOutOfPath(data?.newPath)
+                                        : "") +
+                                      data?.newFilename
+                                    }
+                                    user={user}
+                                    id={data?._id}
+                                    selectType={"file"}
+                                    filePassword={data?.filePassword}
+                                    isCheckbox={true}
+                                    favouriteIcon={{
+                                      isShow: false,
+                                      handleFavouriteOnClick: async () => {
+                                        setDataForEvent({
+                                          data,
+                                          action: "favourite",
+                                        });
+                                      },
+                                      isFavourite: true,
+                                    }}
+                                    handleSelect={() =>
+                                      handleMultipleFileDataGrid(data)
+                                    }
+                                    fileType={
+                                      data.checkTypeItem === "folder"
+                                        ? "folder"
+                                        : getShortFileTypeFromFileType(
+                                            data.fileType,
+                                          )
+                                    }
+                                    name={data.filename}
+                                    key={index}
+                                    menuItems={menuItems?.map(
+                                      (menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            isFavorite={
+                                              data.favorite ? true : false
+                                            }
+                                            isPassword={
+                                              data.filePassword ? true : false
+                                            }
+                                            onClick={() => {
                                               setDataForEvent({
-                                                action: "preview",
+                                                action: menuItem.action,
                                                 data,
                                               });
-                                            },
-                                          }}
-                                          imagePath={
-                                            user?.newName +
-                                            "-" +
-                                            user?._id +
-                                            "/" +
-                                            (data?.newPath
-                                              ? removeFileNameOutOfPath(
-                                                  data?.newPath,
-                                                )
-                                              : "") +
-                                            data?.newFilename
-                                          }
-                                          user={user}
-                                          id={data?._id}
-                                          filePassword={data?.filePassword}
-                                          isCheckbox={true}
-                                          favouriteIcon={{
-                                            isShow: false,
-                                            handleFavouriteOnClick:
-                                              async () => {
-                                                setDataForEvent({
-                                                  data,
-                                                  action: "favourite",
-                                                });
-                                              },
-                                            isFavourite: true,
-                                          }}
-                                          handleSelect={() =>
-                                            handleMultipleFileDataGrid(data)
-                                          }
-                                          fileType={
-                                            data.checkTypeItem === "folder"
-                                              ? "folder"
-                                              : getShortFileTypeFromFileType(
-                                                  data.fileType,
-                                                )
-                                          }
-                                          name={data.filename}
-                                          key={index}
-                                          menuItems={menuItems?.map(
-                                            (menuItem, index) => {
-                                              return (
-                                                <MenuDropdownItem
-                                                  isFavorite={
-                                                    data.favorite ? true : false
-                                                  }
-                                                  isPassword={
-                                                    data.filePassword
-                                                      ? true
-                                                      : false
-                                                  }
-                                                  onClick={() => {
-                                                    setDataForEvent({
-                                                      action: menuItem.action,
-                                                      data,
-                                                    });
-                                                  }}
-                                                  key={index}
-                                                  title={menuItem.title}
-                                                  icon={menuItem.icon}
-                                                />
-                                              );
-                                            },
-                                          )}
-                                        />
-                                      );
-                                    },
-                                  )}
-                                </>
-                              </FileCardContainer>
+                                            }}
+                                            key={index}
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                          />
+                                        );
+                                      },
+                                    )}
+                                  />
+                                );
+                              },
                             )}
-                          </Box>
+                          </FileCardContainer>
                         )}
                         {toggle === "list" && (
-                          <>
-                            {dataFilesLoadingForList &&
-                            dataFilesAndFolders.data ? (
-                              <ListSkeleton />
-                            ) : (
-                              <FavouriteFileDataGrid
-                                pagination={{
-                                  total: Math.ceil(
-                                    dataFilesAndFolders.total /
-                                      ITEM_PER_PAGE_LIST,
-                                  ),
-                                  currentPage: currentFilePage,
-                                  setCurrentPage: setCurrentFilePage,
-                                }}
-                                data={dataFilesAndFolders.data}
-                                total={dataFilesAndFolders.total}
-                                dataSelector={dataSelector}
-                                handleEvent={(action, data) => {
-                                  setDataForEvent({
-                                    action,
-                                    data,
-                                  });
-                                }}
-                                handleSelection={handleMultipleFileDataList}
-                              />
-                            )}
-                          </>
+                          <FavouriteFileDataGrid
+                            pagination={{
+                              total: Math.ceil(
+                                dataFilesAndFolders.total / ITEM_PER_PAGE_LIST,
+                              ),
+                              currentPage: currentFilePage,
+                              setCurrentPage: setCurrentFilePage,
+                            }}
+                            data={dataFilesAndFolders.data}
+                            total={dataFilesAndFolders.total}
+                            dataSelector={dataSelector}
+                            handleEvent={(action, data) => {
+                              setDataForEvent({
+                                action,
+                                data,
+                              });
+                            }}
+                            handleSelection={handleMultipleFileDataList}
+                          />
                         )}
                       </React.Fragment>
                     </MUI_FAVOURITE.FavouriteItem>

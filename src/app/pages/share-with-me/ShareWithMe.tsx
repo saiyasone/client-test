@@ -1010,20 +1010,26 @@ function ShareWithMe() {
                                   return (
                                     <Fragment key={index}>
                                       <FolderGridItem
+                                        key={index}
                                         file_id={
                                           data?.folderId._id ? true : false
                                         }
                                         folderId={
                                           data?.folderId._id ? true : false
                                         }
+                                        isContainFiles={
+                                          data?.folderId?.total_size > 0
+                                            ? true
+                                            : false
+                                        }
                                         id={data?._id}
                                         folder_name={data?.folderId.folder_name}
+                                        selectType={"folder"}
                                         setIsOpenMenu={setIsOpenMenu}
                                         isOpenMenu={isOpenMenu}
                                         isPinned={
                                           data?.folderId.pin ? true : false
                                         }
-                                        key={index}
                                         onOuterClick={() => {
                                           setMultiChecked(multiChecked);
                                           setChecked({});
@@ -1166,6 +1172,7 @@ function ShareWithMe() {
                                         key={index}
                                         id={data?._id}
                                         path={data?.fileId?.path}
+                                        selectType={"file"}
                                         name={data?.fileId?.filename}
                                         filePassword={
                                           data?.fileId?.filePassword
@@ -1285,18 +1292,6 @@ function ShareWithMe() {
                               })}
                             </FileCardContainer>
                           )}
-
-                          {/* {limitScroll < total && toggle !== "list" && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                mt: 3,
-                              }}
-                            >
-                              <LinearProgress />
-                            </Box>
-                          )} */}
                         </Fragment>
                       )}
                     </Fragment>

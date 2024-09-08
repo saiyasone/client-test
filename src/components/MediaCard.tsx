@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef } from "react";
 
 import {
   Button,
@@ -48,46 +48,51 @@ function MediaCard(props) {
       navigate(`/myfile/file/${userId}/${value}/${status}`);
     }
   };
-  let application = 0;
-  let image = 0;
-  let video = 0;
-  let audio = 0;
-  let text: any = 0;
-  let other = 0;
-  for (let i = 0; i < getCount?.getFileCategoryDetails?.data?.length; i++) {
-    if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "application"
-    ) {
-      application = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "image"
-    ) {
-      image = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "video"
-    ) {
-      video = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "audio"
-    ) {
-      audio = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "text"
-    ) {
-      text = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-        "" ||
-      null
-    ) {
-      other = getCount?.getFileCategoryDetails?.data[i]?.size;
+
+  const applicationRef = useRef<number>(0);
+  const imageRef = useRef<number>(0);
+  const videoRef = useRef<number>(0);
+  const audioRef = useRef<number>(0);
+  const textRef = useRef<number>(0);
+  const otherRef = useRef<number>(0);
+
+  useEffect(() => {
+    for (let i = 0; i < getCount?.getFileCategoryDetails?.data?.length; i++) {
+      if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+        "application"
+      ) {
+        applicationRef.current =
+          getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+        "image"
+      ) {
+        imageRef.current = getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+        "video"
+      ) {
+        videoRef.current = getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+        "audio"
+      ) {
+        audioRef.current = getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+        "text"
+      ) {
+        textRef.current = getCount?.getFileCategoryDetails?.data[i]?.size;
+      } else if (
+        getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
+          "" ||
+        null
+      ) {
+        otherRef.current = getCount?.getFileCategoryDetails?.data[i]?.size;
+      }
     }
-  }
+  }, [getCount?.getFileCategoryDetails?.data]);
 
   return (
     <Box>
@@ -112,32 +117,32 @@ function MediaCard(props) {
                         {card.type === "audio"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(audio)
+                            : convertBytetoMBandGB(audioRef.current)
                           : ""}
                         {card.type === "video"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(video)
+                            : convertBytetoMBandGB(videoRef.current)
                           : ""}
                         {card.type === "image"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(image)
+                            : convertBytetoMBandGB(imageRef.current)
                           : ""}
                         {card.type === "application"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(application)
+                            : convertBytetoMBandGB(applicationRef.current)
                           : ""}
                         {card.type === "other"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(other)
+                            : convertBytetoMBandGB(otherRef.current)
                           : ""}
                         {card.type === "text"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(parseInt(text))
+                            : convertBytetoMBandGB(textRef.current)
                           : ""}
                       </Typography>
                     </Box>
