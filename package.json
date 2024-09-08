@@ -94,6 +94,7 @@
     "react-responsive-pagination": "^2.5.0",
     "react-router-dom": "^6.23.1",
     "react-select": "^5.8.0",
+    "react-share": "^5.1.0",
     "react-share-social": "^0.1.60",
     "react-type-animation": "^3.2.0",
     "socket.io-client": "^4.7.5",
