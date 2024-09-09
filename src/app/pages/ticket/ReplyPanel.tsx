@@ -17,7 +17,6 @@ function ReplyPanel(props) {
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollTo(0, 0);
-    // messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleReply = (chat) => {
@@ -26,7 +25,14 @@ function ReplyPanel(props) {
 
   async function onDownloadFile(chat, file) {
     try {
-      console.log(chat, file);
+      console.log({ chat, file });
+      // const multipleData = [
+      //   {
+      //     id: file?._id,
+      //     checkType: "file",
+      //     newPath: file
+      //   },
+      // ];
     } catch (err) {
       console.error(err);
     }
