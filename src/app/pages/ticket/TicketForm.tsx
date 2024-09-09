@@ -197,7 +197,6 @@ export default function TicketForm() {
                 id="labelTitle"
                 name="title"
                 placeholder="Title"
-                // label="title"
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.title && errors.title)}
@@ -218,7 +217,6 @@ export default function TicketForm() {
                 id="labelEmail"
                 name="email"
                 placeholder="Email"
-                // label="email"
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.email && errors.email)}
@@ -239,7 +237,6 @@ export default function TicketForm() {
                 id="labelMessage"
                 name="message"
                 placeholder="message"
-                // label="message"
                 multiline={true}
                 rows={7}
                 fullWidth={true}

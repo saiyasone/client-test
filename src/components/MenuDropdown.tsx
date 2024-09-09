@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 //mui component and style
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import { useMediaQuery } from "@mui/material";
 import Menu from "@mui/material/Menu";
 import { styled } from "@mui/material/styles";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
@@ -41,12 +42,14 @@ const MenuListContainer = styled("div")({
 // const MenuDropdown = ({ menuAction, ...props }) => {
 const MenuDropdown = ({ ...props }) => {
   const [anchorEl, setAnchorEl] = useState(null);
+  const isMobile = useMediaQuery("(max-width:600px)");
   const open = Boolean(anchorEl);
+  const toggleRef = useRef<HTMLButtonElement>(null);
+
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
-  const handleClick = (event) => {
+  const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
   };
-
   // const handleClose = (event, reason) => {
   const handleClose = () => {
     setAnchorEl(null);
@@ -65,6 +68,7 @@ const MenuDropdown = ({ ...props }) => {
     props.onOpenChange?.(open);
   }, [open]);
 
+  
   return (
     <MenuDropdownStyled className="menu-dropdown">
       {props.customButton ? (
@@ -83,6 +87,7 @@ const MenuDropdown = ({ ...props }) => {
         </>
       ) : (
         <MenuDropdownButton
+          ref={toggleRef}
           id="dropdown-button"
           aria-controls={open ? "dropdown-menu" : undefined}
           aria-haspopup="true"
@@ -105,7 +110,7 @@ const MenuDropdown = ({ ...props }) => {
             paper: {
               style: {
                 position: "relative",
-                width: "max-content",
+                width: isMobile ? "180px" : "max-content",
                 boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.05)",
               },
             },

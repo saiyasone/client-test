@@ -52,6 +52,7 @@ export default function FloatingButton() {
   );
   const [folderOpen, setFolderOpen] = React.useState(false);
   const [folder, setFolder] = React.useState("");
+  const [isRandomFolder, setIsRandomFolder] = React.useState<boolean>(false);
   const [resMessage, setResMessage] = React.useState<any>(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const [getType, setGetType] = React.useState("");
@@ -61,6 +62,8 @@ export default function FloatingButton() {
 
   const handleFolderClose = () => {
     setFolderOpen(false);
+    setIsRandomFolder(false);
+    setFolder("");
   };
 
   //Modal;
@@ -135,10 +138,7 @@ export default function FloatingButton() {
 
   React.useEffect(() => {
     setResMessage(false);
-    if (
-      // localStorage.getItem("folderId")
-      folderJson
-    ) {
+    if (folderJson) {
       newFolderPath({
         variables: {
           where: {
@@ -183,6 +183,10 @@ export default function FloatingButton() {
         eventUploadTrigger.trigger();
       }
     } catch (error: any) {
+      if (error.message) {
+        setFolder(error.message);
+        setIsRandomFolder(true);
+      }
       setIsLoading(false);
       const strMsg = error.message.split(": ")[1];
       if (strMsg) {
@@ -202,7 +206,6 @@ export default function FloatingButton() {
         setErrorMessage("Please select a new folder!");
       } else {
         setErrorMessage(error);
-        setFolder(strMsg);
       }
     }
   };
@@ -304,6 +307,18 @@ export default function FloatingButton() {
                 setFolder(e.target.value);
               }}
             />
+            {isRandomFolder && folder && (
+              <Typography
+                component="p"
+                sx={{ ml: 1 }}
+                style={{ fontSize: "12px" }}
+              >
+                Folder rename to
+                <strong style={{ fontSize: "12px", marginLeft: "4px" }}>
+                  {folder}
+                </strong>
+              </Typography>
+            )}
             {resMessage ? (
               <Typography
                 component="p"

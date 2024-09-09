@@ -5,7 +5,7 @@ import { Box, Checkbox, IconButton, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Grid";
 import Paper from "@mui/material/Paper";
 import { styled } from "@mui/material/styles";
-import { styled as muiStyled } from "@mui/system";
+import { styled as muiStyled, useMediaQuery } from "@mui/system";
 import FolderEmptyIcon from "assets/images/empty/folder-empty.svg?react";
 import FolderNotEmptyIcon from "assets/images/empty/folder-not-empty.svg?react";
 
@@ -22,13 +22,14 @@ import { BsPinAngle, BsPinAngleFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 import * as MdIcon from "react-icons/md";
 import { MdFavorite, MdOutlineFavoriteBorder } from "react-icons/md";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
 import { getFileType } from "utils/file.util";
 import { cutStringWithEllipsis } from "utils/string.util";
 import Loader from "./Loader";
 import MenuDropdown from "./MenuDropdown";
 import NormalButton from "./NormalButton";
+import { toggleMenu } from "stores/features/useEventSlice";
 
 export const SelectionContainer = styled("div")({
   position: "absolute",
@@ -233,12 +234,13 @@ const FileCardItem: React.FC<any> = ({
     height: 200,
     width: 200,
   });
-
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const itemRef = useRef(null);
   const isFileCardItemHover = useHover(itemRef);
   const isFileCardOuterClicked = useOuterClick(itemRef);
+
   const {
     isNormalCard,
     sx,
@@ -251,7 +253,7 @@ const FileCardItem: React.FC<any> = ({
     checkboxAction.checkboxFileAndFolderSelector,
   );
 
-  const handleDropdownOpen = (isOpen) => {
+  const handleDropdownOpen = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
   };
 
@@ -290,7 +292,7 @@ const FileCardItem: React.FC<any> = ({
       <Item
         ref={itemRef}
         className="card-item"
-        onClick={handleItemClick}
+        // onClick={handleItemClick}
         {...{
           ...(styleSelectedCard && {
             isstyledselectedcard: styleSelectedCard,
@@ -321,11 +323,13 @@ const FileCardItem: React.FC<any> = ({
             <CustomCheckbox
               sx={{
                 display:
-                  !!dataSelector?.selectionFileAndFolderData?.find(
+                  (!!dataSelector?.selectionFileAndFolderData?.find(
                     (el) =>
                       el?.id === props?.id &&
                       el.checkType === props?.selectType,
-                  ) && true
+                  ) &&
+                    true) ||
+                  isMobile
                     ? "block"
                     : "none",
               }}
@@ -347,7 +351,7 @@ const FileCardItem: React.FC<any> = ({
           </SelectionContainer>
         )}
 
-        {props?.menuItems && isOpenMenu && (
+        {(isMobile || (props?.menuItems && isOpenMenu)) && (
           <MenuButtonContainer>
             <MenuDropdown
               customButton={props.customButton}
