@@ -64,6 +64,7 @@ import useAuth from "../../../hooks/useAuth";
 import useBreadcrumbData from "../../../hooks/useBreadcrumbData";
 import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
@@ -90,6 +91,7 @@ function ShareWithMe() {
   });
 
   const [listShareMe, setListShareMe] = useState<any>(null);
+  const [fileshare, setFileshare] = useState<any>(null);
   const manageGraphqlError = useManageGraphqlError();
   const { setFolderId }: any = useContext(FolderContext);
 
@@ -164,6 +166,10 @@ function ShareWithMe() {
   const handleCloseFileDrop = () => {
     setIsFiledrop(false);
     resetDataForEvents();
+  };
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
   };
 
   const isCheckPassword = () => {
@@ -457,6 +463,10 @@ function ShareWithMe() {
       onCompleted: async (data) => {
         const queryData = data?.getShare?.data;
         const queryTotal = data?.getShare?.total;
+        const filteredData = data?.getShare?.data?.filter(
+          (item:any) => item.fileId !== null,
+        );
+        setFileshare(filteredData);
         if (queryTotal > 0) {
           setTotal(queryTotal);
           setListShareMe(() => {
@@ -484,6 +494,7 @@ function ShareWithMe() {
   useEffect(() => {
     queryGetShare();
   }, [limitScroll, currentPage, toggle, countPage]);
+
 
   const menuOnClick = async (action) => {
     setIsAutoClose(true);
@@ -1371,7 +1382,7 @@ function ShareWithMe() {
               name={name}
               setName={setName}
             />
-            {showPreview && (
+            {/* {showPreview && (
               <DialogPreviewFile
                 open={showPreview}
                 handleClose={() => {
@@ -1391,6 +1402,16 @@ function ShareWithMe() {
                 path={dataForEvent.data.fileId?.newPath}
                 user={dataForEvent.data?.ownerId}
                 permission={dataForEvent?.data?.permission}
+              />
+            )} */}
+            {showPreview && (
+              <DialogPreviewFileSlide
+                open={showPreview}
+                handleClose={handleClosePreview}
+                data={dataForEvent.data}
+                user={dataForEvent.data?.ownerId}
+                mainFile={fileshare}
+                propsStatus="share"
               />
             )}
 

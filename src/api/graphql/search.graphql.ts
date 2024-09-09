@@ -28,6 +28,10 @@ export const QUERY_SEARCH_FOLDER_AND_FILE = gql`
         createdBy {
           _id
           newName
+          newName
+          lastName
+          email
+          firstName
         }
       }
     }

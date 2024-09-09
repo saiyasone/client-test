@@ -7,6 +7,8 @@ import Menu from "@mui/material/Menu";
 import { styled } from "@mui/material/styles";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import "styles/menuDropdown.style.css";
+import { toggleMenu } from "stores/features/useEventSlice";
+import { useDispatch } from "react-redux";
 
 const MenuDropdownStyled = styled("div")({
   position: "relative",
@@ -45,14 +47,16 @@ const MenuDropdown = ({ ...props }) => {
   const isMobile = useMediaQuery("(max-width:600px)");
   const open = Boolean(anchorEl);
   const toggleRef = useRef<HTMLButtonElement>(null);
-
+  const dispatch = useDispatch()
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
   const handleClick = (event: any) => {
     setAnchorEl(event.currentTarget);
+    dispatch(toggleMenu(true));
   };
   // const handleClose = (event, reason) => {
   const handleClose = () => {
     setAnchorEl(null);
+    dispatch(toggleMenu(false));
   };
 
   useEffect(() => {
@@ -66,6 +70,7 @@ const MenuDropdown = ({ ...props }) => {
 
   useEffect(() => {
     props.onOpenChange?.(open);
+    dispatch(toggleMenu(open));
   }, [open]);
 
   

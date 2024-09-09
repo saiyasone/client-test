@@ -38,6 +38,7 @@ import FileSlideButton from "components/file/FileSlideButton";
 import { useAllowKey } from "hooks/file/useAllowKey";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import SharePrevieFile from "app/pages/file/SharePreviewFile";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const CloseIconButton = styled(Box)(({ theme }) => ({
   padding: "6px",
@@ -106,10 +107,11 @@ type DialogProps = {
   handleClose: () => void;
   data: IFileTypes;
   user: IUserTypes;
-  mainFile: IFileTypes[];
+  mainFile?: IFileTypes[];
+  propsStatus: string;
 };
 export default function DialogPreviewFileSlide(props: DialogProps) {
-  const { open, handleClose, data, user, mainFile } = props;
+  const { open, handleClose, data, user, mainFile, propsStatus } = props;
   const theme = useTheme();
   const [zoom, setZoom] = React.useState(0.5);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -123,7 +125,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
   const [filename, setFilename] = React.useState<string>();
-
+  const { setRefreshAuto, refreshAuto } = useRefreshState();
   const handleGetFolderURL = useGetUrl(data);
   const handleDownloadUrl = useGetUrlDownload(data);
   const manageFile = useManageFile({ user });
@@ -134,11 +136,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     zoomRef,
     refSlide,
   ]);
-  const manageUserFromShare = useManageUserFromShare({
-    inputFileOrFolder: data,
-    inputType: data.fileType,
-    user,
-  });
 
   React.useEffect(() => {
     if (
@@ -159,29 +156,85 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     handleClose,
     enabled: dataForEvent !== "share",
   });
-  const fileType = isCurrentImage.fileType;
+  const fileType = isCurrentImage?.fileType || isCurrentImage?.type;
   const [styles, setStyles] = React.useState<
     Record<string, Partial<FileIconProps>>
   >({});
-  const fileStyle = styles[fileType];
+  const fileStyle = styles[fileType || ""];
+  const newUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}preview?path=`;
   let real_path;
+  let sourcePath;
+  let pathToUse;
 
-  const pathToUse = isCurrentImage.path ?? data.path;
-  if (pathToUse === null || pathToUse === "") {
-    real_path = "";
-  } else {
-    real_path = removeFileNameOutOfPath(pathToUse);
+  switch (propsStatus) {
+    case "mycloud":
+      pathToUse = isCurrentImage?.path || data?.path;
+
+      if (pathToUse === null || pathToUse === "") {
+        real_path = "";
+      } else {
+        real_path = removeFileNameOutOfPath(pathToUse);
+      }
+
+      sourcePath = `${
+        user?.newName +
+        "-" +
+        user?._id +
+        "/" +
+        real_path +
+        (isCurrentImage?.newFilename || data?.newFilename)
+      }`;
+      break;
+    case "extendFolder":
+      sourcePath = `${
+        user?.newName + "-" + user?._id + "/" + isCurrentImage.newPath
+      }`;
+      break;
+
+    case "share":
+      if (
+        !isCurrentImage.fileId.newPath ||
+        isCurrentImage.fileId.newPath == null
+      ) {
+
+        real_path = "";
+        sourcePath = `${
+          user.newName +
+          "-" +
+          user._id +
+          "/" +
+          real_path +
+          isCurrentImage?.fileId?.newFilename
+        }`;
+      } else {
+        sourcePath = `${
+          user.newName + "-" + user._id + "/" + isCurrentImage?.fileId?.newPath
+        }`;
+      }
+      break;
+    case "recent":
+      if (!isCurrentImage.newPath || isCurrentImage.newPath == null) {
+        real_path = "";
+        sourcePath = `${
+          user.newName +
+          "-" +
+          user._id +
+          "/" +
+          real_path +
+          isCurrentImage?.newFilename
+        }`;
+      } else {
+        sourcePath = `${
+          user.newName + "-" + user._id + "/" + isCurrentImage?.newPath
+        }`;
+      }
+      break;
+    default:
+      return;
   }
 
-  const newUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}preview?path=`;
-  const sourcePath = `${
-    user?.newName +
-    "-" +
-    user?._id +
-    "/" +
-    real_path +
-    (isCurrentImage?.newFilename ?? data.newFilename)
-  }`;
+
+
 
   const handleZoomIn = () => {
     setZoom((prevZoom) => Math.min(prevZoom + 0.1, 2));
@@ -220,6 +273,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   }, [!open, isMobile]);
 
   const handleNextView = () => {
+    if (!mainFile) return;
     if (!dataForEvent) {
       const newImage = handleNext({
         currentFile: isCurrentImage ?? data,
@@ -232,6 +286,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     }
   };
   const handlePrevView = () => {
+    if (!mainFile) return;
     if (!dataForEvent) {
       const prevImage = handlePrev({
         currentFile: isCurrentImage ?? data,
@@ -255,6 +310,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       await manageFile.handleFavoriteFile(data._id, newFavoriteStatus, {
         onSuccess: async () => {
           data.favorite = newFavoriteStatus;
+          setRefreshAuto({ isAutoClose: true, isStatus: "favourite" });
         },
         onFailed: async () => {},
       });
@@ -309,7 +365,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         handleFavorite();
         break;
       case "password":
-        if (user.packageId.lockFile === "on") {
+        if (user.packageId.lockFile !== "on") {
           setDataForEvent(event);
         } else {
           setDataForEvent("");
@@ -373,7 +429,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 <img
                   ref={imageRef}
                   src={newUrl + sourcePath}
-                  alt={isCurrentImage.filename}
+                  alt={isCurrentImage?.filename}
                   loading="lazy"
                   style={{
                     transform: `scale(${zoom})`,

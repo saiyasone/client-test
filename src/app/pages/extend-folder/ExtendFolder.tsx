@@ -80,6 +80,7 @@ import useFirstRender from "../../../hooks/useFirstRender";
 import ExtendFileDataGrid from "./ExtendFileDataGrid";
 import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 // const ITEM_PER_PAGE = 10;
 const _ITEM_GRID_PER_PAGE = 20;
@@ -222,6 +223,12 @@ function ExtendFolder() {
     folderName: " ",
   });
   const csvRef: any = useRef();
+
+  const handleClosePreview = () => {
+    resetDataForEvent();
+    setShowPreview(false);
+  };
+
   const useDataExportCSV = useExportCSV({
     folderId: csvFolder.folderId,
     exportRef: csvRef,
@@ -599,6 +606,7 @@ function ExtendFolder() {
         return;
     }
   };
+
 
   // confirm encryption password
   const isCheckPassword = () => {
@@ -1676,7 +1684,7 @@ function ExtendFolder() {
         data={dataForEvent.data}
       />
 
-      {showPreview && (
+      {/* {showPreview && (
         <DialogPreviewFile
           open={showPreview}
           handleClose={() => {
@@ -1696,8 +1704,17 @@ function ExtendFolder() {
           path={dataForEvent.data.newPath}
           user={user}
         />
+      )} */}
+      {showPreview && (
+        <DialogPreviewFileSlide
+          open={showPreview}
+          handleClose={handleClosePreview}
+          data={dataForEvent.data}
+          user={user}
+          mainFile={fetchSubFoldersAndFiles.files.data}
+          propsStatus="extendFolder"
+        />
       )}
-
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {

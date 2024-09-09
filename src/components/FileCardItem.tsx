@@ -240,7 +240,7 @@ const FileCardItem: React.FC<any> = ({
   const itemRef = useRef(null);
   const isFileCardItemHover = useHover(itemRef);
   const isFileCardOuterClicked = useOuterClick(itemRef);
-
+  const dispatch = useDispatch();
   const {
     isNormalCard,
     sx,
@@ -254,6 +254,7 @@ const FileCardItem: React.FC<any> = ({
   );
 
   const handleDropdownOpen = (isOpen: boolean) => {
+    dispatch(toggleMenu(true));
     setIsDropdownOpen(isOpen);
   };
 

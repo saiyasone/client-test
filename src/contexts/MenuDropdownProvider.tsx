@@ -1,9 +1,11 @@
 // MenuStateProvider.js
-import { createContext, useContext, useState } from "react";
-
+import { createContext, ReactNode, useContext, useState } from "react";
+interface MenuDropdownProvider {
+  children: ReactNode;
+}
 const MenuStateContext = createContext<any>(null);
 
-export const MenuDropdownProvider = ({ children }) => {
+export const MenuDropdownProvider = ({ children }: MenuDropdownProvider) => {
   const [isAutoClose, setIsAutoClose] = useState(false);
   return (
     <MenuStateContext.Provider value={{ isAutoClose, setIsAutoClose }}>

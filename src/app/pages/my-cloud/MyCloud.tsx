@@ -174,9 +174,6 @@ export function MyCloud() {
       setName("");
     }
   }, [renameDialogOpen]);
-  useEffect(() => {
-    console.log(isMenu);
-  }, [isMenu]);
 
   useEffect(() => {
     const packages = user?.packageId;
@@ -940,7 +937,7 @@ export function MyCloud() {
   };
 
   const handleDataPreview = () => {
-    setOpenPreview(true);
+    setOpenPreview(!openPreview);
     setName(dataForEvent.data?.filename);
     setPath(dataForEvent.data?.newPath);
   };
@@ -1153,13 +1150,13 @@ export function MyCloud() {
         break;
       }
       case "preview": {
-        setEventClick("preview");
-
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
+          setEventClick("preview");
           handleDataPreview();
         }
+
         break;
       }
       case "export-csv": {
@@ -1975,6 +1972,7 @@ export function MyCloud() {
         data={dataForEvent.data}
         user={user}
         mainFile={mainFile}
+        propsStatus="mycloud"
       />
     </Fragment>
   );

@@ -63,6 +63,8 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import FavouriteFileDataGrid from "./FavouriteFileDataGrid";
 import * as MUI_FAVOURITE from "./styles/favourite.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const ITEM_PER_PAGE_LIST = 10;
 const ITEM_PER_PAGE_GRID = 40;
@@ -76,6 +78,8 @@ function FavouriteFile() {
   const [dataFilesAndFoldersForGrid, setDataFilesAndFoldersForGrid] =
     useState<any>([null]);
   const isFirstRender = useFirstRender();
+  const { setRefreshAuto, refreshAuto } = useRefreshState();
+
   const [
     getFiles,
     {
@@ -196,6 +200,13 @@ function FavouriteFile() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    if (refreshAuto?.isAutoClose && refreshAuto.isStatus == "favourite") {
+      filesRefetch();
+      handleClosePreview();
+    }
+  }, [refreshAuto?.isAutoClose]);
+
   const handleOpenPasswordLink = () => {
     setIsPasswordLink(true);
   };
@@ -248,6 +259,11 @@ function FavouriteFile() {
       setIsCheckAll(false);
     }
   }, [dataSelector?.selectionFileAndFolderData]);
+
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
+  };
 
   const customGetFolders = () => {
     getFolders({
@@ -1072,29 +1088,14 @@ function FavouriteFile() {
         />
       )}
 
-      {showPreview && (
-        <DialogPreviewFile
-          open={showPreview}
-          handleClose={() => {
-            resetDataForEvents();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            if (userPackage?.downLoadOption === "another") {
-              handleGetDownloadLink();
-            } else {
-              handleDownloadFiles();
-            }
-          }}
-          filename={dataForEvent.data.filename}
-          newFilename={dataForEvent.data.newFilename}
-          fileType={dataForEvent.data.fileType}
-          path={dataForEvent.data.newPath}
-          user={user}
-          userId={user?._id}
-        />
-      )}
-
+      <DialogPreviewFileSlide
+        open={showPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={dataFiles?.files?.data}
+        propsStatus="recent"
+      />
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {

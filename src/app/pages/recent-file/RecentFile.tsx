@@ -33,7 +33,7 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import menuItems from "constants/menuItem.constant";
@@ -69,6 +69,7 @@ function RecentFile() {
   const navigate = useNavigate();
   const [actionStatus, setActionStatus] = useState<any>("all");
   const [dataRecentFiles, setDataRecentFiles] = useState<any>(null);
+  const [recentFiles, setRecentFiles] = useState<any>(null);
   const isMobile = useMediaQuery("(max-width:768px)");
   const isFirstRender = useFirstRender();
   const [isDataRecentFilesFound, setIsDataRecentFilesFound] =
@@ -230,6 +231,10 @@ function RecentFile() {
       resetDataForEvents();
     }
   }, [isAutoClose]);
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
+  };
 
   const customGetRecentFiles = () => {
     setTotalItems(0);
@@ -248,6 +253,7 @@ function RecentFile() {
       onCompleted: async (data) => {
         const queryData = data?.getRecentFile?.data;
         const queryTotal = data?.getRecentFile?.total;
+        setRecentFiles(data.getRecentFile.data);
         setTotal(queryTotal);
         setDataRecentFiles(() => {
           const result = manageFile.splitDataByDate(queryData, "actionDate");
@@ -813,32 +819,14 @@ function RecentFile() {
         />
       )}
 
-      {showPreview && (
-        <DialogPreviewFile
-          open={showPreview}
-          handleClose={() => {
-            setShowPreview(false);
-            resetDataForEvents();
-          }}
-          onClick={() => {
-            if (
-              userPackage?.downLoadOption === "another" ||
-              userPackage?.category === "free"
-            ) {
-              handleGetDownloadLink();
-            } else {
-              handleDownloadFile();
-            }
-          }}
-          filename={dataForEvent.data.filename}
-          newFilename={dataForEvent.data.newFilename}
-          fileType={dataForEvent.data.fileType}
-          path={dataForEvent.data.newPath}
-          user={user}
-          userId={user?._id}
-        />
-      )}
-
+      <DialogPreviewFileSlide
+        open={showPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={recentFiles}
+        propsStatus="recent"
+      />
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {

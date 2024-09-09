@@ -153,6 +153,7 @@ const DialogCreateShare = (props) => {
   const manageGraphqlError = useManageGraphqlError();
   const { open, data, onClose, share: propShare } = props;
 
+
   const share = useMemo(() => {
     return propShare || {};
   }, [propShare]);

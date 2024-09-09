@@ -12,6 +12,7 @@ const Search = styled("div")(({ theme }: any) => ({
   position: "relative",
   width: "100%",
   border: "1px solid #ececec",
+  padding:"0.3rem",
 }));
 
 const SearchIconWrapper = styled("div")(() => ({
@@ -42,7 +43,7 @@ const Input = styled(InputBase)(({ theme }: any) => ({
   },
 }));
 
-function InputSearch(props) {
+function InputSearch(props:any) {
   const { t } = useTranslation();
   const location = useLocation();
   const params = useParams();
@@ -53,7 +54,7 @@ function InputSearch(props) {
 
   const [value, setValue] = useState(inputSearch);
 
-  const handleOnChange = (e) => {
+  const handleOnChange = (e:any) => {
     const newValue = e.target.value;
     setValue(newValue);
     if (onChange) {
@@ -61,7 +62,7 @@ function InputSearch(props) {
     }
   };
 
-  const handleOnEnterKey = (e) => {
+  const handleOnEnterKey = (e:any) => {
     if (e?.keyCode === 13 && inputSearch) {
       onEnter();
       inputRef.current.blur();
@@ -105,6 +106,7 @@ function InputSearch(props) {
           }}
           onKeyUp={(e) => handleOnEnterKey(e)}
           onMouseDown={onMouseOver}
+          onTouchStart={onMouseOver} 
           {...props.inputProps}
         />
       </Search>
