@@ -30,7 +30,6 @@ const useManageChat = (props) => {
           },
           limit,
           orderBy: "_id_DESC",
-          // orderBy: "_id_ASC",
         },
       });
       if (res.data?.tickets?.data) {

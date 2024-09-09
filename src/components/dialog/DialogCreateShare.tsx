@@ -269,30 +269,41 @@ const DialogCreateShare = (props) => {
         ) {
           let shareCount = 0;
           for (let i = 0; i < sharedSelectedUserList.length; i++) {
-            if (share.isFromShare) {
-              shareCount += 1;
-              await createShareFromSharing({
-                variables: {
-                  body: {
-                    permission: statusShare,
-                    toAccount: sharedSelectedUserList[i],
-                    shareId: share._id,
-                  },
+            shareCount += 1;
+            await createShare({
+              variables: {
+                body: {
+                  folderId: data?._id,
+                  isPublic: accessStatusShare,
+                  permission: statusShare,
+                  toAccount: sharedSelectedUserList[i],
                 },
-              });
-            } else {
-              shareCount += 1;
-              await createShare({
-                variables: {
-                  body: {
-                    folderId: data?._id,
-                    isPublic: accessStatusShare,
-                    permission: statusShare,
-                    toAccount: sharedSelectedUserList[i],
-                  },
-                },
-              });
-            }
+              },
+            });
+            // if (share.isFromShare) {
+            //   shareCount += 1;
+            //   await createShareFromSharing({
+            //     variables: {
+            //       body: {
+            //         permission: statusShare,
+            //         toAccount: sharedSelectedUserList[i],
+            //         shareId: share._id,
+            //       },
+            //     },
+            //   });
+            // } else {
+            //   shareCount += 1;
+            //   await createShare({
+            //     variables: {
+            //       body: {
+            //         folderId: data?._id,
+            //         isPublic: accessStatusShare,
+            //         permission: statusShare,
+            //         toAccount: sharedSelectedUserList[i],
+            //       },
+            //     },
+            //   });
+            // }
           }
           if (shareCount === sharedSelectedUserList.length) {
             successMessage("Shared folder successful", 3000);
@@ -302,30 +313,41 @@ const DialogCreateShare = (props) => {
         } else {
           let shareCount = 0;
           for (let i = 0; i < sharedSelectedUserList.length; i++) {
-            if (share.isFromShare) {
-              shareCount += 1;
-              await createShareFromSharing({
-                variables: {
-                  body: {
-                    permission: statusShare,
-                    toAccount: sharedSelectedUserList[i],
-                    shareId: share._id,
-                  },
+            shareCount += 1;
+            await createShare({
+              variables: {
+                body: {
+                  fileId: data?._id,
+                  isPublic: accessStatusShare,
+                  permission: statusShare,
+                  toAccount: sharedSelectedUserList[i],
                 },
-              });
-            } else {
-              shareCount += 1;
-              await createShare({
-                variables: {
-                  body: {
-                    fileId: data?._id,
-                    isPublic: accessStatusShare,
-                    permission: statusShare,
-                    toAccount: sharedSelectedUserList[i],
-                  },
-                },
-              });
-            }
+              },
+            });
+            // if (share.isFromShare) {
+            //   shareCount += 1;
+            //   await createShareFromSharing({
+            //     variables: {
+            //       body: {
+            //         permission: statusShare,
+            //         toAccount: sharedSelectedUserList[i],
+            //         shareId: share._id,
+            //       },
+            //     },
+            //   });
+            // } else {
+            //   shareCount += 1;
+            //   await createShare({
+            //     variables: {
+            //       body: {
+            //         fileId: data?._id,
+            //         isPublic: accessStatusShare,
+            //         permission: statusShare,
+            //         toAccount: sharedSelectedUserList[i],
+            //       },
+            //     },
+            //   });
+            // }
           }
           if (shareCount === sharedSelectedUserList.length) {
             setIsAutoClose(true);
