@@ -110,7 +110,7 @@ export default function ShowUpload(props: Props) {
   const [fileStates, setFileStates] = useState<Record<number, any>>({});
   const [startUpload, setStartUpload] = useState(false);
   const [presignUploadSuccess, setPresignUploadSuccess] = useState(false);
-  const [uploadComplete, setUploadComplete] = useState(false);
+  // const [uploadComplete, setUploadComplete] = useState(false);
   const chunkSize = 100 * 1024 * 1024; // 100MB
 
   const [hideFolderSelectMore, setHideFolderSelectMore] = useState(0);
@@ -516,7 +516,7 @@ export default function ShowUpload(props: Props) {
 
       setFileStates(newFileStates);
       setStartUpload(true);
-    } catch (error) {
+    } catch (error: any) {
       console.log({ error });
       setHideSelectMore(0);
       setCanClose(false);

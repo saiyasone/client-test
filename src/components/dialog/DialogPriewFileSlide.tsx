@@ -204,7 +204,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   React.useEffect(() => {
     if (data) {
       setIsCurrentImage(data);
-      setType(getFolderName(data.fileType));
+      setType(getFolderName(data.fileType)!);
     }
   }, [data, isAutoClose]);
   React.useEffect(() => {
@@ -227,7 +227,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       });
       if (newImage) {
         setIsCurrentImage(newImage ?? isCurrentImage);
-        setType(getFolderName(newImage.fileType));
+        setType(getFolderName(newImage.fileType)!);
       }
     }
   };
@@ -239,7 +239,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       });
       if (prevImage) {
         setIsCurrentImage(prevImage ?? isCurrentImage);
-        setType(getFolderName(prevImage.fileType));
+        setType(getFolderName(prevImage.fileType)!);
       }
     }
   };

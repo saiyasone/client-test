@@ -156,8 +156,8 @@ function FileCardItem(props) {
         setDeletedFileOnpen(false);
       }
       refecthFolder();
-    } catch (err) {
-      errorMessage("Sorry! Something went wrong. Please try again!");
+    } catch (err: any) {
+      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
     }
   };
 

@@ -594,7 +594,7 @@ function RecentFile() {
         setIsAutoClose(true);
       },
       onFailed: () => {
-        errorMessage("Sorry! Something went wrong. Please try again!");
+        errorMessage("Sorry! Something went wrong. Please try again!", 3000);
       },
     });
   };
