@@ -155,7 +155,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               sx={{
                 display:
                   !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) =>
+                    (el: any) =>
                       el?.id === props?.id &&
                       el.checkType === props?.selectType,
                   ) && true
@@ -166,7 +166,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               aria-label={"check-" + props?.id}
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) =>
+                  (el: any) =>
                     el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
