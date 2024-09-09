@@ -9,6 +9,7 @@
     "start:dev": "Set VITE_APP_ENV=development&& vite",
     "start:staging": "Set VITE_APP_ENV=staging&& vite",
     "start:prod": "Set VITE_APP_ENV=production&& vite",
+    "build:dev": "tsc && vite build --mode development",
     "build": "tsc && vite build",
     "build:staging": "tsc && vite build --mode staging",
     "build:production": "tsc && vite build --mode production",
