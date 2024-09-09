@@ -292,7 +292,7 @@ const FileCardItem: React.FC<any> = ({
       <Item
         ref={itemRef}
         className="card-item"
-        // onClick={handleItemClick}
+        onClick={handleItemClick}
         {...{
           ...(styleSelectedCard && {
             isstyledselectedcard: styleSelectedCard,
@@ -324,7 +324,7 @@ const FileCardItem: React.FC<any> = ({
               sx={{
                 display:
                   (!!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) =>
+                    (el: any) =>
                       el?.id === props?.id &&
                       el.checkType === props?.selectType,
                   ) &&
@@ -336,7 +336,7 @@ const FileCardItem: React.FC<any> = ({
               className="checkbox-selected"
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) =>
+                  (el: any) =>
                     el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
@@ -346,7 +346,6 @@ const FileCardItem: React.FC<any> = ({
                 />
               }
               aria-label={"checkbox" + props?.id}
-              onClick={handleItemClick}
             />
           </SelectionContainer>
         )}

@@ -58,7 +58,7 @@ export const {
   setRemoveDataPassword,
 } = checkboxFileAndFolderSlice.actions;
 
-export const checkboxFileAndFolderSelector = (state) =>
+export const checkboxFileAndFolderSelector = (state: any) =>
   state.checkboxFileAndFolder;
 
 export default checkboxFileAndFolderSlice.reducer;
