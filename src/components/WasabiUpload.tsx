@@ -131,7 +131,7 @@ function WasabiUpload(props: Props) {
 
     const dashboard = uppyInstance.getPlugin("Dashboard");
     if (dashboard) {
-      dashboard;
+      //
     }
   }
 
@@ -187,6 +187,7 @@ function WasabiUpload(props: Props) {
         });
         uppy.on("complete", () => {
           eventUploadTrigger?.trigger();
+          handleDoneUpload();
         });
 
         uppy.use(Webcam, {});
@@ -210,7 +211,6 @@ function WasabiUpload(props: Props) {
         uppy.use(AwsS3Multipart, {
           shouldUseMultipart: true,
           limit: 4,
-          endpoint: "",
 
           async createMultipartUpload(file: File | Blob | any) {
             const uploading = await uploadFileAction({
@@ -314,7 +314,7 @@ function WasabiUpload(props: Props) {
         setUppyInstance(uppy);
 
         return () => {
-          uppy.clear();
+          uppy.close();
         };
       } catch (error: any) {
         console.log(error);

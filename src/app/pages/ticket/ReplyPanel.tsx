@@ -27,7 +27,7 @@ function ReplyPanel(props) {
     dispatch(setChatMessage(chat));
   };
 
-  async function onDownloadFile(chat, file) {
+  async function onDownloadFile(_, file) {
     try {
       const multipleData: any = [
         {

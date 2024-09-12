@@ -33,6 +33,7 @@
     "@tinymce/tinymce-react": "^5.0.1",
     "@uppy/audio": "^2.0.1",
     "@uppy/aws-s3": "^4.1.0",
+    "@uppy/core": "3.13.1",
     "@uppy/dashboard": "^3.9.1",
     "@uppy/drag-drop": "^3.1.0",
     "@uppy/file-input": "^3.1.2",

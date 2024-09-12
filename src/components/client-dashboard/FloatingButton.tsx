@@ -233,9 +233,9 @@ export default function FloatingButton() {
               },
             }}
             onClick={() => {
-              // setOpenUppy(true);
-              fileUpload("file");
-              setGetType("file");
+              setOpenUppy(true);
+              // fileUpload("file");
+              // setGetType("file");
             }}
           />
           <SpeedDialAction
