@@ -181,10 +181,10 @@ const routes: RouteObject[] = [
       },
     ],
   },
-  // {
-  //   path: "uppy",
-  //   element: <UppyUpload />,
-  // },
+  {
+    path: "uppy",
+    element: <UppyUpload />,
+  },
   {
     path: "confirm",
     element: <ConfirmPayment />,

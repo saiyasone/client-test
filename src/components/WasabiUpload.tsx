@@ -1,13 +1,13 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useContext, useEffect, useRef, useState } from "react";
 
 // uppy package
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
-import xhrUpload from "@uppy/xhr-upload";
 import ImageEditor from "@uppy/image-editor";
 import ThumbnailGenerator from "@uppy/thumbnail-generator";
 import Webcam from "@uppy/webcam";
 import AudioFile from "@uppy/audio";
+import AwsS3Multipart from "@uppy/aws-s3";
 
 import * as MUI from "../styles/uppyStyle.style";
 
@@ -28,20 +28,19 @@ import {
 import { ENV_KEYS } from "constants/env.constant";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { errorMessage } from "utils/alert.util";
-import { Box, Button, Typography } from "@mui/material";
-import UploadFolderManual from "./UploadFolder";
+import { Typography } from "@mui/material";
 import useAuth from "hooks/useAuth";
 import { encryptData } from "utils/secure.util";
+import { getFileNameExtension } from "utils/file.util";
+import { UAParser } from "ua-parser-js";
+import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 
-// type Props = {
-//   open?: boolean;
-// };
+type Props = {
+  open: boolean;
+  onClose?: () => void;
+};
 
-function UppyUpload() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [fileCount, setFileCount] = useState(0);
-  const [isOpenFolder, setIsOpenFolder] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
+function WasabiUpload(props: Props) {
   const [canClose, setCanClose] = useState(false);
 
   const [fileId, setFileId] = useState({});
@@ -51,9 +50,12 @@ function UppyUpload() {
   const selectFileRef = useRef(selectFiles);
   const fileIdRef = useRef<any>(fileId);
 
+  const UA = new UAParser();
+  const result = UA.getResult();
+
   // auth
   const { user }: any = useAuth();
-  let uploadSuccess = 0;
+  const eventUploadTrigger = useContext(EventUploadTriggerContext);
 
   //   graphql
   const [uploadFileAction] = useMutation(MUTATION_CREATE_FILE);
@@ -61,48 +63,15 @@ function UppyUpload() {
 
   const manageGraphError = useManageGraphqlError();
 
-  async function handleUpload() {
+  async function handleUploadV1() {
     if (!uppyInstance.getFiles().length) return;
 
-    setIsUploading(true);
     setCanClose(true);
 
     try {
-      const dataFile = uppyInstance.getFiles() as any[];
-
-      await dataFile.map(async (file, index) => {
-        const extension = file?.name?.lastIndexOf(".");
-        const fileExtension = file.name?.slice(extension);
-        if (uppyInstance) {
-          const result = await uploadFileAction({
-            variables: {
-              data: {
-                newFilename: `${file.data.customeNewName}${fileExtension}`,
-                filename: file.name,
-                fileType: file.type,
-                size: file.size.toString(),
-                checkFile: "main",
-                country: null,
-                device: "Windows10",
-                totalUploadFile: dataFile.length,
-              },
-            },
-          });
-          const fileId = await result.data?.createFiles?._id;
-          if (fileId) {
-            fileIdRef.current = {
-              ...fileIdRef.current,
-              [index]: fileId,
-            };
-
-            setFileId(fileIdRef.current);
-            await uppyInstance.upload();
-          }
-        }
-      });
+      await uppyInstance.upload();
     } catch (error: any) {
-      handleDoneUpload();
-      console.log(error);
+      //
     }
   }
 
@@ -111,9 +80,6 @@ function UppyUpload() {
       const _id = fileIdRef.current[index];
 
       if (_id) {
-        // setSelectFiles(() =>
-        //   selectFileRef.current.filter((selected) => selected.id !== file.id),
-        // );
         setFileId((prev) => {
           const newFileId = { ...prev };
           delete newFileId[index];
@@ -145,22 +111,28 @@ function UppyUpload() {
     return randomName;
   }
 
+  function handleCloseDialog() {
+    handleDoneUpload();
+    props.onClose?.();
+  }
+
   function handleDoneUpload() {
     setFileId({});
     setSelectFiles([]);
-    setIsUploading(false);
     setCanClose(false);
-    setFileCount(0);
     fileIdRef.current.value = null;
     selectFileRef.current = [];
-  }
 
-  function handleIsUploading() {
-    if (canClose) {
-      return;
+    const files = uppyInstance.getFiles();
+
+    files.forEach((file) => {
+      uppyInstance.removeFile(file.id);
+    });
+
+    const dashboard = uppyInstance.getPlugin("Dashboard");
+    if (dashboard) {
+      dashboard;
     }
-    setIsOpen(false);
-    handleDoneUpload();
   }
 
   function getIndex(fileId) {
@@ -168,14 +140,6 @@ function UppyUpload() {
       (selected) => selected.id === fileId,
     );
   }
-
-  const checkAllFilesRemoved = () => {
-    const files = selectFileRef.current;
-    console.log(files);
-    // if (files.length === 0) {
-    //   console.log("All files removed");
-    // }
-  };
 
   useEffect(() => {
     const initializeUppy = () => {
@@ -187,6 +151,42 @@ function UppyUpload() {
           },
           autoProceed: false,
           allowMultipleUploadBatches: true,
+        });
+
+        uppy.on("file-added", async (file) => {
+          try {
+            setSelectFiles((prev: any) => [
+              ...prev,
+              {
+                id: file.id,
+                name: file.name,
+                size: file.size,
+                type: file.data.type,
+              },
+            ]);
+
+            const newFilename = await fetchRandomData();
+            file.newFilename = newFilename + getFileNameExtension(file.name);
+          } catch (error) {
+            //
+          }
+        });
+        uppy.on("file-removed", (file) => {
+          try {
+            if (canClose) {
+              const index = getIndex(file.id);
+              handleCancelUpload({ index });
+            }
+          } catch (error) {
+            console.error("Error removing file:", error);
+          }
+        });
+
+        uppy.on("cancel-all", () => {
+          // handleDoneUpload();
+        });
+        uppy.on("complete", () => {
+          eventUploadTrigger?.trigger();
         });
 
         uppy.use(Webcam, {});
@@ -207,75 +207,114 @@ function UppyUpload() {
         uppy.use(AudioFile, {
           showAudioSourceDropdown: true,
         });
-        uppy.on("file-added", (file: any) => {
-          try {
-            setSelectFiles((prev: any) => [
-              ...prev,
-              {
-                id: file.id,
-                name: file.name,
-                size: file.data.size,
-                type: file.data.type,
+        uppy.use(AwsS3Multipart, {
+          shouldUseMultipart: true,
+          limit: 4,
+          endpoint: "",
+
+          async createMultipartUpload(file: File | Blob | any) {
+            const uploading = await uploadFileAction({
+              variables: {
+                data: {
+                  destination: "",
+                  newFilename: file.newFilename,
+                  filename: file.name,
+                  fileType: file.data.type,
+                  size: file.size.toString(),
+                  checkFile: "main",
+                  country: "other",
+                  device: result.os.name || "" + result.os.version || "",
+                  totalUploadFile: uppy.getFiles().length,
+                  newPath: "",
+                },
               },
-            ]);
-
-            fetchRandomData().then((data) => {
-              file.data.customeNewName = data;
             });
-          } catch (error) {
-            //
-          }
-        });
-        uppy.on("file-removed", (file) => {
-          try {
-            const index = getIndex(file.id);
-            handleCancelUpload({ index });
-            // checkAllFilesRemoved();
-          } catch (error) {
-            console.error("Error removing file:", error);
-          }
-        });
-        uppy.on("upload-error", () => {});
-        uppy.on("cancel-all", () => {
-          handleDoneUpload();
-        });
-        uppy.on("upload-success", () => {
-          uploadSuccess++;
-          setFileCount(uploadSuccess);
 
-          if (uploadSuccess === selectFileRef.current?.length) {
-            handleDoneUpload();
-          }
-        });
-
-        uppy.use(xhrUpload, {
-          endpoint: ENV_KEYS.VITE_APP_LOAD_UPLOAD_URL,
-          formData: true,
-          method: "POST",
-          fieldName: "file",
-
-          headers: (file: any) => {
-            const extension = file?.name?.lastIndexOf(".");
-            const fileExtension = file.name?.slice(extension);
-
+            await uploading.data?.createFiles?._id;
             const headers = {
-              PATH: `${user?.newName}-${user?._id}`,
-              FILENAME: `${file.data?.customeNewName}${fileExtension}`,
               createdBy: user?._id,
+              FILENAME: file.newFilename,
+              PATH: `${user?.newName}-${user?._id}`,
+            };
+            const _encryptHeader = await encryptData(headers);
+
+            return fetch(
+              `${ENV_KEYS.VITE_APP_LOAD_URL}initiate-multipart-upload`,
+              {
+                method: "POST",
+                headers: {
+                  encryptedheaders: _encryptHeader,
+                },
+              },
+            )
+              .then((response) => response.json())
+              .then((data) => ({
+                uploadId: data.uploadId,
+                key: data.key,
+              }));
+          },
+          async signPart(file: File | Blob | any, { uploadId, partNumber }) {
+            const headers = {
+              createdBy: user?._id,
+              FILENAME: file.newFilename,
+              PATH: `${user?.newName}-${user?._id}`,
             };
 
-            const encryptedData = encryptData(headers);
+            const _encryptHeader = await encryptData(headers);
 
-            return {
-              encryptedHeaders: encryptedData,
+            const formData = new FormData();
+            formData.append("partNumber", partNumber.toString());
+            formData.append("uploadId", uploadId);
+            formData.append("FILENAME", file.newFilename);
+
+            return fetch(
+              `${ENV_KEYS.VITE_APP_LOAD_URL}generate-presigned-url`,
+              {
+                method: "POST",
+                body: formData,
+                headers: {
+                  encryptedheaders: _encryptHeader,
+                },
+              },
+            )
+              .then((response) => response.json())
+              .then((data) => ({
+                url: data.url,
+              }));
+          },
+          async completeMultipartUpload(
+            file: File | Blob | any,
+            { uploadId, parts },
+          ) {
+            const headers = {
+              createdBy: user?._id,
+              FILENAME: file.newFilename,
+              PATH: `${user?.newName}-${user?._id}`,
             };
+            const _encryptHeader = await encryptData(headers);
+
+            const formData = new FormData();
+            formData.append("parts", JSON.stringify(parts));
+            formData.append("uploadId", uploadId);
+            // formData.append("FILENAME", file.newFileName);
+
+            return fetch(
+              `${ENV_KEYS.VITE_APP_LOAD_URL}complete-multipart-upload`,
+              {
+                method: "POST",
+                body: formData,
+                headers: {
+                  encryptedheaders: _encryptHeader,
+                },
+              },
+            ).then((response) => response.json());
           },
         });
 
         setUppyInstance(uppy);
 
         return () => {
-          uppy.close();
+          uppy.clear();
         };
       } catch (error: any) {
         console.log(error);
@@ -283,7 +322,7 @@ function UppyUpload() {
     };
 
     initializeUppy();
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     if (selectFiles.length > 0) {
@@ -293,40 +332,10 @@ function UppyUpload() {
 
   return (
     <Fragment>
-      <Box sx={{ display: "flex", gap: "1rem", mt: 4 }}>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setIsOpen(!isOpen);
-          }}
-        >
-          Upload file
-        </Button>
-        <Button
-          variant="contained"
-          onClick={() => {
-            setIsOpenFolder(true);
-          }}
-        >
-          Upload folder
-        </Button>
-      </Box>
-
-      <UploadFolderManual
-        isOpen={isOpenFolder}
-        userData={user}
-        handleClose={() => {
-          setIsOpenFolder(false);
-        }}
-      />
       <MUI.UploadDialogContainer
-        //   onClose={canClose ? () => {} : handleCloseModal}
-        // open={open || false}
         fullWidth={true}
-        open={isOpen}
-        onClose={() => {
-          setIsOpen(false);
-        }}
+        open={props.open}
+        onClose={canClose ? () => {} : handleCloseDialog}
       >
         <MUI.UploadUppyContainer>
           <MUI.UppyHeader>
@@ -342,8 +351,6 @@ function UppyUpload() {
                   strings: {
                     addMore: "Add more",
                     cancel: "Cancel",
-                    // dropPaste: "Hello files",
-                    // browse: "browse",
                     browseFiles: "browse files",
                     dropHint: "Drop your files here",
                   },
@@ -364,11 +371,11 @@ function UppyUpload() {
                 <MUI.ButtonActionContainer>
                   <MUI.ButtonCancelAction
                     disabled={canClose}
-                    onClick={handleIsUploading}
+                    onClick={canClose ? () => {} : handleCloseDialog}
                   >
                     Cancel
                   </MUI.ButtonCancelAction>
-                  <MUI.ButtonUploadAction onClick={handleUpload}>
+                  <MUI.ButtonUploadAction onClick={handleUploadV1}>
                     Upload now
                   </MUI.ButtonUploadAction>
                 </MUI.ButtonActionContainer>
@@ -381,4 +388,4 @@ function UppyUpload() {
   );
 }
 
-export default UppyUpload;
+export default WasabiUpload;

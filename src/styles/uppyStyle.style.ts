@@ -384,7 +384,7 @@ export const ButtonActionContainer = styled("div")({
   button: {
     fontSize: "0.8rem",
     borderRadius: "5px",
-    padding: "10px 18px",
+    padding: "8px 18px",
     border: "none",
     outline: "none",
     cursor: "pointer",

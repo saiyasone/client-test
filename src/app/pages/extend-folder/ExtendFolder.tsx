@@ -81,7 +81,6 @@ import ExtendFileDataGrid from "./ExtendFileDataGrid";
 import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
 
-// const ITEM_PER_PAGE = 10;
 const _ITEM_GRID_PER_PAGE = 20;
 
 function ExtendFolder() {

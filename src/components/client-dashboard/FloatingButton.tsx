@@ -26,6 +26,7 @@ import {
   QUERY_FOLDER,
 } from "api/graphql/folder.graphql";
 import ShowUpload from "components/ShowUpload";
+import WasabiUpload from "components/WasabiUpload";
 // import UppyUpload from "components/UppyUpload";
 import { ENV_KEYS } from "constants/env.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -47,6 +48,7 @@ const Transition = React.forwardRef(function Transition(
 export default function FloatingButton() {
   const { user }: any = useAuth();
   const [selectFiles, setSelectFiles] = React.useState<any[]>([]);
+  const [openUppy, setOpenUppy] = React.useState(false);
   const [selectedFolderFiles, setSelectedFolderFiles] = React.useState<any[]>(
     [],
   );
@@ -231,6 +233,7 @@ export default function FloatingButton() {
               },
             }}
             onClick={() => {
+              // setOpenUppy(true);
               fileUpload("file");
               setGetType("file");
             }}
@@ -268,8 +271,6 @@ export default function FloatingButton() {
           />
         </SpeedDial>
       </Box>
-
-      {/* {open && <UppyUpload open={open} />} */}
 
       {selectFiles && (
         <ShowUpload
@@ -362,6 +363,13 @@ export default function FloatingButton() {
           </DialogActions>
         </Box>
       </Dialog>
+
+      <WasabiUpload
+        open={openUppy}
+        onClose={() => {
+          setOpenUppy(false);
+        }}
+      />
     </React.Fragment>
   );
 }
