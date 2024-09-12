@@ -136,8 +136,6 @@ export default function FloatingButton() {
     console.log(error);
   }
 
-  React.useEffect(() => {}, [globalFolderId]);
-
   React.useEffect(() => {
     setResMessage(false);
     if (folderJson) {

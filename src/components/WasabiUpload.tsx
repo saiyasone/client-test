@@ -1,39 +1,41 @@
 import { Fragment, useContext, useEffect, useRef, useState } from "react";
 
 // uppy package
-import Uppy from "@uppy/core";
-import { Dashboard } from "@uppy/react";
-import ImageEditor from "@uppy/image-editor";
-import ThumbnailGenerator from "@uppy/thumbnail-generator";
-import Webcam from "@uppy/webcam";
 import AudioFile from "@uppy/audio";
 import AwsS3Multipart from "@uppy/aws-s3";
+import Uppy from "@uppy/core";
+import ImageEditor from "@uppy/image-editor";
+import { Dashboard } from "@uppy/react";
+import ThumbnailGenerator from "@uppy/thumbnail-generator";
+import Webcam from "@uppy/webcam";
 
 import * as MUI from "../styles/uppyStyle.style";
 
 // uppy css
-import "../styles/uppy-theme.css";
-import "@uppy/core/dist/style.min.css";
-import "@uppy/core/dist/style.css";
-import "@uppy/dashboard/dist/style.min.css";
-import "@uppy/webcam/dist/style.min.css";
-import "@uppy/image-editor/dist/style.css";
 import "@uppy/audio/dist/style.min.css";
+import "@uppy/core/dist/style.css";
+import "@uppy/core/dist/style.min.css";
+import "@uppy/dashboard/dist/style.min.css";
+import "@uppy/image-editor/dist/style.css";
+import "@uppy/webcam/dist/style.min.css";
+import "../styles/uppy-theme.css";
 
-import { useMutation } from "@apollo/client";
+import { useLazyQuery, useMutation } from "@apollo/client";
+import { Typography } from "@mui/material";
 import {
   MUTATION_CREATE_FILE,
   MUTATION_DELETE_FILE,
 } from "api/graphql/file.graphql";
+import { QUERY_PATH_FOLDER } from "api/graphql/folder.graphql";
 import { ENV_KEYS } from "constants/env.constant";
-import useManageGraphqlError from "hooks/useManageGraphqlError";
-import { errorMessage } from "utils/alert.util";
-import { Typography } from "@mui/material";
-import useAuth from "hooks/useAuth";
-import { encryptData } from "utils/secure.util";
-import { getFileNameExtension } from "utils/file.util";
-import { UAParser } from "ua-parser-js";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
+import { FolderContext } from "contexts/FolderProvider";
+import useAuth from "hooks/useAuth";
+import useManageGraphqlError from "hooks/useManageGraphqlError";
+import { UAParser } from "ua-parser-js";
+import { errorMessage } from "utils/alert.util";
+import { getFileNameExtension } from "utils/file.util";
+import { encryptData } from "utils/secure.util";
 
 type Props = {
   open: boolean;
@@ -45,30 +47,77 @@ function WasabiUpload(props: Props) {
 
   const [fileId, setFileId] = useState({});
   const [selectFiles, setSelectFiles] = useState<any>([]);
+  const [subPath, setSubPath] = useState("");
+  const [newFilePath, setNewFilePath] = useState("");
 
-  const [uppyInstance, setUppyInstance] = useState(() => new Uppy());
+  const [uppyInstance, setUppyInstance] = useState<any>(() => new Uppy());
   const selectFileRef = useRef(selectFiles);
   const fileIdRef = useRef<any>(fileId);
 
   const UA = new UAParser();
   const result = UA.getResult();
 
-  // auth
-  const { user }: any = useAuth();
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
+  const { folderId, trackingFolderData }: any = useContext(FolderContext);
+
+  // auth
+  const { user: userAuth }: any = useAuth();
+  const user = trackingFolderData?.createdBy?._id
+    ? trackingFolderData?.createdBy
+    : userAuth;
 
   //   graphql
-  const [uploadFileAction] = useMutation(MUTATION_CREATE_FILE);
+  const [uploadFileAction] = useMutation<{ createFiles: { _id?: string } }>(
+    MUTATION_CREATE_FILE,
+  );
+  const [queryPath] = useLazyQuery(QUERY_PATH_FOLDER, {
+    fetchPolicy: "no-cache",
+  });
   const [deleteFile] = useMutation(MUTATION_DELETE_FILE);
 
   const manageGraphError = useManageGraphqlError();
 
-  async function handleUploadV1() {
-    if (!uppyInstance.getFiles().length) return;
+  async function handleUploadToStorage() {
+    const dataFiles = uppyInstance.getFiles() as any[];
 
-    setCanClose(true);
+    if (dataFiles.length < 0) {
+      return;
+    }
 
     try {
+      const uploadPromise = dataFiles.map(async (file, index) => {
+        const filePath = newFilePath + "/" + getFileNameExtension(file.name);
+        const uploading = await uploadFileAction({
+          variables: {
+            data: {
+              destination: "",
+              newFilename: file.newFilename,
+              filename: file.name,
+              fileType: file.data.type,
+              size: file.size.toString(),
+              checkFile: folderId > 0 ? "sub" : "main",
+              ...(folderId > 0 ? { folder_id: folderId } : ""),
+              ...(folderId > 0 ? { newPath: filePath } : ""),
+              country: "other",
+              device: result.os.name || "" + result.os.version || "",
+              totalUploadFile: dataFiles.length,
+            },
+          },
+        });
+        const fileId = await uploading.data?.createFiles?._id;
+
+        if (fileId) {
+          fileIdRef.current = {
+            ...fileIdRef.current,
+            [index]: fileId,
+          };
+
+          setFileId(fileIdRef.current);
+          setCanClose(true);
+        }
+      });
+
+      await Promise.all(uploadPromise);
       await uppyInstance.upload();
     } catch (error: any) {
       //
@@ -131,7 +180,7 @@ function WasabiUpload(props: Props) {
 
     const dashboard = uppyInstance.getPlugin("Dashboard");
     if (dashboard) {
-      //
+      dashboard.close();
     }
   }
 
@@ -153,7 +202,7 @@ function WasabiUpload(props: Props) {
           allowMultipleUploadBatches: true,
         });
 
-        uppy.on("file-added", async (file) => {
+        uppy.on("file-added", async (file: any) => {
           try {
             setSelectFiles((prev: any) => [
               ...prev,
@@ -213,29 +262,12 @@ function WasabiUpload(props: Props) {
           limit: 4,
 
           async createMultipartUpload(file: File | Blob | any) {
-            const uploading = await uploadFileAction({
-              variables: {
-                data: {
-                  destination: "",
-                  newFilename: file.newFilename,
-                  filename: file.name,
-                  fileType: file.data.type,
-                  size: file.size.toString(),
-                  checkFile: "main",
-                  country: "other",
-                  device: result.os.name || "" + result.os.version || "",
-                  totalUploadFile: uppy.getFiles().length,
-                  newPath: "",
-                },
-              },
-            });
-
-            await uploading.data?.createFiles?._id;
             const headers = {
               createdBy: user?._id,
               FILENAME: file.newFilename,
-              PATH: `${user?.newName}-${user?._id}`,
+              PATH: `${subPath}`,
             };
+
             const _encryptHeader = await encryptData(headers);
 
             return fetch(
@@ -257,16 +289,13 @@ function WasabiUpload(props: Props) {
             const headers = {
               createdBy: user?._id,
               FILENAME: file.newFilename,
-              PATH: `${user?.newName}-${user?._id}`,
+              PATH: `${subPath}`,
             };
-
             const _encryptHeader = await encryptData(headers);
-
             const formData = new FormData();
             formData.append("partNumber", partNumber.toString());
             formData.append("uploadId", uploadId);
             formData.append("FILENAME", file.newFilename);
-
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}generate-presigned-url`,
               {
@@ -289,14 +318,13 @@ function WasabiUpload(props: Props) {
             const headers = {
               createdBy: user?._id,
               FILENAME: file.newFilename,
-              PATH: `${user?.newName}-${user?._id}`,
+              PATH: `${subPath}`,
             };
             const _encryptHeader = await encryptData(headers);
-
             const formData = new FormData();
             formData.append("parts", JSON.stringify(parts));
             formData.append("uploadId", uploadId);
-            // formData.append("FILENAME", file.newFileName);
+            formData.append("FILENAME", file.newFileName);
 
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}complete-multipart-upload`,
@@ -322,7 +350,34 @@ function WasabiUpload(props: Props) {
     };
 
     initializeUppy();
-  }, []);
+  }, [subPath]);
+
+  useEffect(() => {
+    async function querySubFolder() {
+      if (folderId > 0) {
+        try {
+          const queryfolderPath = await queryPath({
+            variables: {
+              where: {
+                _id: folderId,
+                createdBy: user?._id,
+              },
+            },
+          });
+          const newPath = queryfolderPath?.data?.folders?.data[0]?.newPath;
+          if (newPath) {
+            const real_path = `${user?.newName}-${user?._id}/${newPath}`;
+            setSubPath(real_path);
+            setNewFilePath(newPath);
+          }
+        } catch (error) {
+          console.log({ error });
+        }
+      }
+    }
+
+    querySubFolder();
+  }, [folderId]);
 
   useEffect(() => {
     if (selectFiles.length > 0) {
@@ -375,7 +430,7 @@ function WasabiUpload(props: Props) {
                   >
                     Cancel
                   </MUI.ButtonCancelAction>
-                  <MUI.ButtonUploadAction onClick={handleUploadV1}>
+                  <MUI.ButtonUploadAction onClick={handleUploadToStorage}>
                     Upload now
                   </MUI.ButtonUploadAction>
                 </MUI.ButtonActionContainer>

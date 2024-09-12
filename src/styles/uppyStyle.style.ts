@@ -4,7 +4,7 @@ const theme = createTheme();
 
 export const UploadDialogContainer = styled(Dialog)({
   "& .MuiPaper-root": {
-    maxWidth: "720px",
+    maxWidth: "680px",
   },
 });
 
