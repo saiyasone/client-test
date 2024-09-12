@@ -1,5 +1,4 @@
-import { Fragment, useEffect, useRef } from "react";
-
+import { Fragment } from "react";
 import {
   Button,
   Card,
@@ -19,8 +18,6 @@ import { useNavigate } from "react-router-dom";
 import * as MUI from "styles/component.style";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import cardNumber from "./slider/cardNumber";
-import { IFileCategoryTypes } from "types/fileCategoryTypes";
-import useFetchFile from "hooks/file/useFetchFile";
 
 const Item = styled(Paper)(({ theme }) => ({
   backgroundColor: theme.palette.mode === "dark" ? "#1A2027" : "#fff",

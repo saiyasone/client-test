@@ -1,15 +1,10 @@
 import React, { Fragment, useState } from "react";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import ResponsivePagination from "react-responsive-pagination";
 import "styles/pagination.style.css";
 
 // material ui icon and component
-import { Box, Checkbox } from "@mui/material";
-
-// component
-
-// graphql
-
+import { Box, Checkbox, useMediaQuery } from "@mui/material";
 //function
 import { styled } from "@mui/material/styles";
 import Action from "components/action-table/Action";
@@ -17,6 +12,7 @@ import FileDataGrid from "components/file/FileDataGrid";
 import moment from "moment";
 import { getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
+import { IFavouriteTypes } from "types/favouriteType";
 
 const FavouriteFilesDataGridContainer = styled("div")(() => ({
   height: "100%",
@@ -24,22 +20,30 @@ const FavouriteFilesDataGridContainer = styled("div")(() => ({
   flexDirection: "column",
 }));
 
-const FileIconContainer = styled("div")(() => ({
-  width: "24px",
+const FileIconContainer = styled("div")(({ theme }) => ({
+  maxWidth: "24px",
   display: "flex",
   alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    maxWidth: "20px",
+    minWidth: "20px",
+  },
 }));
 
-function FavouriteFileDataGrid(props) {
+function FavouriteFileDataGrid(props: any) {
   const [hover, setHover] = useState("");
   const [isPage, setIsPage] = useState(false);
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
   const [isLoaded, setIsloaded] = useState<any>(null);
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const [styles, setStyles] = React.useState<
+    Record<string, Partial<FileIconProps>>
+  >({});
 
-  const handlePopperOpen = (event) => {
+  const handlePopperOpen = (event: any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data.find((r) => r.id === id);
+    const row = props.data.find((r: IFavouriteTypes) => r.id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
@@ -66,21 +70,27 @@ function FavouriteFileDataGrid(props) {
     }
   }, [props?.data]);
 
+  const handleClick = (params: { row: IFavouriteTypes }) => {
+    if (!isMobile) {
+      return;
+    }
+    props.handleEvent("preview", params.row);
+  };
   const columns = [
     {
       field: "checkboxAction",
       headerName: "",
       editable: false,
       sortable: false,
-      width: 60,
-      renderCell: (params) => {
+      maxWidth: isMobile ? 40 : 70,
+      renderCell: (params: { row: IFavouriteTypes }) => {
         const { _id } = params?.row || {};
 
         return (
           <Checkbox
             checked={
               !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
+                (el: IFavouriteTypes) => el?.id === _id,
               ) && true
             }
             aria-label={"checkbox" + _id}
@@ -93,7 +103,9 @@ function FavouriteFileDataGrid(props) {
       field: "filename",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      minWidth: 120,
+      flex: 1,
+      renderCell: (params: { row: IFavouriteTypes }) => {
         const { filename } = params.row;
         return (
           <div
@@ -106,8 +118,8 @@ function FavouriteFileDataGrid(props) {
           >
             <FileIconContainer>
               <FileIcon
-                extension={getFileType(filename)}
-                {...{ ...defaultStyles[getFileType(filename) as string] }}
+                extension={getFileType(filename) ?? ""}
+                {...{ ...styles[getFileType(filename) as string] }}
               />
             </FileIconContainer>
             <div
@@ -123,12 +135,12 @@ function FavouriteFileDataGrid(props) {
           </div>
         );
       },
-      flex: 1,
     },
     {
       field: "size",
       headerName: "Size",
-      renderCell: (params) => convertBytetoMBandGB(params.row.size),
+      renderCell: (params: { row: IFavouriteTypes }) =>
+        convertBytetoMBandGB(parseInt(params.row.size)),
       editable: false,
       flex: 1,
     },
@@ -136,7 +148,7 @@ function FavouriteFileDataGrid(props) {
       field: "updatedAt",
       headerName: "Date",
       editable: false,
-      renderCell: (params) =>
+      renderCell: (params: { row: IFavouriteTypes }) =>
         moment(params.row.actionDate).format("YYYY-MM-DD h:mm:ss"),
       flex: 1,
     },
@@ -147,14 +159,15 @@ function FavouriteFileDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params) => {
+      renderCell: (params: IFavouriteTypes) => {
         return (
           <Action
             params={params}
             eventActions={{
               hover,
               setHover,
-              handleEvent: (action, data) => props.handleEvent(action, data),
+              handleEvent: (action: string, data: IFavouriteTypes) =>
+                props.handleEvent(action, data),
             }}
             anchor={[menuDropdownAnchor, setMenuDropdownAnchor]}
           />
@@ -180,12 +193,20 @@ function FavouriteFileDataGrid(props) {
               onMouseLeave: handlePopperClose,
             },
           },
-          onRowDoubleClick: (params) => {
+          onRowDoubleClick: (params: { row: IFavouriteTypes }) => {
             props.handleEvent("preview", params.row);
+          },
+          onCellClick: (params: { field: string; row: IFavouriteTypes }) => {
+            if (
+              params.field !== "checkboxAction" &&
+              params.field !== "action"
+            ) {
+              handleClick(params);
+            }
           },
           columns,
           hideFooter: true,
-          getRowId: (row) => row._id,
+          getRowId: (row: IFavouriteTypes) => row._id,
         }}
         data={props.data}
       />

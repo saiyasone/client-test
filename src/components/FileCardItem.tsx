@@ -17,7 +17,7 @@ import lockIcon from "assets/images/lock-icon.png";
 import useHover from "hooks/useHover";
 import useOuterClick from "hooks/useOuterClick";
 import useResizeImage from "hooks/useResizeImage";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import { BsPinAngle, BsPinAngleFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 import * as MdIcon from "react-icons/md";
@@ -29,7 +29,7 @@ import { cutStringWithEllipsis } from "utils/string.util";
 import Loader from "./Loader";
 import MenuDropdown from "./MenuDropdown";
 import NormalButton from "./NormalButton";
-import { toggleMenu } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 
 export const SelectionContainer = styled("div")({
   position: "absolute",
@@ -240,21 +240,24 @@ const FileCardItem: React.FC<any> = ({
   const itemRef = useRef(null);
   const isFileCardItemHover = useHover(itemRef);
   const isFileCardOuterClicked = useOuterClick(itemRef);
-  const dispatch = useDispatch();
+
   const {
     isNormalCard,
     sx,
     onDoubleClick: onCardDoubleClick,
+    onClick,
     ...cardDataProps
   } = cardProps || {};
-
+  const dispatch = useDispatch();
   // redux store
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
   );
-
+  const { isSelected } = useSelector((state: RootState) => state.event);
+  const [styles, setStyles] = React.useState<
+    Record<string, Partial<FileIconProps>>
+  >({});
   const handleDropdownOpen = (isOpen: boolean) => {
-    dispatch(toggleMenu(true));
     setIsDropdownOpen(isOpen);
   };
 
@@ -293,7 +296,7 @@ const FileCardItem: React.FC<any> = ({
       <Item
         ref={itemRef}
         className="card-item"
-        // onClick={handleItemClick}
+        onClick={handleItemClick}
         {...{
           ...(styleSelectedCard && {
             isstyledselectedcard: styleSelectedCard,
@@ -305,6 +308,7 @@ const FileCardItem: React.FC<any> = ({
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
+          onClick,
           ischecked: cardDataProps?.ischecked?.toString(),
           sx: {
             ...(!isNormalCard && {
@@ -319,13 +323,13 @@ const FileCardItem: React.FC<any> = ({
           },
         }}
       >
-        {props?.isCheckbox && (
+        {((props?.isCheckbox && !isMobile) || isSelected) && (
           <SelectionContainer>
             <CustomCheckbox
               sx={{
                 display:
                   (!!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) =>
+                    (el: any) =>
                       el?.id === props?.id &&
                       el.checkType === props?.selectType,
                   ) &&
@@ -337,7 +341,7 @@ const FileCardItem: React.FC<any> = ({
               className="checkbox-selected"
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) =>
+                  (el: any) =>
                     el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
@@ -424,9 +428,9 @@ const FileCardItem: React.FC<any> = ({
                 {fileType !== "folder" && (
                   <FileIconContainer>
                     <FileIcon
-                      extension={getFileType(props.name)}
+                      extension={getFileType(props.name) ?? ""}
                       {...{
-                        ...defaultStyles[getFileType(props.name) as string],
+                        ...styles[getFileType(props.name) as string],
                       }}
                     />
                   </FileIconContainer>

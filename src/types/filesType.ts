@@ -1,5 +1,8 @@
 export interface IFileTypes {
   _id: string;
+  fileId: any;
+  permission: string | undefined;
+  ownerId: any;
   actionDate: Date;
   actionStatus: string;
   aproveDownloadPublic: number;

@@ -110,7 +110,7 @@ export default function ActionFileShare(props) {
           customButton={{
             element: (
               <IconButton>
-                <MoreVertRoundedIcon />
+                <MoreVertRoundedIcon sx={{ color: props.color ?? "" }} />
               </IconButton>
             ),
           }}
@@ -120,7 +120,8 @@ export default function ActionFileShare(props) {
               <MenuDropdownItem
                 key={index}
                 disabled={
-                  params?.row?.permission === "edit" ||
+                  params?.row?.permission ||
+                  params?.permission === "edit" ||
                   props.user?.permission === "edit"
                     ? false
                     : menuItem.disabled

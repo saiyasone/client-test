@@ -81,6 +81,7 @@ import ExtendFileDataGrid from "./ExtendFileDataGrid";
 import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 // const ITEM_PER_PAGE = 10;
 const _ITEM_GRID_PER_PAGE = 20;
@@ -98,6 +99,7 @@ function ExtendFolder() {
     return Base64.decode(params.id);
   }, [params.id]);
   const { triggerFolder, handleTriggerFolder }: any = useContext(FolderContext);
+  const { refreshAuto } = useRefreshState();
 
   // multiple selection state
   const [isMultiplePasswordLink, setIsMultiplePasswordLink] =
@@ -191,7 +193,11 @@ function ExtendFolder() {
     } else {
       fetchSubFoldersAndFiles.queryGridDataFileAndFolder();
     }
-  }, [triggerFolder]);
+    if (refreshAuto?.isStatus === "extendfolder") {
+      fetchSubFoldersAndFiles.queryGridDataFileAndFolder();
+      fetchSubFoldersAndFiles.queryListDataFileAndFolder();
+    }
+  }, [triggerFolder, refreshAuto?.isAutoClose]);
 
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
 
@@ -606,7 +612,6 @@ function ExtendFolder() {
         return;
     }
   };
-
 
   // confirm encryption password
   const isCheckPassword = () => {

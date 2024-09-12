@@ -1,5 +1,5 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import { TbDownload, TbUpload } from "react-icons/tb";
 
@@ -8,6 +8,7 @@ import {
   Box,
   Button,
   IconButton,
+  ListItemText,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -39,6 +40,7 @@ import DialogValidateFilePassword from "components/dialog/DialogValidateFilePass
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
@@ -54,6 +56,9 @@ import { BiTime } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import { setMenuToggle, toggleSelected } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
+import { IRecentTypes } from "types/recentFileType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
   cutFileType,
@@ -93,8 +98,11 @@ function RecentFile() {
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
   const [toggle, setToggle] = useState<any>("list");
   const [totalItems, setTotalItems] = useState<any>(0);
-
-  const handleToggle = (value) => {
+  const { refreshAuto } = useRefreshState();
+  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+    (state: RootState) => state.event,
+  );
+  const handleToggle = (value: string) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
   };
@@ -173,6 +181,12 @@ function RecentFile() {
   }, [user]);
 
   useEffect(() => {
+    if (refreshAuto?.isStatus == "recent") {
+      customGetRecentFiles();
+    }
+  }, [refreshAuto?.isAutoClose]);
+
+  useEffect(() => {
     if (dataGetUrl) {
       handleGetFolderURL?.(dataGetUrl);
       setTimeout(() => {
@@ -183,7 +197,7 @@ function RecentFile() {
 
   const handleGetLink = async () => {
     setDataGetUrl(dataForEvent.data);
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: IRecentTypes) => {
       return {
         ...prev,
         action: "",
@@ -191,14 +205,14 @@ function RecentFile() {
     });
   };
 
-  const handleTotalItems = (result) => {
+  const handleTotalItems = (result: any[]) => {
     const value = result?.map((data) => {
       const items = data?.data?.length;
       return items;
     });
 
     const updateValue = value?.reduce(
-      (accumulator, currentValue) => accumulator + currentValue,
+      (accumulator: any, currentValue: any) => accumulator + currentValue,
       0,
     );
     return updateValue;
@@ -218,7 +232,7 @@ function RecentFile() {
 
   const handleGetDownloadLink = async () => {
     setDataDownloadURL(dataForEvent.data);
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: IRecentTypes) => {
       return {
         ...prev,
         action: "",
@@ -231,6 +245,7 @@ function RecentFile() {
       resetDataForEvents();
     }
   }, [isAutoClose]);
+
   const handleClosePreview = () => {
     resetDataForEvents();
     setShowPreview(false);
@@ -259,10 +274,10 @@ function RecentFile() {
           const result = manageFile.splitDataByDate(queryData, "actionDate");
 
           setTotalItems(handleTotalItems(result));
-          return result.map((recentFiles) => {
+          return result.map((recentFiles: any) => {
             return {
               ...recentFiles,
-              data: recentFiles.data?.map((data) => ({
+              data: recentFiles.data?.map((data: any) => ({
                 id: data._id,
                 ...data,
               })),
@@ -279,8 +294,8 @@ function RecentFile() {
   };
 
   // handle select multiple files
-  const handleMultipleFileData = (data, dataFile) => {
-    const optionValue = dataFile?.find((file) => file?._id === data);
+  const handleMultipleFileData = (data: IRecentTypes, dataFile: any) => {
+    const optionValue = dataFile?.find((file: any) => file?._id === data);
 
     dispatch(
       checkboxAction.setFileAndFolderData({
@@ -363,7 +378,7 @@ function RecentFile() {
   }, [isDataRecentFilesFound]);
 
   const resetDataForEvents = () => {
-    setDataForEvent((state) => ({
+    setDataForEvent((state: IRecentTypes) => ({
       ...state,
       action: null,
       type: null,
@@ -376,7 +391,7 @@ function RecentFile() {
     }
   }, [dataForEvent.action]);
 
-  const menuOnClick = async (action) => {
+  const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
     const checkPassword = isCheckPassword();
     switch (action) {
@@ -477,7 +492,9 @@ function RecentFile() {
 
     return checkPassword;
   };
-
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
   async function handleSubmitDecryptedPassword() {
     switch (eventClick) {
       case "detail":
@@ -524,7 +541,7 @@ function RecentFile() {
 
   const handleCloseDecryptedPassword = () => {
     setEventClick("");
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: IRecentTypes) => {
       return {
         ...prev,
         action: "",
@@ -534,7 +551,7 @@ function RecentFile() {
   };
 
   // File action for count in recent file
-  const handleActionFile = async (val) => {
+  const handleActionFile = async (val: string) => {
     try {
       await fileAction({
         variables: {
@@ -569,7 +586,7 @@ function RecentFile() {
       {
         onSuccess: () => {
           successMessage("Download successful", 3000);
-          setDataForEvent((prev) => {
+          setDataForEvent((prev: IRecentTypes) => {
             return {
               ...prev,
               totalDownload: parseInt(dataForEvent.data?.totalDownload + 1),
@@ -578,7 +595,7 @@ function RecentFile() {
 
           recentFileRefetch();
         },
-        onFailed: (error) => {
+        onFailed: (error: any) => {
           errorMessage(error, 3000);
         },
 
@@ -600,7 +617,7 @@ function RecentFile() {
         setIsAutoClose(true);
       },
       onFailed: () => {
-        errorMessage("Sorry! Something went wrong. Please try again!");
+        errorMessage("Sorry! Something went wrong. Please try again!", 2000);
       },
     });
   };
@@ -615,7 +632,7 @@ function RecentFile() {
         resetDataForEvents();
         setIsAutoClose(true);
       },
-      onFailed: (error) => {
+      onFailed: (error: any) => {
         const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
         errorMessage(
           manageGraphqlError.handleErrorMessage(
@@ -640,7 +657,7 @@ function RecentFile() {
             successMessage("One File added to Favourite", 2000);
           }
           await handleActionFile("edit");
-          setDataForEvent((state) => ({
+          setDataForEvent((state: { data: IRecentTypes }) => ({
             action: null,
             data: {
               ...state.data,
@@ -666,7 +683,9 @@ function RecentFile() {
     }
   }, [dataForEvent.action]);
 
-  const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
+  const handleFileDetailDialogBreadcrumbFolderNavigate = async (
+    link: string,
+  ) => {
     const result = await getFolders({
       variables: {
         where: {
@@ -683,10 +702,12 @@ function RecentFile() {
     }
   };
 
-  const handleDeletedUserFromShareOnSave = async (deletedUsers) => {
+  const handleDeletedUserFromShareOnSave = async (
+    deletedUsers: IRecentTypes,
+  ) => {
     manageUserFromShare.handleDeletedUserFromShareOnSave(deletedUsers, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IRecentTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -697,10 +718,12 @@ function RecentFile() {
     });
   };
 
-  const handleChangedUserPermissionFromShareSave = async (sharedData) => {
+  const handleChangedUserPermissionFromShareSave = async (
+    sharedData: IRecentTypes,
+  ) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IRecentTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -708,6 +731,27 @@ function RecentFile() {
         }));
         successMessage("Changed user permission of share successful!!", 2000);
       },
+    });
+  };
+
+  const handleClick = useCallback(
+    async (data: IRecentTypes) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: IRecentTypes) => {
+    setDataForEvent({
+      action: "preview",
+      data,
     });
   };
 
@@ -1024,91 +1068,123 @@ function RecentFile() {
             <MUI_RECENT.RecentFilesList>
               {isLoaded &&
                 dataRecentFiles?.length > 0 &&
-                dataRecentFiles.map((dataRecentFile, index) => {
+                dataRecentFiles.map((dataRecentFile: any, index: number) => {
                   return (
                     <Fragment key={index}>
                       {dataRecentFile.data.length > 0 && (
                         <MUI_RECENT.RecentFilesItem>
-                          <Typography variant="h4" fontWeight="bold">
-                            {dataRecentFile.title}
-                          </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Typography
+                              variant="h6"
+                              sx={{
+                                fontWeight: "bold",
+                                fontSize: isMobile ? "14px" : "20px",
+                              }}
+                            >
+                              {dataRecentFile.title}
+                            </Typography>
+                            {isMobile && toggle !== "list" && (
+                              <ListItemText
+                                sx={{
+                                  p: 2,
+                                  display: "flex",
+                                  justifyContent: "flex-end",
+                                }}
+                                onClick={() => {
+                                  dispatch(toggleSelected(!isSelected));
+                                  handleClearMultipleFileData();
+                                }}
+                                primary={isSelected ? "Unselect" : "Select"}
+                              />
+                            )}
+                          </Box>
                           {toggle === "grid" && (
                             <FileCardContainer>
-                              {dataRecentFile.data.map((data, index) => {
-                                return (
-                                  <FileCardItem
-                                    imagePath={
-                                      user?.newName +
-                                      "-" +
-                                      user?._id +
-                                      "/" +
-                                      (data.newPath
-                                        ? removeFileNameOutOfPath(data.newPath)
-                                        : "") +
-                                      data.newFilename
-                                    }
-                                    user={user}
-                                    selectType={"file"}
-                                    data={data}
-                                    filePassword={data?.filePassword}
-                                    cardProps={{
-                                      onDoubleClick: () => {
-                                        setDataForEvent({
-                                          action: "preview",
-                                          data,
-                                        });
-                                      },
-                                    }}
-                                    id={data?._id}
-                                    isCheckbox={true}
-                                    fileType={getShortFileTypeFromFileType(
-                                      data.fileType,
-                                    )}
-                                    handleSelect={(dataId) =>
-                                      handleMultipleFileData(
-                                        dataId,
-                                        dataRecentFile.data,
-                                      )
-                                    }
-                                    favouriteIcon={{
-                                      isShow: false,
-                                      handleFavouriteOnClick: async () => {
-                                        setDataForEvent({
-                                          data,
-                                          action: "favourite",
-                                        });
-                                      },
-                                      isFavourite:
-                                        data?.favorite === 1 ? true : false,
-                                    }}
-                                    name={data.filename}
-                                    key={index}
-                                    menuItems={menuItems.map(
-                                      (menuItem, index) => {
-                                        return (
-                                          <MenuDropdownItem
-                                            isFavorite={
-                                              data.favorite ? true : false
-                                            }
-                                            isPassword={
-                                              data.filePassword ? true : false
-                                            }
-                                            onClick={() => {
-                                              setDataForEvent({
-                                                action: menuItem.action,
-                                                data,
-                                              });
-                                            }}
-                                            key={index}
-                                            title={menuItem.title}
-                                            icon={menuItem.icon}
-                                          />
-                                        );
-                                      },
-                                    )}
-                                  />
-                                );
-                              })}
+                              {dataRecentFile.data.map(
+                                (data: IRecentTypes, index: number) => {
+                                  return (
+                                    <FileCardItem
+                                      imagePath={
+                                        user?.newName +
+                                        "-" +
+                                        user?._id +
+                                        "/" +
+                                        (data.newPath
+                                          ? removeFileNameOutOfPath(
+                                              data.newPath,
+                                            )
+                                          : "") +
+                                        data.newFilename
+                                      }
+                                      user={user}
+                                      selectType={"file"}
+                                      data={data}
+                                      filePassword={data?.filePassword}
+                                      cardProps={{
+                                        onClick: isMobile
+                                          ? async () => await handleClick(data)
+                                          : undefined,
+                                        onDoubleClick: !isMobile
+                                          ? () => handleDoubleClick(data)
+                                          : undefined,
+                                      }}
+                                      id={data?._id}
+                                      isCheckbox={true}
+                                      fileType={getShortFileTypeFromFileType(
+                                        data.fileType,
+                                      )}
+                                      handleSelect={(dataId: any) =>
+                                        handleMultipleFileData(
+                                          dataId,
+                                          dataRecentFile.data,
+                                        )
+                                      }
+                                      favouriteIcon={{
+                                        isShow: false,
+                                        handleFavouriteOnClick: async () => {
+                                          setDataForEvent({
+                                            data,
+                                            action: "favourite",
+                                          });
+                                        },
+                                        isFavourite:
+                                          data?.favorite === 1 ? true : false,
+                                      }}
+                                      name={data.filename}
+                                      key={index}
+                                      menuItems={menuItems.map(
+                                        (menuItem, index) => {
+                                          return (
+                                            <MenuDropdownItem
+                                              isFavorite={
+                                                data.favorite ? true : false
+                                              }
+                                              isPassword={
+                                                data.filePassword ? true : false
+                                              }
+                                              onClick={() => {
+                                                setDataForEvent({
+                                                  action: menuItem.action,
+                                                  data,
+                                                });
+                                              }}
+                                              key={index}
+                                              title={menuItem.title}
+                                              icon={menuItem.icon}
+                                            />
+                                          );
+                                        },
+                                      )}
+                                    />
+                                  );
+                                },
+                              )}
                             </FileCardContainer>
                           )}
                           {toggle !== "grid" && (
@@ -1116,14 +1192,17 @@ function RecentFile() {
                               {dataRecentFile.data.length > 0 && (
                                 <RecentFileDataGrid
                                   data={dataRecentFile.data}
-                                  handleEvent={(action, data) => {
+                                  handleEvent={(
+                                    action: string,
+                                    data: IRecentTypes,
+                                  ) => {
                                     setDataForEvent({
                                       action,
                                       data,
                                     });
                                   }}
                                   dataSelector={dataSelector}
-                                  handleSelection={(dataId) =>
+                                  handleSelection={(dataId: any) =>
                                     handleMultipleFileData(
                                       dataId,
                                       dataRecentFile.data,

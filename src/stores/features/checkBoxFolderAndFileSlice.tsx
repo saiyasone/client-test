@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: any = {
   isLoading: false,
@@ -58,7 +58,7 @@ export const {
   setRemoveDataPassword,
 } = checkboxFileAndFolderSlice.actions;
 
-export const checkboxFileAndFolderSelector = (state) =>
+export const checkboxFileAndFolderSelector = (state: any) =>
   state.checkboxFileAndFolder;
 
 export default checkboxFileAndFolderSlice.reducer;

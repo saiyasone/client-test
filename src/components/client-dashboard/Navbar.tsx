@@ -356,7 +356,7 @@ const Navbar = ({ onDrawerToggle }) => {
     });
   };
 
-  const handleOnSearchChange = async (value: anny) => {
+  const handleOnSearchChange = async (value: any) => {
     if (value) {
       await handleSearchFolderAndFile(value);
     } else {

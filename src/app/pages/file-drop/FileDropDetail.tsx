@@ -482,7 +482,7 @@ function FileDropDetail() {
       }
     } catch (err) {
       resetDataForEvent();
-      errorMessage("Sorry! Something went wrong. Please try again!");
+      errorMessage("Sorry! Something went wrong. Please try again!",2000);
     }
   };
 

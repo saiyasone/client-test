@@ -65,6 +65,7 @@ import useBreadcrumbData from "../../../hooks/useBreadcrumbData";
 import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
@@ -74,7 +75,7 @@ function ShareWithMe() {
   const [getShareMe, { refetch: refetchShare }] = useLazyQuery(QUERY_SHARE, {
     fetchPolicy: "no-cache",
   });
-
+  const { refreshAuto } = useRefreshState();
   const manageFile = useManageFile({ user });
 
   const [getFolders] = useLazyQuery(QUERY_FOLDER, { fetchPolicy: "no-cache" });
@@ -120,7 +121,7 @@ function ShareWithMe() {
     ),
     inputType: dataForEvent.data?.folderId?.folder_type,
     user,
-    toAccount: user.email,
+    toAccount: user?.email,
   });
 
   const [folderDrop, setFolderDrop] = useState<any>("");
@@ -464,7 +465,7 @@ function ShareWithMe() {
         const queryData = data?.getShare?.data;
         const queryTotal = data?.getShare?.total;
         const filteredData = data?.getShare?.data?.filter(
-          (item:any) => item.fileId !== null,
+          (item: any) => item.fileId !== null,
         );
         setFileshare(filteredData);
         if (queryTotal > 0) {
@@ -495,6 +496,11 @@ function ShareWithMe() {
     queryGetShare();
   }, [limitScroll, currentPage, toggle, countPage]);
 
+  useEffect(() => {
+    if (refreshAuto?.isStatus === "share") {
+      queryGetShare();
+    }
+  }, [refreshAuto?.isAutoClose]);
 
   const menuOnClick = async (action) => {
     setIsAutoClose(true);
@@ -1382,34 +1388,13 @@ function ShareWithMe() {
               name={name}
               setName={setName}
             />
-            {/* {showPreview && (
-              <DialogPreviewFile
-                open={showPreview}
-                handleClose={() => {
-                  setShowPreview(false);
-                  resetDataForEvents();
-                }}
-                onClick={() => {
-                  if (userPackage?.downLoadOption === "another") {
-                    handleGetDownloadLink();
-                  } else {
-                    handleDownloadFileAndFolder();
-                  }
-                }}
-                filename={dataForEvent.data.fileId?.filename}
-                newFilename={dataForEvent.data.fileId?.newFilename}
-                fileType={dataForEvent.data.fileId?.fileType}
-                path={dataForEvent.data.fileId?.newPath}
-                user={dataForEvent.data?.ownerId}
-                permission={dataForEvent?.data?.permission}
-              />
-            )} */}
+
             {showPreview && (
               <DialogPreviewFileSlide
                 open={showPreview}
                 handleClose={handleClosePreview}
                 data={dataForEvent.data}
-                user={dataForEvent.data?.ownerId}
+                user={user}
                 mainFile={fileshare}
                 propsStatus="share"
               />

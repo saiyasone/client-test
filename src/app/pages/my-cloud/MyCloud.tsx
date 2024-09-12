@@ -60,6 +60,7 @@ import moment from "moment";
 import {
   Fragment,
   SetStateAction,
+  useCallback,
   useContext,
   useEffect,
   useRef,
@@ -87,6 +88,9 @@ import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 import { RootState } from "stores/store";
+import { useRefreshState } from "contexts/RefreshProvider";
+import { setMenuToggle } from "stores/features/useEventSlice";
+import { IMyCloudTypes } from "types/mycloudFileType";
 
 const ITEM_PER_PAGE_GRID = 20;
 
@@ -133,11 +137,8 @@ export function MyCloud() {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [userPackage, setUserPackage] = useState<any>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
-  const {
-    isOpenMenu: isMenu,
-    isSelected,
-    isOnClicked,
-  } = useSelector((state: RootState) => state.event);
+  const { refreshAuto } = useRefreshState();
+
   // slice in redux
   const dispatch = useDispatch();
   const dataSelector = useSelector(
@@ -196,6 +197,13 @@ export function MyCloud() {
   const location = useLocation();
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
+  const {
+    isOpenMenu: isMenu,
+    isSelected,
+    isOnClicked,
+    isToggleMenu,
+  } = useSelector((state: RootState) => state.event);
+
   const { limitScroll, addMoreLimit } = useScroll({
     total,
     limitData: ITEM_PER_PAGE_GRID,
@@ -612,6 +620,13 @@ export function MyCloud() {
     queryFolder();
   }, [checkUploadSuccessAll]);
 
+  useEffect(() => {
+    if (refreshAuto?.isStatus === "mycloud") {
+      queryFile();
+      queryFileGrid();
+    }
+  }, [refreshAuto?.isAutoClose]);
+
   const handleViewMoreFolder = () => {
     setViewMore((prevState) => prevState + 20);
   };
@@ -777,7 +792,7 @@ export function MyCloud() {
   };
 
   // File action for count in recent file
-  const handleActionFile = async (val: string, data: any) => {
+  const handleActionFile = async (val: string, data: IMyCloudTypes) => {
     try {
       await fileAction({
         variables: {
@@ -819,7 +834,7 @@ export function MyCloud() {
     );
   };
 
-  const handleMultipleFileData = (selectData: any) => {
+  const handleMultipleFileData = (selectData: IMyCloudTypes) => {
     const optionValue = mainFile?.find((file: any) => file._id === selectData);
 
     dispatch(
@@ -945,7 +960,7 @@ export function MyCloud() {
   const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState: any) => ({
+        setDataForEvent((prevState: {data:IMyCloudTypes}) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -962,7 +977,7 @@ export function MyCloud() {
   const handleChangedUserPermissionFromShareSave = async (sharedData: any) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState: any) => ({
+        setDataForEvent((prevState: { data: IMyCloudTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -1177,7 +1192,7 @@ export function MyCloud() {
   };
 
   // favourite function
-  const handleFavourite = async (data: any) => {
+  const handleFavourite = async (data: IMyCloudTypes) => {
     await manageFile.handleFavoriteFile(data._id, data.favorite ? 0 : 1, {
       onSuccess: async () => {
         setIsAutoClose(true);
@@ -1223,7 +1238,7 @@ export function MyCloud() {
         } else {
           successMessage("One File added to Pin", 3000);
         }
-        setGetValue((state: any) => ({
+        setGetValue((state: { data: IMyCloudTypes }) => ({
           data: {
             ...state.data,
             pin: data.pin ? 0 : 1,
@@ -1311,6 +1326,26 @@ export function MyCloud() {
     handleClearMultipleFileAndFolder();
   }, [dispatch, location]);
 
+  const handleClick = useCallback(
+    async (data: IMyCloudTypes) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: IMyCloudTypes) => {
+    setDataForEvent({
+      action: "preview",
+      data,
+    });
+  };
   return (
     <Fragment>
       <Box
@@ -1619,7 +1654,7 @@ export function MyCloud() {
                     <Box sx={{ mt: 4 }}>
                       {mainFile?.length > 0 && (
                         <FileCardContainer>
-                          {mainFile?.map((item: any, index: number) => {
+                          {mainFile?.map((item: IMyCloudTypes, index: number) => {
                             return (
                               <Fragment key={index}>
                                 <FileCardItem
@@ -1651,25 +1686,12 @@ export function MyCloud() {
                                   name={item?.filename}
                                   newName={item?.newFilename}
                                   cardProps={{
-                                    ...(isMobile
-                                      ? {
-                                          onClick: () => {
-                                            setGetValue(item);
-                                            setDataForEvent({
-                                              data: item,
-                                              action: "preview",
-                                            });
-                                          },
-                                        }
-                                      : {
-                                          onDoubleClick: () => {
-                                            setGetValue(item);
-                                            setDataForEvent({
-                                              data: item,
-                                              action: "preview",
-                                            });
-                                          },
-                                        }),
+                                    onClick: isMobile
+                                      ? async () => await handleClick(item)
+                                      : undefined,
+                                    onDoubleClick: !isMobile
+                                      ? () => handleDoubleClick(item)
+                                      : undefined,
                                   }}
                                   menuItems={menuItems.map(
                                     (menuItem, index) => {

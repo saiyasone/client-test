@@ -71,6 +71,8 @@ import { convertBytetoMBandGB } from "utils/storage.util";
 import ExtendFileDataGrid from "../extend-folder/ExtendFileDataGrid";
 import ExtendFolderDataGrid from "../extend-folder/ExtendFolderDataGrid";
 import useFetchShareFolder from "hooks/folder/useFetchShareFolder";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const ITEM_PER_PAGE = 10;
 
@@ -82,6 +84,7 @@ function ExtendShare() {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState<any>(null);
   const parentFolderUrl: any = Base64.decode(params.id);
+  const { refreshAuto } = useRefreshState();
 
   const handleToggle = (value) => {
     setToggle(value);
@@ -107,16 +110,16 @@ function ExtendShare() {
   const { data: parentFolder } = useFetchShareFolder({
     folderUrl: parentFolderUrl,
   });
-
+  const [fileshare, setFileshare] = useState<any>(null);
   const fetchSubFoldersAndFiles = useFetchSharedSubFolderAndFile(
     parentFolder?._id,
     userAuth,
   );
 
   useEffect(() => {
-    // if (fetchSubFoldersAndFiles.data) {
-    //   console.log(fetchSubFoldersAndFiles.data);
-    // }
+    if (fetchSubFoldersAndFiles.data) {
+      setFileshare(fetchSubFoldersAndFiles?.data?.files?.data);
+    }
   }, [fetchSubFoldersAndFiles.data]);
 
   // for detect file password
@@ -186,6 +189,7 @@ function ExtendShare() {
   const [userPackage, setUserPackage] = useState<any>(null);
   const [dataDownloadURL, setDataDownloadURL] = useState<any>(null);
   const handleDownloadUrl = useGetUrlExtendFolderDownload(dataDownloadURL);
+
   useEffect(() => {
     if (dataDownloadURL) {
       handleDownloadUrl?.(dataDownloadURL);
@@ -210,6 +214,11 @@ function ExtendShare() {
         action: "",
       };
     });
+  };
+
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
   };
 
   useEffect(() => {
@@ -269,7 +278,10 @@ function ExtendShare() {
     if (eventUploadTrigger.triggerData.isTriggered && parentFolder?._id) {
       fetchSubFoldersAndFiles.refetch();
     }
-  }, [eventUploadTrigger.triggerData]);
+    if (refreshAuto?.isStatus === "extendshare") {
+      fetchSubFoldersAndFiles.refetch();
+    }
+  }, [eventUploadTrigger.triggerData, refreshAuto?.isAutoClose]);
 
   useEffect(() => {
     const shareData =
@@ -1020,26 +1032,13 @@ function ExtendShare() {
       )}
 
       {showPreview && (
-        <DialogPreviewFile
+        <DialogPreviewFileSlide
           open={showPreview}
-          handleClose={() => {
-            resetDataForEvents();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            setDataForEvent((prev) => {
-              return {
-                ...prev,
-                action: "download",
-              };
-            });
-          }}
-          filename={dataForEvent.data.name}
-          permission={dataForEvent.data.permission}
-          newFilename={dataForEvent.data.newName}
-          fileType={dataForEvent.data.type}
-          path={dataForEvent.data.newPath}
-          user={dataForEvent.data?.createdBy}
+          handleClose={handleClosePreview}
+          data={dataForEvent.data}
+          user={userAuth}
+          mainFile={fileshare}
+          propsStatus="extendshare"
         />
       )}
 

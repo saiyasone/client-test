@@ -1,8 +1,21 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import React, { Fragment, useContext, useEffect, useState } from "react";
+import React, {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 
 // component
-import { Box, Button, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  ListItem,
+  ListItemText,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 
 // icons
 import _ from "lodash";
@@ -31,7 +44,7 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import { ENV_KEYS } from "constants/env.constant";
@@ -39,6 +52,7 @@ import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { FolderContext } from "contexts/FolderProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
@@ -52,7 +66,10 @@ import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import { setMenuToggle, toggleSelected } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 import * as MUI from "styles/clientPage.style";
+import { IFavouriteTypes } from "types/favouriteType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
   cutFileType,
@@ -63,9 +80,11 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import FavouriteFileDataGrid from "./FavouriteFileDataGrid";
 import * as MUI_FAVOURITE from "./styles/favourite.style";
-import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
-import { useRefreshState } from "contexts/RefreshProvider";
 
+interface INewFavouriteType {
+  data: IFavouriteTypes | [];
+  action: string;
+}
 const ITEM_PER_PAGE_LIST = 10;
 const ITEM_PER_PAGE_GRID = 40;
 
@@ -78,7 +97,11 @@ function FavouriteFile() {
   const [dataFilesAndFoldersForGrid, setDataFilesAndFoldersForGrid] =
     useState<any>([null]);
   const isFirstRender = useFirstRender();
-  const { setRefreshAuto, refreshAuto } = useRefreshState();
+  const { refreshAuto } = useRefreshState();
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+    (state: RootState) => state.event,
+  );
 
   const [
     getFiles,
@@ -138,7 +161,7 @@ function FavouriteFile() {
   );
 
   const [toggle, setToggle] = useState<any>(null);
-  const handleToggle = (value) => {
+  const handleToggle = (value: string) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
   };
@@ -201,9 +224,9 @@ function FavouriteFile() {
   }, [navigate]);
 
   useEffect(() => {
-    if (refreshAuto?.isAutoClose && refreshAuto.isStatus == "favourite") {
-      filesRefetch();
-      handleClosePreview();
+    if (refreshAuto?.isStatus == "recent") {
+      customGetFiles();
+      customGetFilesForGrid();
     }
   }, [refreshAuto?.isAutoClose]);
 
@@ -240,7 +263,7 @@ function FavouriteFile() {
 
   const handleGetDownloadLink = async () => {
     setDataDownloadURL(dataForEvent.data);
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: INewFavouriteType) => {
       return {
         ...prev,
         action: "",
@@ -315,7 +338,7 @@ function FavouriteFile() {
 
   useEffect(() => {
     const dataViewMode = useDataSetting.data?.find(
-      (data) => data?.productKey === settingKeys.viewMode,
+      (data: any) => data?.productKey === settingKeys.viewMode,
     );
 
     if (dataViewMode) {
@@ -356,7 +379,7 @@ function FavouriteFile() {
         setShowEncryptPassword(true);
       } else {
         handleGetFolderURLCCTv?.(dataForEvent.data);
-        setDataForEvent((prev) => {
+        setDataForEvent((prev: INewFavouriteType) => {
           return {
             ...prev,
             action: "",
@@ -375,7 +398,7 @@ function FavouriteFile() {
   /* folders pagination */
   useEffect(() => {
     if (!isFirstRender) {
-      setDataFolderFilters((prevState) => {
+      setDataFolderFilters((prevState: any) => {
         const result = {
           ...prevState,
           skip: (currentFolderPage - 1) * ITEM_PER_PAGE_LIST,
@@ -397,7 +420,7 @@ function FavouriteFile() {
   /* files pagination */
   useEffect(() => {
     if (!isFirstRender) {
-      setDataFileFilters((prevState) => {
+      setDataFileFilters((prevState: any) => {
         const result = {
           ...prevState,
           skip: (currentFilePage - 1) * ITEM_PER_PAGE_LIST,
@@ -421,7 +444,7 @@ function FavouriteFile() {
     if (dataFiles) {
       setDataFilesAndFolders(() => {
         const result = {
-          data: dataFiles?.files?.data?.map((data) => ({
+          data: dataFiles?.files?.data?.map((data: any) => ({
             ...data,
             id: data._id,
           })),
@@ -444,7 +467,7 @@ function FavouriteFile() {
     if (dataFilesForGrid) {
       setDataFilesAndFoldersForGrid(() => {
         const result = {
-          data: dataFilesForGrid?.files?.data?.map((data) => ({
+          data: dataFilesForGrid?.files?.data?.map((data: IFavouriteTypes) => ({
             ...data,
             id: data._id,
           })),
@@ -463,7 +486,7 @@ function FavouriteFile() {
   }, [dataFilesForGrid?.files?.data]);
 
   const resetDataForEvents = () => {
-    setDataForEvent((state) => ({
+    setDataForEvent((state: INewFavouriteType) => ({
       ...state,
       action: null,
       type: null,
@@ -485,7 +508,7 @@ function FavouriteFile() {
     }
   }, [dataForEvent.action]);
 
-  const menuOnClick = async (action) => {
+  const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
     const checkPassword = isCheckPassword();
     switch (action) {
@@ -612,7 +635,7 @@ function FavouriteFile() {
 
   const handleCloseDecryptedPassword = () => {
     setEventClick("");
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: INewFavouriteType) => {
       return {
         ...prev,
         action: "",
@@ -622,7 +645,7 @@ function FavouriteFile() {
   };
 
   // File action for count in recent file
-  const handleActionFile = async (val) => {
+  const handleActionFile = async (val: string) => {
     try {
       await fileAction({
         variables: {
@@ -666,7 +689,7 @@ function FavouriteFile() {
         onSuccess: () => {
           successMessage("Download successful", 2000);
 
-          setDataForEvent((state) => ({
+          setDataForEvent((state: INewFavouriteType) => ({
             ...state,
             action: null,
             data: {
@@ -681,7 +704,7 @@ function FavouriteFile() {
             filesRefetch();
           }
         },
-        onFailed: (error) => {
+        onFailed: (error: any) => {
           errorMessage(error, 3000);
         },
         onClosure: () => {
@@ -815,7 +838,7 @@ function FavouriteFile() {
           } else {
             successMessage("One File added to Pin", 2000);
           }
-          setDataForEvent((state) => ({
+          setDataForEvent((state: any) => ({
             action: null,
             data: {
               ...state.data,
@@ -847,7 +870,7 @@ function FavouriteFile() {
             successMessage("One File added to Favourite", 2000);
           }
           await handleActionFile("edit");
-          setDataForEvent((state) => ({
+          setDataForEvent((state: INewFavouriteType) => ({
             action: null,
             data: {
               ...state.data,
@@ -861,7 +884,7 @@ function FavouriteFile() {
             filesRefetchForGrid();
           }
         },
-        onFailed: (error) => {
+        onFailed: (error: any) => {
           const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
           errorMessage(
             manageGraphqlError.handleErrorMessage(cutErr) as string,
@@ -872,9 +895,9 @@ function FavouriteFile() {
     );
   };
 
-  const handleMultipleFileDataList = (dataId) => {
+  const handleMultipleFileDataList = (dataId: string) => {
     const optionValue = dataFilesAndFolders?.data?.find(
-      (file) => file?._id === dataId,
+      (file: IFavouriteTypes) => file?._id === dataId,
     );
 
     if (optionValue) {
@@ -901,7 +924,7 @@ function FavouriteFile() {
     }
   };
 
-  const handleMultipleFileDataGrid = (optionValue) => {
+  const handleMultipleFileDataGrid = (optionValue: IFavouriteTypes) => {
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
@@ -942,7 +965,9 @@ function FavouriteFile() {
     }
   }, [dataForEvent.action]);
 
-  const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
+  const handleFileDetailDialogBreadcrumbFolderNavigate = async (
+    link: string,
+  ) => {
     await getFolders({
       variables: {
         where: {
@@ -953,10 +978,12 @@ function FavouriteFile() {
     });
   };
 
-  const handleDeletedUserFromShareOnSave = async (sharedData) => {
+  const handleDeletedUserFromShareOnSave = async (
+    sharedData: IFavouriteTypes,
+  ) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState:{data:IFavouriteTypes}) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -967,10 +994,12 @@ function FavouriteFile() {
     });
   };
 
-  const handleChangedUserPermissionFromShareSave = async (sharedData) => {
+  const handleChangedUserPermissionFromShareSave = async (
+    sharedData: IFavouriteTypes,
+  ) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState:{data:IFavouriteTypes}) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -978,6 +1007,27 @@ function FavouriteFile() {
         }));
         successMessage("Changed user permission of share successful!!", 2000);
       },
+    });
+  };
+
+  const handleClick = useCallback(
+    async (data: IFavouriteTypes) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: IFavouriteTypes) => {
+    setDataForEvent({
+      action: "preview",
+      data,
     });
   };
 
@@ -1195,27 +1245,36 @@ function FavouriteFile() {
                 <>
                   <React.Fragment>
                     <MUI_FAVOURITE.FavouriteItem>
-                      <Typography variant="h4" fontWeight="bold">
-                        Files
-                      </Typography>
-
-                      {/* <Checkbox
-                        checked={isCheckAll}
-                        icon={<CheckBoxOutlineBlankSharpIcon />}
-                        checkedIcon={
-                          dataFilesAndFoldersForGrid?.data?.length ===
-                          dataSelector?.selectionFileAndFolderData?.length ? (
-                            <CheckBoxSharpIcon sx={{ color: "#17766B" }} />
-                          ) : (
-                            <CheckboxMinus sx={{ color: "#17766B" }} />
-                          )
-                        } 
-                        onChange={(e) => {
-                          const { checked } = e.target;
-                          setIsCheckAll(checked);
-                          handleCheckAll(checked);
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
                         }}
-                      /> */}
+                      >
+                        <Typography
+                          variant="h6"
+                          sx={{
+                            fontWeight: "bold",
+                            fontSize: isMobile ? "14px" : "20px",
+                          }}
+                        >
+                          Files
+                        </Typography>
+                        {isMobile && toggle !== "list" && (
+                          <ListItemText
+                            sx={{
+                              p: 2,
+                              display: "flex",
+                              justifyContent: "flex-end",
+                            }}
+                            onClick={() => {
+                              dispatch(toggleSelected(!isSelected));
+                              handleClearMultipleFileData();
+                            }}
+                            primary={isSelected ? "Unselect" : "Select"}
+                          />
+                        )}
+                      </Box>
 
                       <React.Fragment>
                         {toggle === "grid" && (
@@ -1227,16 +1286,17 @@ function FavouriteFile() {
                               <FileCardContainer>
                                 <>
                                   {dataFilesAndFoldersForGrid?.data?.map(
-                                    (data, index) => {
+                                    (data: any, index: number) => {
                                       return (
                                         <FileCardItem
                                           cardProps={{
-                                            onDoubleClick: () => {
-                                              setDataForEvent({
-                                                action: "preview",
-                                                data,
-                                              });
-                                            },
+                                            onClick: isMobile
+                                              ? async () =>
+                                                  await handleClick(data)
+                                              : undefined,
+                                            onDoubleClick: !isMobile
+                                              ? () => handleDoubleClick(data)
+                                              : undefined,
                                           }}
                                           imagePath={
                                             user?.newName +
@@ -1330,7 +1390,7 @@ function FavouriteFile() {
                                 data={dataFilesAndFolders.data}
                                 total={dataFilesAndFolders.total}
                                 dataSelector={dataSelector}
-                                handleEvent={(action, data) => {
+                                handleEvent={(action: string, data: any) => {
                                   setDataForEvent({
                                     action,
                                     data,

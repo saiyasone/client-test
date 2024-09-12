@@ -157,7 +157,7 @@ function FileCardItem(props) {
       }
       refecthFolder();
     } catch (err) {
-      errorMessage("Sorry! Something went wrong. Please try again!");
+      errorMessage("Sorry! Something went wrong. Please try again!",2000);
     }
   };
 
