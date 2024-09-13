@@ -34,7 +34,7 @@ const DialogAlert = (props) => {
         {title}
       </DialogTitle>
       <DialogContent sx={{ pb: 1 }}>
-        <DialogContentText component="body" id="alert-dialog-description">
+        <DialogContentText id="alert-dialog-description">
           {message}
         </DialogContentText>
       </DialogContent>

@@ -52,9 +52,9 @@ function NavbarUserDropdown() {
     imagePath: `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
     fileType: "image",
     user,
-    width: 200,
     height: 200,
     isPublic: false,
+    width: 200,
   });
 
   const handleGetUser = async () => {
@@ -96,6 +96,7 @@ function NavbarUserDropdown() {
   const fullName = useMemo(() => {
     return _.toUpper(`${userAccount.firstName} ${userAccount.lastName}`);
   }, [userAccount]);
+
 
   return (
     <React.Fragment>

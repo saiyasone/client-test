@@ -1,0 +1,67 @@
+export interface IUserTypes {
+  _id: string;
+  accountId: string;
+  address: string;
+  anonymousExpired: string | null;
+  browser: string | null;
+  codeAnonymous: string | null;
+  country: string;
+  countryId: { _id: null; name: null };
+  createdAt: Date;
+  currentDevice: string | null;
+  device: string | null;
+  email: string;
+  firstName: string;
+  gender: string | null;
+  ip: string | null;
+  lastLoggedInAt: Date;
+  lastName: string;
+  newDevice: string;
+  newName: string;
+  packageId: IPackagesTypes;
+  phone: string;
+  profile: string;
+  provider: string;
+  state: string;
+  status: string;
+  storage: string;
+  twoFactorIsEnabled: number;
+  twoFactorIsVerified: number;
+  twoFactorQrCode: string | null;
+  twoFactorSecret: string | null;
+  updatedAt: Date;
+  username: string;
+  zipCode: string;
+}
+
+export interface IPackagesTypes {
+  _id: string;
+  packageId: string;
+  name: string;
+  category: string;
+  annualPrice: string;
+  ads: number;
+  bgColor: string | null;
+  captcha: 0;
+  createdAt: string | null;
+  description: string | null;
+  discount: string | null;
+  downLoadOption: string | null;
+  fileUploadPerDay: string | null;
+  lockFile: string | null;
+  lockFolder: string | null;
+  maxUploadSize: string | null;
+  monthlyPrice: number;
+  multipleDownload: number;
+  multipleUpload: string;
+  numberOfFileUpload: string | null;
+  sort: string | null;
+  status: string;
+  storage: string;
+  support: string | null;
+  textColor: string | null;
+  totalUsed: string | null;
+  type: string | null;
+  updatedAt: Date | null;
+  uploadPerDay: string;
+}

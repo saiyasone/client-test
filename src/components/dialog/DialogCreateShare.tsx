@@ -39,7 +39,6 @@ import "styles/chipInput.style.css";
 import * as MUI from "styles/dialog/dialogCreateShare.style";
 import { errorMessage, successMessage } from "utils/alert.util";
 import { base64Encode } from "utils/base64.util";
-import { getFilenameWithoutExtension } from "utils/file.util";
 import { cutStringWithEllipsis } from "utils/string.util";
 
 const theme = createTheme();
@@ -172,9 +171,11 @@ const DialogCreateShare = (props) => {
   const { setIsAutoClose } = useMenuDropdownState();
   const [sharedSelectedUserList, setSharedSelectedUserList] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sendLoading, setSendLoading] = useState(false);
   const [showShared, setShowShared] = useState(false);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
   const encodeKey = ENV_KEYS.VITE_APP_ENCODE_KEY;
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
   const totalHandleUrl = useGetUrl(props?.data);
 
   const [sharedUserList, setSharedUserList] = useState<any[]>([]);
@@ -188,15 +189,6 @@ const DialogCreateShare = (props) => {
           toAccount: {
             ...user,
             title: `${user.firstName} ${user.lastName}`,
-            thumbnailSrc:
-              user?.newName +
-              "-" +
-              user?._id +
-              "/" +
-              ENV_KEYS.VITE_APP_THUMBNAIL_PATH +
-              "/" +
-              getFilenameWithoutExtension(user?.profile) +
-              `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
             src:
               user?.newName +
               "-" +
@@ -238,8 +230,8 @@ const DialogCreateShare = (props) => {
 
     const dataType =
       data?.folder_type || data?.folderId?._id ? "folder" : "file";
-    const ownerData = data?.createdBy?._id ?? data?.ownerId?._id;
-    const newNameData = data?.createdBy?.newName ?? data?.ownerId?.newName;
+    const ownerData = data?.createdBy?._id || data?.ownerId?._id;
+    const newNameData = data?.createdBy?.newName || data?.ownerId?.newName;
 
     fileId = base64Encode(
       {
@@ -270,6 +262,7 @@ const DialogCreateShare = (props) => {
   const handleShareStatus = async () => {
     try {
       if (sharedSelectedUserList.length > 0) {
+        setSendLoading(true);
         if (
           data?.folder_type === "folder" ||
           data?.checkTypeItem === "folder"
@@ -345,11 +338,14 @@ const DialogCreateShare = (props) => {
         onClose();
       }
     } catch (error: any) {
+      setSendLoading(false);
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(
         manageGraphqlError.handleErrorMessage(cutErr) as string,
         3000,
       );
+    } finally {
+      setSendLoading(false);
     }
   };
 
@@ -494,7 +490,19 @@ const DialogCreateShare = (props) => {
                           <Fragment key={index}>
                             <BoxImage>
                               <SharedUserProfileImage
-                                {...changedSharedUser.toAccount}
+                                {...{
+                                  ...user,
+                                  title: `${user.firstName} ${user.lastName}`,
+                                  src:
+                                    newUrl +
+                                    changedSharedUser?.toAccount?.newName +
+                                    "-" +
+                                    changedSharedUser?.toAccount?._id +
+                                    "/" +
+                                    ENV_KEYS.VITE_APP_ZONE_PROFILE +
+                                    "/" +
+                                    changedSharedUser?.toAccount?.profile,
+                                }}
                               />
                             </BoxImage>
                           </Fragment>
@@ -692,13 +700,14 @@ const DialogCreateShare = (props) => {
                 >
                   Close
                 </Button>
-                <Button
+                <LoadingButton
                   sx={{
                     borderRadius: "6px",
                     padding: "8px 25px",
                   }}
                   type="button"
                   variant="contained"
+                  loading={sendLoading}
                   color="primaryTheme"
                   {...{
                     ...(accessStatusShare === "private" &&
@@ -712,184 +721,181 @@ const DialogCreateShare = (props) => {
                   }}
                 >
                   Send
-                </Button>
-              </ActionContainer>
-            </DialogContent>
-          </>
-        ) : (
-          <>
-            <DialogContent>
-              <MUI.ShareSelectHeader>
-                <Typography variant="h2">Who has access</Typography>
-                <Typography component="p">
-                  Owned by {data?.ownerId?.email}
-                </Typography>
-              </MUI.ShareSelectHeader>
-              <MUI.ShareSelectOwnerContainer>
-                <MUI.ShareProfileContainer>
-                  <MUI.ShareProfileImage>
-                    <SharedUserProfileImage
-                      {...{
-                        ...user,
-                        title: `${user.firstName} ${user.lastName}`,
-                        thumbnailSrc:
-                          user?.newName +
-                          "-" +
-                          user?._id +
-                          "/" +
-                          ENV_KEYS.VITE_APP_THUMBNAIL_PATH +
-                          "/" +
-                          getFilenameWithoutExtension(user?.profile) +
-                          `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
-                        src:
-                          user?.newName +
-                          "-" +
-                          user?._id +
-                          "/" +
-                          ENV_KEYS.VITE_APP_ZONE_PROFILE +
-                          "/" +
-                          user?.profile,
-                      }}
-                    />
-                  </MUI.ShareProfileImage>
-
-                  <MUI.ShareProfileInfo>
-                    <Typography variant="h2">
-                      {_.startCase(
-                        `${data?.ownerId?.firstName} ${data?.ownerId?.lastName}`,
-                      )}
-                    </Typography>
-                    <Typography variant="h5">{data?.ownerId?.email}</Typography>
-                  </MUI.ShareProfileInfo>
-                </MUI.ShareProfileContainer>
-                <MUI.ShareProfileInfoList>
-                  <Typography variant="h2">
-                    Share with {sharedUserList.length} accounts
-                  </Typography>
-
-                  {sharedUserList.map((sharedUser, index) => {
-                    return (
-                      <Box key={index} sx={{ margin: "0.6rem 0" }}>
-                        <MUI.FlexBetween>
-                          <MUI.ShareProfileContainer>
-                            <MUI.ShareProfileImage>
-                              <SharedUserProfileImage
-                                {...sharedUser.toAccount}
-                              />
-                            </MUI.ShareProfileImage>
-
-                            <MUI.ShareProfileInfo>
-                              <Typography
-                                variant="h3"
-                                sx={{ fontSize: "15px" }}
-                              >
-                                {_.startCase(sharedUser?.toAccount?.title)}
-                              </Typography>
-                              <Typography variant="h5">
-                                {sharedUser?.toAccount?.email}
-                              </Typography>
-                            </MUI.ShareProfileInfo>
-                          </MUI.ShareProfileContainer>
-                          <Box
-                            sx={{
-                              display: "flex",
-                              alignItems: "center",
-                              height: "100%",
-                              "& .menu-dropdown": {
-                                height: "100%",
-                              },
-                            }}
-                          >
-                            {props.onChangedUserPermissionFromShareSave && (
-                              <ActionCreateShare
-                                accessStatusShare={"private"}
-                                statusshare={sharedUser._permission}
-                                handleStatus={(val) => {
-                                  setIsAutoClose(true);
-                                  handleChangeUserPermissionFromShare(
-                                    sharedUser._id,
-                                    val,
-                                  );
-                                }}
-                              />
-                            )}
-                            <Box
-                              sx={{
-                                ml: 2,
-                                position: "relative",
-                                height: "100%",
-                              }}
-                            >
-                              {sharedUser._isDeleted && (
-                                <Typography
-                                  component="span"
-                                  sx={{
-                                    color: "#3DC03C",
-                                    position: "absolute",
-                                    top: 0,
-                                    right: 0,
-                                    transform: "translate(40%,-40%)",
-                                  }}
-                                >
-                                  <FaIcon.FaCheckCircle />
-                                </Typography>
-                              )}
-
-                              <MUI.ButtonShare
-                                sx={{
-                                  height: "100%",
-                                }}
-                                onClick={() =>
-                                  handleSelecteDeletedUserFromShare(
-                                    sharedUser?._id,
-                                  )
-                                }
-                              >
-                                <HiOutlineTrash
-                                  style={{ verticalAlign: "middle" }}
-                                />
-                              </MUI.ButtonShare>
-                            </Box>
-                          </Box>
-                        </MUI.FlexBetween>
-                      </Box>
-                    );
-                  })}
-                </MUI.ShareProfileInfoList>
-              </MUI.ShareSelectOwnerContainer>
-
-              <ActionContainer
-                sx={{ justifyContent: "flex-end", gap: "1.5rem" }}
-              >
-                <Button
-                  sx={{
-                    borderRadius: "6px",
-                    padding: "8px 25px",
-                  }}
-                  type="button"
-                  variant="contained"
-                  color="greyTheme"
-                  onClick={() => {
-                    setShowShared(false);
-                  }}
-                >
-                  Cancel
-                </Button>
-                <LoadingButton
-                  sx={{
-                    borderRadius: "6px",
-                    padding: "8px 25px",
-                  }}
-                  onClick={handleSelectedDeletedUserFromShareOnSave}
-                  type="button"
-                  variant="contained"
-                  color="primaryTheme"
-                >
-                  Save change
                 </LoadingButton>
               </ActionContainer>
             </DialogContent>
           </>
+        ) : (
+          <DialogContent>
+            <MUI.ShareSelectHeader>
+              <Typography variant="h2">Who has access</Typography>
+              <Typography component="p">
+                Owned by {data?.ownerId?.email}
+              </Typography>
+            </MUI.ShareSelectHeader>
+            <MUI.ShareSelectOwnerContainer>
+              <MUI.ShareProfileContainer>
+                <MUI.ShareProfileImage>
+                  <SharedUserProfileImage
+                    {...{
+                      ...user,
+                      title: `${user.firstName} ${user.lastName}`,
+                      src:
+                        newUrl +
+                        sharedUserList?.[0]?.ownerId?.newName +
+                        "-" +
+                        sharedUserList?.[0]?.ownerId?._id +
+                        "/" +
+                        ENV_KEYS.VITE_APP_ZONE_PROFILE +
+                        "/" +
+                        sharedUserList?.[0]?.ownerId?.profile,
+                    }}
+                  />
+                </MUI.ShareProfileImage>
+
+                <MUI.ShareProfileInfo>
+                  <Typography variant="h2">
+                    {_.startCase(
+                      `${data?.ownerId?.firstName} ${data?.ownerId?.lastName}`,
+                    )}
+                  </Typography>
+                  <Typography variant="h5">{data?.ownerId?.email}</Typography>
+                </MUI.ShareProfileInfo>
+              </MUI.ShareProfileContainer>
+              <MUI.ShareProfileInfoList>
+                <Typography variant="h2">
+                  Share with {sharedUserList.length} accounts
+                </Typography>
+
+                {sharedUserList.map((sharedUser, index) => {
+                  return (
+                    <Box key={index} sx={{ margin: "0.6rem 0" }}>
+                      <MUI.FlexBetween>
+                        <MUI.ShareProfileContainer>
+                          <MUI.ShareProfileImage>
+                            <SharedUserProfileImage
+                              {...{
+                                ...user,
+                                title: `${user.firstName} ${user.lastName}`,
+                                src:
+                                  newUrl +
+                                  sharedUser?.toAccount?.newName +
+                                  "-" +
+                                  sharedUser?.toAccount?._id +
+                                  "/" +
+                                  ENV_KEYS.VITE_APP_ZONE_PROFILE +
+                                  "/" +
+                                  sharedUser?.toAccount?.profile,
+                              }}
+                            />
+                          </MUI.ShareProfileImage>
+
+                          <MUI.ShareProfileInfo>
+                            <Typography variant="h3" sx={{ fontSize: "15px" }}>
+                              {_.startCase(sharedUser?.toAccount?.title)}
+                            </Typography>
+                            <Typography variant="h5">
+                              {sharedUser?.toAccount?.email}
+                            </Typography>
+                          </MUI.ShareProfileInfo>
+                        </MUI.ShareProfileContainer>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            height: "100%",
+                            "& .menu-dropdown": {
+                              height: "100%",
+                            },
+                          }}
+                        >
+                          {props.onChangedUserPermissionFromShareSave && (
+                            <ActionCreateShare
+                              accessStatusShare={"private"}
+                              statusshare={sharedUser._permission}
+                              handleStatus={(val) => {
+                                setIsAutoClose(true);
+                                handleChangeUserPermissionFromShare(
+                                  sharedUser._id,
+                                  val,
+                                );
+                              }}
+                            />
+                          )}
+                          <Box
+                            sx={{
+                              ml: 2,
+                              position: "relative",
+                              height: "100%",
+                            }}
+                          >
+                            {sharedUser._isDeleted && (
+                              <Typography
+                                component="span"
+                                sx={{
+                                  color: "#3DC03C",
+                                  position: "absolute",
+                                  top: 0,
+                                  right: 0,
+                                  transform: "translate(40%,-40%)",
+                                }}
+                              >
+                                <FaIcon.FaCheckCircle />
+                              </Typography>
+                            )}
+
+                            <MUI.ButtonShare
+                              sx={{
+                                height: "100%",
+                              }}
+                              onClick={() =>
+                                handleSelecteDeletedUserFromShare(
+                                  sharedUser?._id,
+                                )
+                              }
+                            >
+                              <HiOutlineTrash
+                                style={{ verticalAlign: "middle" }}
+                              />
+                            </MUI.ButtonShare>
+                          </Box>
+                        </Box>
+                      </MUI.FlexBetween>
+                    </Box>
+                  );
+                })}
+              </MUI.ShareProfileInfoList>
+            </MUI.ShareSelectOwnerContainer>
+
+            <ActionContainer sx={{ justifyContent: "flex-end", gap: "1.5rem" }}>
+              <Button
+                sx={{
+                  borderRadius: "6px",
+                  padding: "8px 25px",
+                }}
+                type="button"
+                variant="contained"
+                color="greyTheme"
+                onClick={() => {
+                  setShowShared(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <LoadingButton
+                sx={{
+                  borderRadius: "6px",
+                  padding: "8px 25px",
+                }}
+                onClick={handleSelectedDeletedUserFromShareOnSave}
+                type="button"
+                variant="contained"
+                color="primaryTheme"
+              >
+                Save change
+              </LoadingButton>
+            </ActionContainer>
+          </DialogContent>
         )}
       </Box>
     </Dialog>

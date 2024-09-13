@@ -1,64 +1,60 @@
 import html2canvas from "html2canvas";
 import { errorMessage } from "./alert.util";
 
-export const handleShareQR = async (
-  event: React.MouseEvent<HTMLButtonElement>,
-  qrCodeRef: React.RefObject<HTMLElement>,
-  text: { title: string; description: string },
-) => {
-  event.preventDefault();
-  const fileName = text.title || "share-file";
-  const element = qrCodeRef.current;
-  if (!element) return;
+export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, qrCodeRef: React.RefObject<HTMLElement>, text: {title: string, description: string}) => {
+    event.preventDefault();
+    const fileName = text.title || "share-file";
+    const element = qrCodeRef.current;
+    let result: boolean = false;
 
-  try {
-    const scaleFactor = 10; //image pixel scale 10 times
-    const canvas = await html2canvas(element, {
-      scale: window.devicePixelRatio * scaleFactor,
-      useCORS: true,
-      allowTaint: true,
-    });
+    if (!element) return false;
 
-    const blob = await new Promise<Blob | null>((resolve) =>
-      canvas.toBlob(resolve, "image/jpeg"),
-    );
-    if (!blob) {
-      throw new Error("Failed to convert canvas to blob");
-    }
-    const file = new File([blob], `${fileName}.jpg`, { type: "image/jpeg" });
+    try {
+      const scaleFactor = 10; //image pixel scale 10 times
+      const canvas = await html2canvas(element, {
+        scale: window.devicePixelRatio * scaleFactor,
+        useCORS: true,
+        allowTaint: true,
+      });
+  
+      const blob = await new Promise<Blob | null>((resolve) =>
+        canvas.toBlob(resolve, 'image/jpeg')
+      );
+      if (!blob) {
+        throw new Error("Failed to convert canvas to blob");
+      }
 
-    if (
-      navigator.canShare &&
-      navigator.canShare({ files: [file], text: text.description })
-    ) {
-      await navigator
-        .share({
+      const file = new File([blob], `${fileName}.jpg`, { type: 'image/jpeg' });
+  
+      if (navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
+       
+        await navigator.share({
           title: fileName,
           text: text.description,
           files: [file],
-        })
-        .then(() => {
-          console.log("Shared QR code and text successfully!");
+        }).then(()=>{
+          console.log('Shared QR code and text successfully!');
           // successMessage('Shared QR code and text successfully!', 3000);
+          result = true;
+        }).catch((err: any)=>{
+          throw new Error("Error => "+ err?.message || err);
         })
-        .catch((err: any) => {
-          throw new Error("Error => " + err?.message || err);
-        });
-    } else {
-      errorMessage("Browser to share is not support.", 3000);
-    }
-  } catch (error) {
-    console.error("Error sharing the QR code or text:", error);
-    errorMessage("Failed to share the QR code or text.", 3000);
-  }
-};
+      } else {
+        // errorMessage('Browser to share is not support.', 3000);
+        console.log('Browser to share is not support sharing image.');
+      }
 
-export const handleDownloadQRCode = (
-  event: React.MouseEvent<HTMLButtonElement>,
-  qrCodeRef: React.RefObject<HTMLElement | any>,
-  text: { title: string; description: string },
-) => {
-  console.log(event);
+    } catch (error) {
+      console.error('Error sharing the QR code or text:', error);
+      errorMessage('Failed to share the QR code or text.', 3000);
+    }
+    
+    return result;
+  };
+  
+
+export const handleDownloadQRCode = (event: React.MouseEvent<HTMLButtonElement>, qrCodeRef: React.RefObject<HTMLElement | any>, text: {title: string, description: string}) => {
+  event.preventDefault();
   const fileName = text.title || "download-qr";
   const svgElement = qrCodeRef.current.querySelector("svg");
   if (!svgElement) return;

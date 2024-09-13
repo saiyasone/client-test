@@ -1,6 +1,6 @@
 import { useLazyQuery } from "@apollo/client";
 import { QUERY_SETTING } from "api/graphql/setting.graphql";
-import { createContext, useContext, useEffect, useMemo } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { decryptSettingKey } from "utils/secure.util";
 
 export const SETTING_KEYS = {
@@ -28,7 +28,7 @@ export const SETTING_KEYS = {
 
 export const SettingKeyContext = createContext({});
 
-const SettingKeyProvider = ({ children }) => {
+const SettingKeyProvider = ({ children }: { children?: React.ReactNode }) => {
   const [getSetting, { data }] = useLazyQuery(QUERY_SETTING, {
     fetchPolicy: "no-cache",
   });
@@ -54,7 +54,7 @@ const SettingKeyProvider = ({ children }) => {
   const result = useMemo(() => {
     const accessKeyResult = Object.keys(SETTING_KEYS).map((settingKey) => {
       const dataSettingFound = dataSetting?.find(
-        (data) =>
+        (data: any) =>
           data?.productKey ===
           (SETTING_KEYS[settingKey]?.productKey || SETTING_KEYS[settingKey]),
       );

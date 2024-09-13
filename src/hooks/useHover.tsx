@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 
 function useHover(ref) {
   const [isHovered, setIsHovered] = useState(false);
-
   const handleMouseOver = () => {
     setIsHovered(true);
   };
@@ -12,6 +11,9 @@ function useHover(ref) {
   };
 
   useEffect(() => {
+    if (!ref || !ref.current) {
+      return;
+    }
     const node = ref.current;
 
     node.addEventListener("mouseover", handleMouseOver);

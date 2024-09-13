@@ -27,10 +27,11 @@ const FileTypeTitle: any = styled(Paper)(({ theme }) => ({
   fontSize: "0.8rem",
   marginTop: "5px",
 }));
-export default function CardHeadMobile(props) {
+export default function CardHeadMobile(props: any) {
   const navigate = useNavigate();
   const { user }: any = useAuth();
-  const handleClick = (val) => {
+  const { isLoading } = props;
+  const handleClick = (val: string) => {
     const status = Base64.encode("active", true);
     const value = Base64.encode(val, true);
     const userId = Base64.encode(user?._id, true);
@@ -57,22 +58,34 @@ export default function CardHeadMobile(props) {
                 </FileTypeTitle>
                 <Typography component="p" style={{ fontSize: "0.8rem" }}>
                   {props.type === "application"
-                    ? convertBytetoMBandGB(props.data.application)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.application)
                     : ""}
                   {props.type === "image"
-                    ? convertBytetoMBandGB(props.data.image)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.image)
                     : ""}
                   {props.type === "video"
-                    ? convertBytetoMBandGB(props.data.video)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.video)
                     : ""}
                   {props.type === "audio"
-                    ? convertBytetoMBandGB(props.data.audio)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.audio)
                     : ""}
                   {props.type === "text"
-                    ? convertBytetoMBandGB(props.data.text)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.text)
                     : ""}
                   {props.type === "other"
-                    ? convertBytetoMBandGB(props.data.other)
+                    ? isLoading
+                      ? "Loading..."
+                      : convertBytetoMBandGB(props.data.other)
                     : ""}
                 </Typography>
               </Box>

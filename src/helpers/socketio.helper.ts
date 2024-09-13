@@ -3,8 +3,7 @@ import { io } from "socket.io-client";
 
 export const socketIO = () => {
   return io(ENV_KEYS.VITE_APP_API_SOCKET, {
-    timeout: 1000,
-    reconnection: true,
+    reconnection: false,
     reconnectionDelay: 300,
     reconnectionAttempts: Infinity,
     forceNew: true,

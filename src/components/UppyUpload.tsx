@@ -8,7 +8,6 @@ import ImageEditor from "@uppy/image-editor";
 import ThumbnailGenerator from "@uppy/thumbnail-generator";
 import Webcam from "@uppy/webcam";
 import AudioFile from "@uppy/audio";
-import CryptoJS from "crypto-js";
 
 import * as MUI from "../styles/uppyStyle.style";
 
@@ -32,6 +31,7 @@ import { errorMessage } from "utils/alert.util";
 import { Box, Button, Typography } from "@mui/material";
 import UploadFolderManual from "./UploadFolder";
 import useAuth from "hooks/useAuth";
+import { encryptData } from "utils/secure.util";
 
 // type Props = {
 //   open?: boolean;
@@ -265,28 +265,13 @@ function UppyUpload() {
             const extension = file?.name?.lastIndexOf(".");
             const fileExtension = file.name?.slice(extension);
 
-            const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
             const headers = {
               PATH: `${user?.newName}-${user?._id}`,
               FILENAME: `${file.data?.customeNewName}${fileExtension}`,
+              createdBy: user?._id,
             };
 
-            const key = CryptoJS.enc.Utf8.parse(secretKey);
-            const iv = CryptoJS.lib.WordArray.random(16);
-            const encrypted = CryptoJS.AES.encrypt(
-              JSON.stringify(headers),
-              key,
-              {
-                iv: iv,
-                mode: CryptoJS.mode.CBC,
-                padding: CryptoJS.pad.Pkcs7,
-              },
-            );
-            const cipherText = encrypted.ciphertext.toString(
-              CryptoJS.enc.Base64,
-            );
-            const ivText = iv.toString(CryptoJS.enc.Base64);
-            const encryptedData = cipherText + ":" + ivText;
+            const encryptedData = encryptData(headers);
 
             return {
               encryptedHeaders: encryptedData,

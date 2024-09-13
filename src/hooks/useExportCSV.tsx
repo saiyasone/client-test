@@ -39,7 +39,7 @@ const useExportCSV = ({ folderId, exportRef, onSuccess }) => {
         return {
           ID: index + 1,
           Filename: item.filename,
-          ShortUrl: item.shortUrl ?? "",
+          ShortUrl: item.shortUrl || "",
           Size: convertBytetoMBandGB(item.size),
           createdAt: DateOfNumber(item.createdAt),
         };

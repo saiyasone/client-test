@@ -24,6 +24,7 @@ export const QUERY_SHARE = gql`
           _id
           email
           newName
+          profile
           firstName
           lastName
         }
@@ -70,16 +71,16 @@ export const QUERY_SHARE = gql`
         createdAt
         fromAccount {
           _id
-          username
           email
           newName
         }
         toAccount {
           _id
           email
-          username
+          newName
           firstName
           lastName
+          profile
         }
         accessKey
         isPublic
@@ -94,6 +95,36 @@ export const QUERY_SHARE = gql`
         }
       }
       total
+    }
+  }
+`;
+
+export const QUERY_USER_SHARE = gql`
+  query GetShareDetail(
+    $where: ShareWhereInput
+    $orderBy: OrderByInput
+    $skip: Int
+    $limit: Int
+    $noLimit: Boolean
+  ) {
+    getShareDetail(
+      where: $where
+      orderBy: $orderBy
+      skip: $skip
+      limit: $limit
+      noLimit: $noLimit
+    ) {
+      total
+      items
+      data {
+        _id
+        email
+        newName
+        profile
+        permission
+        isPublic
+        shareId
+      }
     }
   }
 `;
@@ -143,9 +174,6 @@ export const QUERY_FILE_SHARE_PUBLIC = gql`
     filePublic(ID: $id) {
       data {
         _id
-        type_id {
-          _id
-        }
         folder_id {
           _id
         }

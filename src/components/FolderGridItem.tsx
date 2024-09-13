@@ -38,6 +38,7 @@ const Item = styled(Paper)(({ theme, ...props }: any) => ({
   alignItems: "center",
   height: "201.58px",
   minHeight: "201.58px",
+  width: "100%",
   boxShadow: "rgba(0, 0, 0, 0.1) 0px 4px 12px;",
   color: theme.palette.text.secondary,
   ":after": {
@@ -64,8 +65,6 @@ const Item = styled(Paper)(({ theme, ...props }: any) => ({
     cursor: "pointer",
   },
 
-  // ...(props.ischecked ? { backgroundColor: "#A5D4CE" } : ""),
-  // C7E3E0
   ...(props?.ishas ? { backgroundColor: "#DCEAE9" } : ""),
 }));
 
@@ -106,6 +105,11 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
 
   const { onDoubleClick: onCardDoubleClick, ...cardDataProps } =
     cardProps || {};
+
+  const handleDropdownOpen = (isOpen) => {
+    setIsDropdownOpen(isOpen);
+  };
+
   useEffect(() => {
     props.setIsOpenMenu(isFolderItemHover);
     setIsOpenMenu(isFolderItemHover);
@@ -115,14 +119,6 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
     props.setIsOpenMenu(isCardOuterClicked);
     onOuterClick?.();
   }, [isCardOuterClicked]);
-
-  const handleDropdownOpen = (isOpen) => {
-    setIsDropdownOpen(isOpen);
-  };
-
-  const handleItemClick = (id) => {
-    props?.handleSelectionFolder(id);
-  };
 
   return (
     <Grid item md={4} lg={2} xs={6} sm={6}>
@@ -152,7 +148,6 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
             </MenuDropdown>
           </MenuButtonContainer>
         )}
-
         <Box>
           <MUI.SelectionContainer>
             <CustomCheckbox
@@ -160,7 +155,9 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               sx={{
                 display:
                   !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el) => el?.id === props?.id,
+                    (el: any) =>
+                      el?.id === props?.id &&
+                      el.checkType === props?.selectType,
                   ) && true
                     ? "block"
                     : "none",
@@ -169,15 +166,16 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
               aria-label={"check-" + props?.id}
               checked={
                 !!dataSelector?.selectionFileAndFolderData?.find(
-                  (el) => el?.id === props?.id,
+                  (el: any) =>
+                    el?.id === props?.id && el.checkType === props?.selectType,
                 ) && true
               }
-              onClick={() => handleItemClick(props?.id)}
             />
           </MUI.SelectionContainer>
+
           <MUI.Folder>
             <IconFolderContainer>
-              {props?.file_id || props?.folderId ? (
+              {props?.isContainFiles || props?.file_id ? (
                 <FolderNotEmptyIcon />
               ) : (
                 <FolderEmptyIcon />

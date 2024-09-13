@@ -32,9 +32,6 @@ const useManageUserFromShare = ({
           await getShares({
             variables: {
               where: {
-                // parentKey: parentKey || 0,
-                // isShare: isShare || "yes",
-                // fromAccount: inputFileOrFolder.createdBy.email,
                 toAccount,
                 ...(inputType === "folder"
                   ? {
@@ -44,14 +41,17 @@ const useManageUserFromShare = ({
                       fileId: inputFileOrFolder._id,
                     }),
                 status: "active",
+                isShare: "yes",
               },
               noLimit: true,
             },
           })
         ).data?.getShare.data;
+
         setSharedUserList(currentSharedUserList);
       }
     };
+
     fetchActiveShare();
   }, [inputFileOrFolder]);
 

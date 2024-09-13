@@ -106,7 +106,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
         successMessage("Updated file-drop link successfully!", 2000);
         props.onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(
         manageGraphqlError.handleErrorMessage(cutErr) as string,
@@ -224,14 +224,10 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 justifyContent: "center !important",
-                mt: 5,
+                mt: 4,
               }}
             >
-              <DatePickerV1Lable sx={{ mt: 2, mb: 2 }}>
-                Allow and Disallow:
-              </DatePickerV1Lable>
               <FormControlLabel
-                sx={{ mt: 2 }}
                 control={
                   <Checkbox
                     id="allow-download"
@@ -240,10 +236,9 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Download"
+                label="Allow Download"
               />
               <FormControlLabel
-                sx={{ mt: 2 }}
                 control={
                   <Checkbox
                     id="allow-upload"
@@ -252,10 +247,9 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Upload"
+                label="Allow Upload"
               />
               <FormControlLabel
-                sx={{ mt: 2 }}
                 control={
                   <Checkbox
                     id="allow-multiple"
@@ -264,7 +258,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Multi upload download"
+                label="Allow Multiples"
               />
             </FormControl>
             <NormalButton

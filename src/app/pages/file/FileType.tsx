@@ -28,7 +28,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
@@ -81,9 +80,6 @@ function FileType() {
   });
   const manageFile = useManageFile({ user });
   // const [updateFile] = useMutation(MUTATION_FILES);
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
     action: null,
@@ -347,7 +343,10 @@ function FileType() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             handleDownloadFile();
@@ -476,9 +475,6 @@ function FileType() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const multipleData = [
       {
         id: dataForEvent.data?._id,
@@ -511,9 +507,7 @@ function FileType() {
           customGetFiles();
         },
         onClosure: async () => {
-          setShowProgressing(false);
           setShowPreview(false);
-          setProcesing(false);
           setFileDetailsDialog(false);
         },
       },
@@ -626,7 +620,10 @@ function FileType() {
     switch (eventClick) {
       case "download":
         handleCloseDecryptedPassword();
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleGetDownloadLink();
         } else {
           await handleDownloadFile();
@@ -802,7 +799,10 @@ function FileType() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: async () => {
-                if (userPackage?.downLoadOption === "another") {
+                if (
+                  userPackage?.downLoadOption === "another" ||
+                  userPackage?.category === "free"
+                ) {
                   handleGetDownloadLink();
                 } else {
                   handleDownloadFile();
@@ -821,7 +821,10 @@ function FileType() {
             setShowPreview(false);
           }}
           onClick={() => {
-            if (userPackage?.downLoadOption === "another") {
+            if (
+              userPackage?.downLoadOption === "another" ||
+              userPackage?.category === "free"
+            ) {
               handleGetDownloadLink();
             } else {
               handleDownloadFile();
@@ -910,10 +913,6 @@ function FileType() {
         onClose={handleCloseMultiplePassword}
       />
 
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
-
       <MUI.FileTypeContainer>
         <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
           {dataSelector?.selectionFileAndFolderData?.length ? (
@@ -989,6 +988,7 @@ function FileType() {
                               data.newFilename
                             }
                             user={user}
+                            selectType={"file"}
                             handleSelect={handleMultipleFiles}
                             favouriteIcon={{
                               isShow: false,

@@ -4,6 +4,7 @@ import {
   IconButton,
   Typography,
   styled,
+  useMediaQuery,
 } from "@mui/material";
 import {
   MUTATION_DELETE_FILE_FOREVER,
@@ -25,11 +26,18 @@ import { FolderContext } from "contexts/FolderProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useAuth from "hooks/useAuth";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
-import { Fragment, useContext, useEffect, useState } from "react";
+import {
+  Fragment,
+  KeyboardEvent,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
 import { errorMessage, successMessage } from "utils/alert.util";
+import DialogAlert from "./dialog/DialogAlert";
 
 const SelectContainer = styled("div")({
   width: "100%",
@@ -87,6 +95,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const manageGraphqlError = useManageGraphqlError();
   const { handleTriggerFolder }: any = useContext(FolderContext);
   const [multipleTab, setMultipleTab] = useState("0");
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [userPackage, setUserPackage] = useState<any>(null);
   const { user }: any = useAuth();
 
@@ -97,6 +106,8 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const [restoreFile] = useMutation(MUTATION_UPDATE_FILE);
   const [deleteFolder] = useMutation(MUTATION_DELETE_FOLDER_TRASH);
   const [deleteFile] = useMutation(MUTATION_DELETE_FILE_FOREVER);
+
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   // redux store
   const dispatch = useDispatch();
@@ -113,45 +124,45 @@ function MenuMultipleSelectionFolderAndFile(props) {
     switch (action) {
       case "file-download":
         if (
-          userPackage?.downLoadOption === "direct" ||
-          userPackage?.category !== "free"
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
         ) {
-          handleDownloadFile();
-        } else {
           handleGetLinkAnother();
+        } else {
+          handleDownloadFile();
         }
         break;
 
       case "share-download":
         if (
-          userPackage?.downLoadOption === "direct" ||
-          userPackage?.category !== "free"
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
         ) {
-          handleShareDownloadData();
-        } else {
           handleGetLinkAnother();
+        } else {
+          handleDownloadFile();
         }
         break;
 
       case "folder-download":
         if (
-          userPackage?.downLoadOption === "direct" ||
-          userPackage?.category !== "free"
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
         ) {
-          handleDownloadFileAndFolder();
-        } else {
           handleGetLinkAnother();
+        } else {
+          handleDownloadFileAndFolder();
         }
         break;
 
       case "filedrop-download":
         if (
-          userPackage?.downLoadOption === "direct" ||
-          userPackage?.category !== "free"
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
         ) {
-          handleDownloadFileDrop();
-        } else {
           handleGetLinkAnother();
+        } else {
+          handleDownloadFileDrop();
         }
         break;
 
@@ -161,12 +172,12 @@ function MenuMultipleSelectionFolderAndFile(props) {
 
       case "multiple-download":
         if (
-          userPackage?.downLoadOption === "direct" ||
-          userPackage?.category !== "free"
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
         ) {
-          handleDownloadFileAndFolder();
-        } else {
           handleGetLinkAnother();
+        } else {
+          handleDownloadFileAndFolder();
         }
         break;
 
@@ -195,7 +206,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "delete forever":
-        handleDeleteForever();
+        setIsDeleteOpen(true);
         break;
 
       case "delete":
@@ -238,24 +249,6 @@ function MenuMultipleSelectionFolderAndFile(props) {
         onSuccess: () => {
           dispatch(checkboxAction.setIsLoading(false));
           // handleClearFile();
-        },
-        onFailed: () => {
-          dispatch(checkboxAction.setIsLoading(false));
-        },
-      },
-    );
-  };
-
-  const handleShareDownloadData = async () => {
-    dispatch(checkboxAction.setIsLoading(true));
-    manageFileAction.handleMultipleDownloadFileAndFolder(
-      {
-        multipleData: dataSelector?.selectionFileAndFolderData,
-        isShare: true,
-      },
-      {
-        onSuccess: () => {
-          dispatch(checkboxAction.setIsLoading(false));
         },
         onFailed: () => {
           dispatch(checkboxAction.setIsLoading(false));
@@ -583,6 +576,24 @@ function MenuMultipleSelectionFolderAndFile(props) {
     }
   };
 
+  // Function to handle Escape key press
+  const handleEscKey = (event: KeyboardEvent): void => {
+    if (event.key === "Escape") {
+      handleClearFile();
+    }
+  };
+
+  const handleKeyDown = (event: Event) =>
+    handleEscKey(event as unknown as KeyboardEvent);
+
+  useEffect(() => {
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     function handleMultipleMenu() {
       if (dataSelector?.selectionFileAndFolderData?.length) {
@@ -634,7 +645,8 @@ function MenuMultipleSelectionFolderAndFile(props) {
                 onClick={handleClearFile}
               />
               <Typography variant="h2">
-                {dataSelector?.selectionFileAndFolderData?.length} Selected
+                {dataSelector?.selectionFileAndFolderData?.length}{" "}
+                {!isMobile && "Selected"}
               </Typography>
             </SelectBoxContainer>
           </SelectBoxLeft>
@@ -888,6 +900,16 @@ function MenuMultipleSelectionFolderAndFile(props) {
           )}
         </SelectWrapper>
       </SelectContainer>
+
+      <DialogAlert
+        open={isDeleteOpen}
+        onClose={() => {
+          setIsDeleteOpen(false);
+        }}
+        title="Are you sure that you want to delete this item?"
+        onClick={handleDeleteForever}
+        message={"Note: Any deleted files or folders will not restore again!."}
+      />
     </Fragment>
   );
 }

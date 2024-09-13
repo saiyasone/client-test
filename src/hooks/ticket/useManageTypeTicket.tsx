@@ -1,10 +1,10 @@
 import { useLazyQuery } from "@apollo/client";
-import { QUERY_TICKET } from "api/graphql/ticket.graphql";
+import { QUERY_TICKET_TYPE } from "api/graphql/ticket.graphql";
 import { useEffect } from "react";
 
 const useManageTypeTicket = ({ typeID }) => {
   const [getUserTicket, { data: get_user_ticket }] = useLazyQuery(
-    QUERY_TICKET,
+    QUERY_TICKET_TYPE,
     {
       fetchPolicy: "no-cache",
     },

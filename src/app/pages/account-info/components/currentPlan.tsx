@@ -48,14 +48,14 @@ const CurrentPlan: React.FC<CurrentPlanProps> = ({ paymentState }) => {
       <MUI.BoxShowPlanDetail>
         <MUI.BoxLeftShowPlanDetail>
           <Typography variant="h5">
-            Your Current Paln is &nbsp;
+            Your Current Plan is &nbsp;
             <span style={{ color: "#17766B" }}>{user?.packageId?.name}</span>
           </Typography>
           <Typography variant="h6">A simple start for everyone</Typography>
           <Typography variant="h5">
             Active until:{" "}
             <span style={{ color: "#17766B" }}>
-              {DateTimeFormate(paymentState?.currentPlanInfo?.expiredAt) ?? ""}
+              {DateTimeFormate(paymentState?.currentPlanInfo?.expiredAt) || ""}
             </span>
           </Typography>
           <Typography variant="h6">

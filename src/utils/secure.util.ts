@@ -23,7 +23,7 @@ export const decryptId = (encryptedParam: any, secretKey?: string) => {
   }
 };
 
-export const encryptData = (model) => {
+export const encryptData = (model: any) => {
   const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
   const key = CryptoJS.enc.Utf8.parse(secretKey);
   const iv = CryptoJS.lib.WordArray.random(16);
@@ -38,7 +38,7 @@ export const encryptData = (model) => {
   return encryptedData;
 };
 
-export const encryptDataLink = (data) => {
+export const encryptDataLink = (data: any) => {
   const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
   const key = CryptoJS.enc.Utf8.parse(secretKey);
   const iv = CryptoJS.lib.WordArray.random(16);
@@ -62,7 +62,7 @@ export const encryptDataLink = (data) => {
   return encryptedData;
 };
 
-export const decryptDataLink = (data) => {
+export const decryptDataLink = (data: any) => {
   const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
 
   const [cipherText, ivText] = data.split(":");
@@ -119,7 +119,7 @@ export const decryptToken = (encryptData: any, secretKey: string) => {
   }
 };
 
-export const decryptSettingKey = (encryptData, secretKey) => {
+export const decryptSettingKey = (encryptData: any, secretKey: string) => {
   try {
     if (encryptData && secretKey) {
       const key = CryptoJS.enc.Utf8.parse(secretKey);

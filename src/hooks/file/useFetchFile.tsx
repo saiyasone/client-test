@@ -67,33 +67,33 @@ const useFetchFile = ({ user }: any = {}) => {
     const totalSize = accumulateArray(queryData, "size");
 
     const totalActiveSize = accumulateArray(
-      queryData.filter((data) => data.status === "active"),
+      queryData.filter((data: any) => data.status === "active"),
       "size",
     );
 
     const totalDownload = accumulateArray(queryData, "totalDownload");
 
     const documentFileData = queryData.filter(
-      (data) => data.fileType.split("/")[0] === "application",
+      (data: any) => data.fileType.split("/")[0] === "application",
     );
 
     const imageFileData = queryData.filter(
-      (data) => getShortFileTypeFromFileType(data.fileType) === "image",
+      (data: any) => getShortFileTypeFromFileType(data.fileType) === "image",
     );
 
     const videoFileData = queryData.filter(
-      (data) => getShortFileTypeFromFileType(data.fileType) === "video",
+      (data: any) => getShortFileTypeFromFileType(data.fileType) === "video",
     );
 
     const audioFileData = queryData.filter(
-      (data) => getShortFileTypeFromFileType(data.fileType) === "audio",
+      (data: any) => getShortFileTypeFromFileType(data.fileType) === "audio",
     );
 
     const textFileData = queryData.filter(
-      (data) => getShortFileTypeFromFileType(data.fileType) === "text",
+      (data: any) => getShortFileTypeFromFileType(data.fileType) === "text",
     );
 
-    const otherFileData = queryData.filter((data) => {
+    const otherFileData = queryData.filter((data: any) => {
       const dataFileType = getShortFileTypeFromFileType(data.fileType);
       return (
         dataFileType !== "image" &&
@@ -109,7 +109,7 @@ const useFetchFile = ({ user }: any = {}) => {
     return {
       data: queryData,
       downloadedDataCount: accumulateArray(
-        queryData.filter((data) => data.totalDownload >= 1),
+        queryData.filter((data: any) => data.totalDownload >= 1),
         "totalDownload",
       ),
       total: queryTotal,

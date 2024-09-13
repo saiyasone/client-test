@@ -22,7 +22,7 @@ export default function ActionCreateShare(props) {
               variant="outlined"
               sx={{
                 height: "100%",
-                width: "120px",
+                width:  "120px",
               }}
               endIcon={<MdOutlineExpandMore />}
               {...{

@@ -36,7 +36,7 @@ export const warningMessage = (message: string, timeout?: number) => {
   });
 };
 
-export const errorMessage = (message: string, timeout?: number) => {
+export const errorMessage = (message: string, timeout: number) => {
   Notiflix.Notify.init({ position: "right-top" });
   Notiflix.Notify.failure(message, {
     width: "350px",

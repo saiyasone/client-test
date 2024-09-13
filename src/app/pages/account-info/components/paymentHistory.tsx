@@ -1,6 +1,8 @@
 // components
 import SelectV1 from "components/SelectV1";
 import * as MUI from "../styles/accountInfo.styles";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 
 // material ui
 import { DataGrid } from "@mui/x-data-grid";
@@ -11,6 +13,7 @@ import {
   Chip,
   FormControl,
   IconButton,
+  styled,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -19,26 +22,38 @@ import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 // hooks
 import useFilter from "hooks/payment/useFilter";
 import useManagePayment from "hooks/payment/useManage";
-import { DateTimeFormate } from "utils/date.util";
-import { useNavigate } from "react-router-dom";
+import { ENV_KEYS } from "constants/env.constant";
+import useAuth from "hooks/useAuth";
+import { useState } from "react";
+
+const ImageIcon = styled("img")({
+  width: "35px",
+  height: "35px",
+  objectFit: "cover",
+  borderRadius: "100%",
+});
 
 function PaymentHistory() {
-  const navigate = useNavigate();
+  const [isPreview, setIsPreview] = useState(true);
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
+
   const filterPayment = useFilter();
+  const { user }: any = useAuth();
   const managePayment: any = useManagePayment({
     filter: filterPayment.data,
   });
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath =
+    user?.newName + "-" + user?._id + `/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/`;
 
   const columns: any = [
     {
-      field: "no",
+      field: "id",
       headerName: "ID",
       width: 100,
       headerAlign: "center",
       align: "center",
-      key: "no",
       renderCell: (params) => {
         return (
           <Box>
@@ -56,7 +71,6 @@ function PaymentHistory() {
       field: "firstName",
       headerName: "CLIENT",
       flex: 1,
-      key: "firstName",
       renderCell: (params) => {
         return (
           <Box
@@ -66,19 +80,28 @@ function PaymentHistory() {
               justifyContent: "start",
             }}
           >
-            <Avatar />
+            {isPreview ? (
+              <ImageIcon
+                src={newUrl + sourcePath + user?.profile}
+                onError={() => {
+                  setIsPreview(false);
+                }}
+              />
+            ) : (
+              <Avatar sx={{ width: 35, height: 35 }} />
+            )}
             <Box sx={{ marginLeft: "0.5rem" }}>
               <Typography
                 variant="h5"
                 sx={{ color: "#6F6B7D", fontSize: "1rem", fontWeight: "500" }}
               >
-                {params?.row?.payerId?.firstName ?? ""}
+                {params?.row?.payerId?.firstName || ""}
               </Typography>
               <Typography
                 variant="h6"
                 sx={{ color: "#A5A3AE", fontSize: "0.8rem", fontWeight: "400" }}
               >
-                {params?.row?.payerId?.lastName ?? ""}
+                {params?.row?.payerId?.lastName || ""}
               </Typography>
             </Box>
           </Box>
@@ -91,7 +114,6 @@ function PaymentHistory() {
       width: 100,
       headerAlign: "center",
       align: "center",
-      key: "paymentMethod",
       renderCell: (params) => {
         return (
           <Box>
@@ -109,7 +131,6 @@ function PaymentHistory() {
       field: "amount",
       headerName: "TOTAL",
       flex: 1,
-      key: "amount",
       renderCell: (params) => {
         return (
           <Typography
@@ -125,25 +146,23 @@ function PaymentHistory() {
       field: "expiredAt",
       headerName: "ISSUED DATE",
       flex: 1,
-      key: "expiredAt",
       renderCell: (params) => {
         return (
           <Typography
             variant="h5"
             sx={{ color: "#6F6B7D", fontSize: "0.9rem", fontWeight: "400" }}
           >
-            {DateTimeFormate(params?.row?.expiredAt)}
+            {params?.row?.expiredAt}
           </Typography>
         );
       },
     },
     {
-      field: "status",
+      field: "fullName",
       headerName: "BALANCE",
       flex: 1,
       headerAlign: "center",
       align: "center",
-      key: "status",
       renderCell: (params) => {
         const status = params?.row?.status;
         return (
@@ -182,18 +201,17 @@ function PaymentHistory() {
       flex: 1,
       headerAlign: "center",
       align: "center",
-      key: "actions",
-      renderCell: (params) => {
-        // const paymentId = params?.row?.paymentId;
-        const paymentId = params?.row?._id;
+      renderCell: () => {
         return (
           <Box>
-            <IconButton
-              onClick={() =>
-                navigate(`/account-setting/payment-detail/${paymentId}`)
-              }
-            >
+            <IconButton>
+              <EmailOutlinedIcon />
+            </IconButton>
+            <IconButton>
               <RemoveRedEyeOutlinedIcon />
+            </IconButton>
+            <IconButton>
+              <MoreVertOutlinedIcon />
             </IconButton>
           </Box>
         );

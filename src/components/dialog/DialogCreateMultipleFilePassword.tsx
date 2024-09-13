@@ -308,7 +308,7 @@ function DialogCreateMultipleFilePassword(props) {
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <MUI.DoneLabel sx={{ mr: 2 }}>Your password:</MUI.DoneLabel>
                   <Typography variant="h2">
-                    {lockPassword ?? "unknown"}
+                    {lockPassword || "unknown"}
                   </Typography>
                 </Box>
 

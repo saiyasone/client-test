@@ -27,7 +27,7 @@ const TextField = styled(MuiTextField)(spacing);
 function BaseSignUp(props) {
   const theme = createTheme();
   const { signUpCaptcha, hideSignUp, handleSignUpFailure } = props;
-  const { signUp, authLoading }: any = useAuth();
+  const { signUp }: any = useAuth();
   const [captcha, setCaptcha] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const mobileScreen = useMediaQuery(theme.breakpoints.down("sm"));

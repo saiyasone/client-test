@@ -153,7 +153,7 @@ function ShareWithMeDataGrid(props) {
         if (params?.row?.fileId?._id) {
           fileSize = params?.row?.fileId?.size;
         } else {
-          fileSize = params?.row?.size;
+          fileSize = params?.row?.folderId?.total_size;
         }
 
         return <Fragment>{convertBytetoMBandGB(fileSize || 0)}</Fragment>;

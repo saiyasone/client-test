@@ -146,8 +146,8 @@ function FileDropDetail() {
         data: {
           id: valueOption?._id,
           name: valueOption?.filename,
-          newFilename: valueOption?.newFilename ?? "",
-          newPath: valueOption?.newPath ?? "",
+          newFilename: valueOption?.newFilename || "",
+          newPath: valueOption?.newPath || "",
           checkType: "file",
           fileType: valueOption?.fileType,
           dataPassword: valueOption?.filePassword,
@@ -482,7 +482,7 @@ function FileDropDetail() {
       }
     } catch (err) {
       resetDataForEvent();
-      errorMessage("Sorry! Something went wrong. Please try again!");
+      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
     }
   };
 
@@ -664,12 +664,6 @@ function FileDropDetail() {
                               data?.newPath || "";
                           const publicPath = "public/" + data.newFilename;
 
-                          // console.log(
-                          //   data?.createdBy?._id === "0"
-                          //     ? publicPath
-                          //     : privatePath,
-                          // );
-
                           return (
                             <FileCardItem
                               cardProps={{
@@ -691,6 +685,7 @@ function FileDropDetail() {
                               }
                               user={user}
                               isCheckbox={true}
+                              selectType={"file"}
                               fileType={getShortFileTypeFromFileType(
                                 data.fileType,
                               )}
@@ -851,7 +846,7 @@ function FileDropDetail() {
           filename={dataForEvent.data.filename}
           newFilename={dataForEvent.data.newFilename}
           fileType={dataForEvent.data.fileType}
-          path={dataForEvent.data.newPath ?? "public"}
+          path={dataForEvent.data.newPath || "public"}
           user={user}
           userId={user?._id}
         />

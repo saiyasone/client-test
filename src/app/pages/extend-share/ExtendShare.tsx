@@ -38,7 +38,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import { ENV_KEYS } from "constants/env.constant";
 import {
   shareWithMeFileMenuItems,
@@ -72,6 +71,7 @@ import { convertBytetoMBandGB } from "utils/storage.util";
 import ExtendFileDataGrid from "../extend-folder/ExtendFileDataGrid";
 import ExtendFolderDataGrid from "../extend-folder/ExtendFolderDataGrid";
 import useFetchShareFolder from "hooks/folder/useFetchShareFolder";
+import { TitleAndSwitch } from "styles/clientPage.style";
 
 const ITEM_PER_PAGE = 10;
 
@@ -114,12 +114,6 @@ function ExtendShare() {
     userAuth,
   );
 
-  useEffect(() => {
-    // if (fetchSubFoldersAndFiles.data) {
-    //   console.log(fetchSubFoldersAndFiles.data);
-    // }
-  }, [fetchSubFoldersAndFiles.data]);
-
   // for detect file password
   const [filePassword, setFilePassword] = useState<any>("");
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
@@ -127,9 +121,6 @@ function ExtendShare() {
 
   const manageFile = useManageFile({ user });
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
@@ -322,7 +313,10 @@ function ExtendShare() {
   async function handleSubmitDecryptedPassword() {
     switch (eventClick) {
       case "download":
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleCloseDecryptedPassword();
           handleGetDownloadLink();
         } else {
@@ -413,7 +407,10 @@ function ExtendShare() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             if (dataForEvent.type === "folder") {
@@ -554,7 +551,6 @@ function ExtendShare() {
         },
 
         onClosure: () => {
-          setShowProgressing(false);
           setIsAutoClose(false);
           resetDataForEvents();
         },
@@ -617,8 +613,6 @@ function ExtendShare() {
         onClosure: () => {
           setIsAutoClose(false);
           setFileDetailsDialog(false);
-          setShowProgressing(false);
-          setProcesing(false);
         },
       },
     );
@@ -782,12 +776,12 @@ function ExtendShare() {
             dataId: selectOptions?._id,
             shareId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             newFilename: selectOptions?.newFilename,
             permission: selectOptions?.permission,
             checkType: selectOptions?.checkTypeItem,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -821,13 +815,13 @@ function ExtendShare() {
             id: selectOptions?._id,
             dataId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             checkType: selectOptions?.checkTypeItem,
-            permission: selectOptions?.permission ?? "view",
+            permission: selectOptions?.permission || "view",
             newFilename: selectOptions?.newFolder_name,
             totalSize: selectOptions?.isContainsFiles ? 1 : 0,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -1072,99 +1066,236 @@ function ExtendShare() {
           " will be deleted?"
         }
       />
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
-      <MUI.ExtendContainer>
-        <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
-          {dataSelector?.selectionFileAndFolderData?.length > 0 ? (
-            <MenuMultipleSelectionFolderAndFile
+      <TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
+        {dataSelector?.selectionFileAndFolderData?.length > 0 ? (
+          <MenuMultipleSelectionFolderAndFile
+            isShare={true}
+            onPressShare={() => {
+              setShareMultipleDialog(true);
+            }}
+            onPressDeleteShare={handleMultipleDeleteShare}
+          />
+        ) : (
+          <Fragment>
+            <BreadcrumbNavigate
+              title="share-with-me"
+              titlePath="/share-with-me"
+              user={user}
+              path={breadCrumbData}
+              folderId={parentFolder?._id}
+              handleNavigate={handleFolderNavigate}
               isShare={true}
-              onPressShare={() => {
-                setShareMultipleDialog(true);
-              }}
-              onPressDeleteShare={handleMultipleDeleteShare}
             />
-          ) : (
-            <Fragment>
-              <BreadcrumbNavigate
-                title="share-with-me"
-                titlePath="/share-with-me"
-                user={user}
-                path={breadCrumbData}
-                folderId={parentFolder?._id}
-                handleNavigate={handleFolderNavigate}
-                isShare={true}
-              />
-              {fetchSubFoldersAndFiles.isDataFound !== null &&
-                fetchSubFoldersAndFiles.isDataFound && (
-                  <SwitchPages
-                    handleToggle={handleToggle}
-                    toggle={toggle === "grid" ? "grid" : "list"}
-                    setToggle={setToggle}
-                  />
-                )}
-            </Fragment>
-          )}
-        </MUI.TitleAndSwitch>
+            {fetchSubFoldersAndFiles.isDataFound !== null &&
+              fetchSubFoldersAndFiles.isDataFound && (
+                <SwitchPages
+                  handleToggle={handleToggle}
+                  toggle={toggle === "grid" ? "grid" : "list"}
+                  setToggle={setToggle}
+                />
+              )}
+          </Fragment>
+        )}
+      </TitleAndSwitch>
 
-        {fetchSubFoldersAndFiles.isDataFound !== null &&
-          fetchSubFoldersAndFiles.isDataFound && (
-            <>
-              <MUI.ExtendList>
-                <Fragment>
-                  {fetchSubFoldersAndFiles.data.folders.data.length > 0 && (
-                    <MUI.ExtendItem>
-                      <MUI.ExtendTotalItemContainer>
-                        <Typography variant="h4" fontWeight="bold">
-                          Folders
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontSize: "1rem",
-                            color: "initial !important",
-                            fontWeight: "normal !important",
+      {fetchSubFoldersAndFiles.isDataFound !== null &&
+        fetchSubFoldersAndFiles.isDataFound && (
+          <>
+            <MUI.ExtendList>
+              <Fragment>
+                {fetchSubFoldersAndFiles.data.folders.data.length > 0 && (
+                  <MUI.ExtendItem>
+                    <MUI.ExtendTotalItemContainer>
+                      <Typography variant="h4" fontWeight="bold">
+                        Folders
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontSize: "1rem",
+                          color: "initial !important",
+                          fontWeight: "normal !important",
+                        }}
+                      >
+                        {fetchSubFoldersAndFiles.data.folders.data.length} Items
+                      </Typography>
+                    </MUI.ExtendTotalItemContainer>
+                    <Fragment>
+                      {toggle === "grid" && (
+                        <Fragment>
+                          <FileCardContainer>
+                            {fetchSubFoldersAndFiles.data.folders.data.map(
+                              (data, index) => {
+                                return (
+                                  <FileCardItem
+                                    cardProps={{
+                                      onDoubleClick: () => {
+                                        setDataForEvent({
+                                          data,
+                                          action: "double click",
+                                        });
+                                      },
+                                      ...(dataSelector?.selectionFileAndFolderData?.find(
+                                        (el) => el?.id === data?._id,
+                                      ) && {
+                                        ishas: "true",
+                                      }),
+                                    }}
+                                    id={data?._id}
+                                    selectType={"folder"}
+                                    handleSelect={handleMultipleSelectionFolder}
+                                    isContainFiles={data.isContainsFiles}
+                                    isCheckbox={true}
+                                    fileType="folder"
+                                    isPinned={data.pin ? true : false}
+                                    name={data.name}
+                                    key={index}
+                                    menuItems={shareWithMeFolderMenuItems.map(
+                                      (menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            {...((menuItem.action ===
+                                              "get link" ||
+                                              menuItem.action === "share" ||
+                                              menuItem.action === "download") &&
+                                            data.permission !== "edit"
+                                              ? {
+                                                  disabled: true,
+                                                }
+                                              : {
+                                                  ...(!data.isContainsFiles
+                                                    ? menuItem.action ===
+                                                        "get link" ||
+                                                      menuItem.action ===
+                                                        "share" ||
+                                                      menuItem.action ===
+                                                        "download"
+                                                      ? {
+                                                          disabled: true,
+                                                        }
+                                                      : {
+                                                          onClick: () => {
+                                                            setDataForEvent({
+                                                              action:
+                                                                menuItem.action,
+                                                              type: "folder",
+                                                              data,
+                                                            });
+                                                          },
+                                                        }
+                                                    : {
+                                                        onClick: () => {
+                                                          setDataForEvent({
+                                                            action:
+                                                              menuItem.action,
+                                                            type: "folder",
+                                                            data,
+                                                          });
+                                                        },
+                                                      }),
+                                                })}
+                                            isPinned={data.pin ? true : false}
+                                            key={index}
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                          />
+                                        );
+                                      },
+                                    )}
+                                  />
+                                );
+                              },
+                            )}
+                          </FileCardContainer>
+                        </Fragment>
+                      )}
+                      {toggle !== "grid" && (
+                        <ExtendFolderDataGrid
+                          isFromSharingUrl={true}
+                          isShare={true}
+                          shortMenuItems={shortFileShareMenu}
+                          pagination={{
+                            total: Math.ceil(
+                              fetchSubFoldersAndFiles.data.folders.total /
+                                ITEM_PER_PAGE,
+                            ),
+                            currentPage: currentFolderPage,
+                            setCurrentPage: setCurrentFolderPage,
                           }}
-                        >
-                          {fetchSubFoldersAndFiles.data.folders.data.length}{" "}
-                          Items
-                        </Typography>
-                      </MUI.ExtendTotalItemContainer>
-                      <Fragment>
-                        {toggle === "grid" && (
-                          <Fragment>
-                            <FileCardContainer>
-                              {fetchSubFoldersAndFiles.data.folders.data.map(
-                                (data, index) => {
-                                  return (
-                                    <FileCardItem
-                                      cardProps={{
-                                        onDoubleClick: () => {
-                                          setDataForEvent({
-                                            data,
-                                            action: "double click",
-                                          });
-                                        },
-                                        ...(dataSelector?.selectionFileAndFolderData?.find(
-                                          (el) => el?.id === data?._id,
-                                        ) && {
-                                          ishas: "true",
-                                        }),
-                                      }}
-                                      id={data?._id}
-                                      handleSelect={
-                                        handleMultipleSelectionFolder
-                                      }
-                                      isContainFiles={data.isContainsFiles}
-                                      isCheckbox={true}
-                                      fileType="folder"
-                                      isPinned={data.pin ? true : false}
-                                      name={data.name}
-                                      key={index}
-                                      menuItems={shareWithMeFolderMenuItems.map(
-                                        (menuItem, index) => {
+                          data={fetchSubFoldersAndFiles.data.folders.data}
+                          dataSelector={dataSelector}
+                          user={user}
+                          handleEvent={(action, data) => {
+                            setDataForEvent({
+                              action,
+                              type: "folder",
+                              data,
+                            });
+                          }}
+                          handleSelection={handleMultipleSelectionFolder}
+                        />
+                      )}
+                    </Fragment>
+                  </MUI.ExtendItem>
+                )}
+                {fetchSubFoldersAndFiles.data.files.data.length > 0 && (
+                  <MUI.ExtendItem>
+                    <MUI.ExtendTotalItemContainer>
+                      <Typography variant="h4" fontWeight="bold">
+                        Files{" "}
+                      </Typography>
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          fontSize: "1rem",
+                          color: "initial !important",
+                          fontWeight: "normal !important",
+                        }}
+                      >
+                        {fetchSubFoldersAndFiles.data.files.data?.length} Items
+                      </Typography>
+                    </MUI.ExtendTotalItemContainer>
+                    <Fragment>
+                      {toggle === "grid" && (
+                        <FileCardContainer>
+                          {fetchSubFoldersAndFiles.data.files.data.map(
+                            (data, index) => {
+                              return (
+                                <Fragment key={index}>
+                                  <FileCardItem
+                                    cardProps={{
+                                      onDoubleClick: () => {
+                                        setDataForEvent({
+                                          action: "preview",
+                                          data,
+                                        });
+                                      },
+                                    }}
+                                    imagePath={
+                                      data?.createdBy?.newName +
+                                      "-" +
+                                      data?.createdBy?._id +
+                                      "/" +
+                                      (data?.newPath
+                                        ? removeFileNameOutOfPath(data?.newPath)
+                                        : "") +
+                                      data?.newFilename
+                                    }
+                                    selectType={"file"}
+                                    user={data?.createdBy}
+                                    id={data?._id}
+                                    handleSelect={handleMultipleSelectionFile}
+                                    isCheckbox={true}
+                                    fileType={getShortFileTypeFromFileType(
+                                      data?.type,
+                                    )}
+                                    filePassword={data?.filePassword}
+                                    name={data?.name}
+                                    // key={index}
+                                    menuItems={shareWithMeFileMenuItems.map(
+                                      (menuItem, index) => {
+                                        if (data?.permission) {
                                           return (
                                             <MenuDropdownItem
                                               {...((menuItem.action ===
@@ -1177,229 +1308,81 @@ function ExtendShare() {
                                                     disabled: true,
                                                   }
                                                 : {
-                                                    ...(!data.isContainsFiles
-                                                      ? menuItem.action ===
-                                                          "get link" ||
-                                                        menuItem.action ===
-                                                          "share" ||
-                                                        menuItem.action ===
-                                                          "download"
-                                                        ? {
-                                                            disabled: true,
-                                                          }
-                                                        : {
-                                                            onClick: () => {
-                                                              setDataForEvent({
-                                                                action:
-                                                                  menuItem.action,
-                                                                type: "folder",
-                                                                data,
-                                                              });
-                                                            },
-                                                          }
-                                                      : {
-                                                          onClick: () => {
-                                                            setDataForEvent({
-                                                              action:
-                                                                menuItem.action,
-                                                              type: "folder",
-                                                              data,
-                                                            });
-                                                          },
-                                                        }),
+                                                    onClick: () => {
+                                                      setDataForEvent({
+                                                        action: menuItem.action,
+                                                        data,
+                                                      });
+                                                    },
                                                   })}
-                                              isPinned={data.pin ? true : false}
+                                              isFavorite={
+                                                data.favorite ? true : false
+                                              }
                                               key={index}
                                               title={menuItem.title}
                                               icon={menuItem.icon}
                                             />
                                           );
-                                        },
-                                      )}
-                                    />
-                                  );
-                                },
-                              )}
-                            </FileCardContainer>
-                          </Fragment>
-                        )}
-                        {toggle !== "grid" && (
-                          <ExtendFolderDataGrid
+                                        } else {
+                                          return (
+                                            <MenuDropdownItem
+                                              isFavorite={
+                                                data.favorite ? true : false
+                                              }
+                                              onClick={() => {
+                                                setDataForEvent({
+                                                  action: menuItem.action,
+                                                  data,
+                                                });
+                                              }}
+                                              key={index}
+                                              title={menuItem.title}
+                                              icon={menuItem.icon}
+                                            />
+                                          );
+                                        }
+                                      },
+                                    )}
+                                  />
+                                </Fragment>
+                              );
+                            },
+                          )}
+                        </FileCardContainer>
+                      )}
+                      {toggle === "list" && (
+                        <Fragment>
+                          <ExtendFileDataGrid
                             isFromSharingUrl={true}
-                            isShare={true}
                             shortMenuItems={shortFileShareMenu}
                             pagination={{
                               total: Math.ceil(
-                                fetchSubFoldersAndFiles.data.folders.total /
+                                fetchSubFoldersAndFiles.data.files.total /
                                   ITEM_PER_PAGE,
                               ),
-                              currentPage: currentFolderPage,
-                              setCurrentPage: setCurrentFolderPage,
+                              currentPage: currentFilePage,
+                              setCurrentPage: setCurrentFilePage,
                             }}
-                            data={fetchSubFoldersAndFiles.data.folders.data}
-                            dataSelector={dataSelector}
                             user={user}
+                            dataSelector={dataSelector}
+                            data={fetchSubFoldersAndFiles.data.files.data}
                             handleEvent={(action, data) => {
                               setDataForEvent({
                                 action,
-                                type: "folder",
                                 data,
                               });
                             }}
-                            handleSelection={handleMultipleSelectionFolder}
+                            handleSelection={handleMultipleSelectionFile}
                           />
-                        )}
-                      </Fragment>
-                    </MUI.ExtendItem>
-                  )}
-                  {fetchSubFoldersAndFiles.data.files.data.length > 0 && (
-                    <MUI.ExtendItem>
-                      <MUI.ExtendTotalItemContainer>
-                        <Typography variant="h4" fontWeight="bold">
-                          Files{" "}
-                        </Typography>
-                        <Typography
-                          variant="h5"
-                          sx={{
-                            fontSize: "1rem",
-                            color: "initial !important",
-                            fontWeight: "normal !important",
-                          }}
-                        >
-                          {fetchSubFoldersAndFiles.data.files.data?.length}{" "}
-                          Items
-                        </Typography>
-                      </MUI.ExtendTotalItemContainer>
-                      <Fragment>
-                        {toggle === "grid" && (
-                          <FileCardContainer>
-                            {fetchSubFoldersAndFiles.data.files.data.map(
-                              (data, index) => {
-                                return (
-                                  <Fragment key={index}>
-                                    <FileCardItem
-                                      cardProps={{
-                                        onDoubleClick: () => {
-                                          setDataForEvent({
-                                            action: "preview",
-                                            data,
-                                          });
-                                        },
-                                      }}
-                                      imagePath={
-                                        data?.createdBy?.newName +
-                                        "-" +
-                                        data?.createdBy?._id +
-                                        "/" +
-                                        (data?.newPath
-                                          ? removeFileNameOutOfPath(
-                                              data?.newPath,
-                                            )
-                                          : "") +
-                                        data?.newFilename
-                                      }
-                                      user={data?.createdBy}
-                                      id={data?._id}
-                                      handleSelect={handleMultipleSelectionFile}
-                                      isCheckbox={true}
-                                      fileType={getShortFileTypeFromFileType(
-                                        data?.type,
-                                      )}
-                                      filePassword={data?.filePassword}
-                                      name={data?.name}
-                                      // key={index}
-                                      menuItems={shareWithMeFileMenuItems.map(
-                                        (menuItem, index) => {
-                                          if (data?.permission) {
-                                            return (
-                                              <MenuDropdownItem
-                                                {...((menuItem.action ===
-                                                  "get link" ||
-                                                  menuItem.action === "share" ||
-                                                  menuItem.action ===
-                                                    "download") &&
-                                                data.permission !== "edit"
-                                                  ? {
-                                                      disabled: true,
-                                                    }
-                                                  : {
-                                                      onClick: () => {
-                                                        setDataForEvent({
-                                                          action:
-                                                            menuItem.action,
-                                                          data,
-                                                        });
-                                                      },
-                                                    })}
-                                                isFavorite={
-                                                  data.favorite ? true : false
-                                                }
-                                                key={index}
-                                                title={menuItem.title}
-                                                icon={menuItem.icon}
-                                              />
-                                            );
-                                          } else {
-                                            return (
-                                              <MenuDropdownItem
-                                                isFavorite={
-                                                  data.favorite ? true : false
-                                                }
-                                                onClick={() => {
-                                                  setDataForEvent({
-                                                    action: menuItem.action,
-                                                    data,
-                                                  });
-                                                }}
-                                                key={index}
-                                                title={menuItem.title}
-                                                icon={menuItem.icon}
-                                              />
-                                            );
-                                          }
-                                        },
-                                      )}
-                                    />
-                                  </Fragment>
-                                );
-                              },
-                            )}
-                          </FileCardContainer>
-                        )}
-                        {toggle === "list" && (
-                          <Fragment>
-                            <ExtendFileDataGrid
-                              isFromSharingUrl={true}
-                              shortMenuItems={shortFileShareMenu}
-                              pagination={{
-                                total: Math.ceil(
-                                  fetchSubFoldersAndFiles.data.files.total /
-                                    ITEM_PER_PAGE,
-                                ),
-                                currentPage: currentFilePage,
-                                setCurrentPage: setCurrentFilePage,
-                              }}
-                              user={user}
-                              dataSelector={dataSelector}
-                              data={fetchSubFoldersAndFiles.data.files.data}
-                              handleEvent={(action, data) => {
-                                setDataForEvent({
-                                  action,
-                                  data,
-                                });
-                              }}
-                              handleSelection={handleMultipleSelectionFile}
-                            />
-                          </Fragment>
-                        )}
-                      </Fragment>
-                    </MUI.ExtendItem>
-                  )}
-                </Fragment>
-              </MUI.ExtendList>
-            </>
-          )}
-      </MUI.ExtendContainer>
+                        </Fragment>
+                      )}
+                    </Fragment>
+                  </MUI.ExtendItem>
+                )}
+              </Fragment>
+            </MUI.ExtendList>
+          </>
+        )}
 
       <DialogCreateFileDrop
         isOpen={openFileDrop}

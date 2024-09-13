@@ -44,12 +44,8 @@ export const QUERY_PACKAGE = gql`
         customExpiredLink
         downloadFolder
         remoteUpload
-        iosApplication
-        androidApplication
         sort
         totalUsed
-        textColor
-        bgColor
         status
         createdAt
         updatedAt

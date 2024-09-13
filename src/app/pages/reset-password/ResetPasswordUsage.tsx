@@ -70,7 +70,7 @@ function ResetPassword(props) {
           setIsLoading(true);
           await resetPassword?.(values);
           setIsLoading(false);
-        } catch (error) {
+        } catch (error: any) {
           setIsLoading(false);
           const message = error.message || "Something went wrong";
 
