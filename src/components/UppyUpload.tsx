@@ -3,7 +3,7 @@ import { Fragment, useEffect, useRef, useState } from "react";
 // uppy package
 import Uppy from "@uppy/core";
 import { Dashboard } from "@uppy/react";
-import xhrUpload from "@uppy/xhr-upload";
+// import xhrUpload from "@uppy/xhr-upload";
 import ImageEditor from "@uppy/image-editor";
 import ThumbnailGenerator from "@uppy/thumbnail-generator";
 import Webcam from "@uppy/webcam";
@@ -25,23 +25,18 @@ import {
   MUTATION_CREATE_FILE,
   MUTATION_DELETE_FILE,
 } from "api/graphql/file.graphql";
-import { ENV_KEYS } from "constants/env.constant";
+// import { ENV_KEYS } from "constants/env.constant";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { errorMessage } from "utils/alert.util";
 import { Box, Button, Typography } from "@mui/material";
 import UploadFolderManual from "./UploadFolder";
 import useAuth from "hooks/useAuth";
-import { encryptData } from "utils/secure.util";
-
-// type Props = {
-//   open?: boolean;
-// };
+// import { encryptData } from "utils/secure.util";
 
 function UppyUpload() {
   const [isOpen, setIsOpen] = useState(false);
   const [fileCount, setFileCount] = useState(0);
   const [isOpenFolder, setIsOpenFolder] = useState(false);
-  const [isUploading, setIsUploading] = useState(false);
   const [canClose, setCanClose] = useState(false);
 
   const [fileId, setFileId] = useState({});
@@ -64,7 +59,6 @@ function UppyUpload() {
   async function handleUpload() {
     if (!uppyInstance.getFiles().length) return;
 
-    setIsUploading(true);
     setCanClose(true);
 
     try {
@@ -148,7 +142,7 @@ function UppyUpload() {
   function handleDoneUpload() {
     setFileId({});
     setSelectFiles([]);
-    setIsUploading(false);
+
     setCanClose(false);
     setFileCount(0);
     fileIdRef.current.value = null;
@@ -242,42 +236,35 @@ function UppyUpload() {
         uppy.on("upload-success", () => {
           uploadSuccess++;
           setFileCount(uploadSuccess);
-          // console.log({
-          //   selectFile: selectFileRef.current?.length,
-          // });
 
           if (uploadSuccess === selectFileRef.current?.length) {
             handleDoneUpload();
           }
-          // if (result.successful.length === selectFileRef.current?.length) {
-          //   handleDoneUpload();
-          //   console.log("upload file successfully uploaded");
-          // }
         });
 
-        uppy.use(xhrUpload, {
-          endpoint: ENV_KEYS.VITE_APP_LOAD_UPLOAD_URL,
-          formData: true,
-          method: "POST",
-          fieldName: "file",
+        // uppy.use(xhrUpload, {
+        //   endpoint: ENV_KEYS.VITE_APP_LOAD_UPLOAD_URL,
+        //   formData: true,
+        //   method: "POST",
+        //   fieldName: "file",
 
-          headers: (file: any) => {
-            const extension = file?.name?.lastIndexOf(".");
-            const fileExtension = file.name?.slice(extension);
+        //   headers: (file: any) => {
+        //     const extension = file?.name?.lastIndexOf(".");
+        //     const fileExtension = file.name?.slice(extension);
 
-            const headers = {
-              PATH: `${user?.newName}-${user?._id}`,
-              FILENAME: `${file.data?.customeNewName}${fileExtension}`,
-              createdBy: user?._id,
-            };
+        //     const headers = {
+        //       PATH: `${user?.newName}-${user?._id}`,
+        //       FILENAME: `${file.data?.customeNewName}${fileExtension}`,
+        //       createdBy: user?._id,
+        //     };
 
-            const encryptedData = encryptData(headers);
+        //     const encryptedData = encryptData(headers);
 
-            return {
-              encryptedHeaders: encryptedData,
-            };
-          },
-        });
+        //     return {
+        //       encryptedHeaders: encryptedData,
+        //     };
+        //   },
+        // });
 
         setUppyInstance(uppy);
 

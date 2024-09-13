@@ -15,8 +15,15 @@ import { useDropzone } from "react-dropzone";
 import { errorMessage } from "utils/alert.util";
 import DialogUploadChatFile from "./DialogUploadChatFile";
 
-export default function ChatFormReply(props) {
-  const { dataReply, handleReloading, isAdmin } = props;
+type Props = {
+  dataReply?: any;
+  isAdmin?: boolean;
+
+  handleEmit?: (message?: string) => void;
+  handleReloading?: () => void;
+};
+export default function ChatFormReply(props: Props) {
+  const { dataReply, handleReloading, handleEmit, isAdmin } = props;
   const [isFile, setIsFile] = useState(false);
 
   const inputRef = useRef<any>(null);
@@ -42,13 +49,14 @@ export default function ChatFormReply(props) {
     onDrop: onDropFile,
 
     multiple: true,
+    maxFiles: 4,
   });
 
   const handleIsFileClose = () => {
     setIsFile(false);
     dispatch(chatSlice.setFilesEmpty());
     dispatch(chatSlice.setCurrentIndex(0));
-    handleReloading();
+    handleReloading?.();
   };
 
   const handleClearMessage = () => dispatch(chatSlice.setChatMessageEMPTY());
@@ -63,7 +71,6 @@ export default function ChatFormReply(props) {
             typeTicketID: parseInt(dataReply?._id),
             title: dataReply?.title,
             email: dataReply?.email,
-            // message: textMessage,
             message: values?.reply,
             image: [],
             statusSend: chatSelector?.dataReply?._id ? null : "answerMessage",
@@ -71,15 +78,16 @@ export default function ChatFormReply(props) {
               ? parseInt(chatSelector?.dataReply?._id)
               : parseInt("0"),
           },
-          request: isAdmin ? "backoffice" : "client",
+          request: "client",
         },
       });
 
-      if (result?.data?.createTickets?._id) {
-        handleReloading();
+      const newTicketId = await result?.data?.createTickets?._id;
+      if (newTicketId) {
+        handleEmit?.(values.reply);
+        handleReloading?.();
         setIsLoading(false);
         handleClearMessage();
-        // setTextMessage("");
         action?.resetForm();
       }
     } catch (error) {

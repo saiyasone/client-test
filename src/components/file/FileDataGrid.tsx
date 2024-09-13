@@ -10,7 +10,6 @@ import "styles/dataGrid.style.css";
 const FileDataGridContainer = styled("div")({
   width: "100%",
   height: "100%",
-
   ".MuiDataGrid-root": {
     /* backgroundColor: "white", */
     border: "none",
@@ -76,6 +75,7 @@ export default function FileDataGrid({ dataGrid, ...props }) {
       setIsLoaded(true);
     }
   }, [props.data]);
+
 
   return (
     <FileDataGridContainer>

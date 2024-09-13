@@ -449,6 +449,7 @@ export default function ShowUpload(props: Props) {
           let newFilePath = "";
 
           if (folderId > 0) {
+            console.log("first");
             const queryfolderPath = await queryPath({
               variables: {
                 where: {
@@ -1127,7 +1128,7 @@ export default function ShowUpload(props: Props) {
       errorMessage(error, 3000);
     }
   }
-  
+
   const handleCancelUploadPresign = async (fileIndex: number) => {
     const xhr = fileStates[fileIndex]?.xhr;
     if (xhr) {

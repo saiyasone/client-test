@@ -523,7 +523,6 @@ const useManageFile = ({ user }) => {
         downloadBy: multipleData[0]?.toAccount?.email,
         createdBy: multipleData[0].createdBy?._id,
       };
-
       const encryptedData = dataEncrypted({ headers });
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 

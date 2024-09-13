@@ -17,7 +17,7 @@ import lockIcon from "assets/images/lock-icon.png";
 import useHover from "hooks/useHover";
 import useOuterClick from "hooks/useOuterClick";
 import useResizeImage from "hooks/useResizeImage";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import { BsPinAngle, BsPinAngleFill } from "react-icons/bs";
 import { FiDownload } from "react-icons/fi";
 import * as MdIcon from "react-icons/md";
@@ -29,7 +29,7 @@ import { cutStringWithEllipsis } from "utils/string.util";
 import Loader from "./Loader";
 import MenuDropdown from "./MenuDropdown";
 import NormalButton from "./NormalButton";
-import { toggleMenu } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 
 export const SelectionContainer = styled("div")({
   position: "absolute",
@@ -245,14 +245,18 @@ const FileCardItem: React.FC<any> = ({
     isNormalCard,
     sx,
     onDoubleClick: onCardDoubleClick,
+    onClick,
     ...cardDataProps
   } = cardProps || {};
-
+  const dispatch = useDispatch();
   // redux store
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
   );
-
+  const { isSelected } = useSelector((state: RootState) => state.event);
+  const [styles, setStyles] = React.useState<
+    Record<string, Partial<FileIconProps>>
+  >({});
   const handleDropdownOpen = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
   };
@@ -318,7 +322,7 @@ const FileCardItem: React.FC<any> = ({
           },
         }}
       >
-        {props?.isCheckbox && (
+        {((props?.isCheckbox && !isMobile) || isSelected) && (
           <SelectionContainer>
             <CustomCheckbox
               sx={{
@@ -419,47 +423,16 @@ const FileCardItem: React.FC<any> = ({
                     )}
                   </Box>
                 )}
-
-                <Fragment>
-                  {fileType !== "folder" && (
-                    <Fragment>
-                      {props?.filePassword ? (
-                        <LockImage
-                          className="lock-icon-preview"
-                          src={lockIcon}
-                          alt={props.name}
-                        />
-                      ) : (
-                        <FileIconContainer>
-                          <FileIcon
-                            extension={getFileType(props.name)}
-                            {...{
-                              ...defaultStyles[
-                                getFileType(props.name) as string
-                              ],
-                            }}
-                          />
-                        </FileIconContainer>
-                      )}
-                    </Fragment>
-                  )}
-                </Fragment>
-                {/* {fileType === "video" ? (
-                  <VideoThumbnail videoSrc={newUrl + imagePath} />
-                ) : (
-                  <Fragment>
-                    {fileType !== "folder" && (
-                      <FileIconContainer>
-                        <FileIcon
-                          extension={getFileType(props.name)}
-                          {...{
-                            ...defaultStyles[getFileType(props.name) as string],
-                          }}
-                        />
-                      </FileIconContainer>
-                    )}
-                  </Fragment>
-                )} */}
+                {fileType !== "folder" && (
+                  <FileIconContainer>
+                    <FileIcon
+                      extension={getFileType(props.name) ?? ""}
+                      {...{
+                        ...styles[getFileType(props.name) as string],
+                      }}
+                    />
+                  </FileIconContainer>
+                )}
               </React.Fragment>
             )}
             {!props.disableName && (

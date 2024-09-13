@@ -60,9 +60,9 @@ const useGetUrlDownload = (data) => {
                     },
                   },
                 });
+                setCoppied(false);
                 if (result.data?.updateFiles?._id) {
-                  setCoppied(false);
-                  window.open(data?.shortUrl, "_blank");
+                  window.open(data?.shortUrl || data?.fileId?.shortUrl, "_blank");
                 }
               }
             }, 100);

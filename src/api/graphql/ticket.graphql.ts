@@ -81,8 +81,8 @@ export const QUERY_TICKET_TYPE = gql`
 `;
 
 export const MUTATION_CREATE_TICKET = gql`
-  mutation CreateTickets($data: TicketsInput!) {
-    createTickets(data: $data) {
+  mutation CreateTickets($data: TicketsInput!, $request: Request) {
+    createTickets(data: $data, request: $request) {
       _id
       image {
         _id

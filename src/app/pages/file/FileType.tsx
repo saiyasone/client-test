@@ -52,6 +52,7 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import FileDataGrid from "./FileTypeDataGrid";
 import * as MUI from "./styles/fileType.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 const ITEM_PER_PAGE = 20;
 
@@ -67,6 +68,7 @@ function FileType() {
   const [isDataFound, setDataFound] = useState<any>(null);
   const [toggle, setToggle] = useState<any>("list");
   const [userPackage, setUserPackage] = useState<any>(null);
+  const [mainFileTypes, setMainFileTypes] = useState<any>(null);
 
   const navigate = useNavigate();
 
@@ -157,6 +159,11 @@ function FileType() {
     setIsMultiplePasswordLink(false);
   };
 
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
+  };
+  
   const queryFileGrid = async () => {
     if (toggle === "grid") {
       try {
@@ -174,6 +181,8 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
+              console.log(queryData);
+              setMainFileTypes(queryData)
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -230,6 +239,7 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
+              setMainFileTypes(queryData)
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -669,6 +679,7 @@ function FileType() {
     }
   }, [dataForEvent.action]);
 
+
   const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
     const result = await getFolders({
       variables: {
@@ -813,7 +824,7 @@ function FileType() {
         />
       )}
 
-      {showPreview && (
+      {/* {showPreview && (
         <DialogPreviewFile
           open={showPreview}
           handleClose={() => {
@@ -836,8 +847,16 @@ function FileType() {
           path={dataForEvent.data.newPath}
           user={user}
         />
-      )}
+      )} */}
 
+      <DialogPreviewFileSlide
+        open={showPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={mainFileTypes}
+        propsStatus="category"
+      />
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {
