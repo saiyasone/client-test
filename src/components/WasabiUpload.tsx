@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect, useRef, useState } from "react";
 
 // uppy package
 import AudioFile from "@uppy/audio";
-import AwsS3Multipart from "@uppy/aws-s3";
+import AwsS3Multipart from "@uppy/aws-s3-multipart";
 import Uppy from "@uppy/core";
 import ImageEditor from "@uppy/image-editor";
 import { Dashboard } from "@uppy/react";
@@ -232,7 +232,7 @@ function WasabiUpload(props: Props) {
         });
 
         uppy.on("cancel-all", () => {
-          // handleDoneUpload();
+          handleDoneUpload();
         });
         uppy.on("complete", () => {
           eventUploadTrigger?.trigger();
@@ -258,18 +258,15 @@ function WasabiUpload(props: Props) {
           showAudioSourceDropdown: true,
         });
         uppy.use(AwsS3Multipart, {
-          shouldUseMultipart: true,
+          companionUrl: "",
           limit: 4,
-
           async createMultipartUpload(file: File | Blob | any) {
             const headers = {
               createdBy: user?._id,
               FILENAME: file.newFilename,
               PATH: `${subPath}`,
             };
-
             const _encryptHeader = await encryptData(headers);
-
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}initiate-multipart-upload`,
               {
@@ -325,7 +322,6 @@ function WasabiUpload(props: Props) {
             formData.append("parts", JSON.stringify(parts));
             formData.append("uploadId", uploadId);
             formData.append("FILENAME", file.newFileName);
-
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}complete-multipart-upload`,
               {
