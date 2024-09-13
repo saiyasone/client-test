@@ -253,7 +253,9 @@ const FileCardItem: React.FC<any> = ({
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
   );
-  const { isSelected } = useSelector((state: RootState) => state.event);
+  const { isSelected, isFolderSelected } = useSelector(
+    (state: RootState) => state.event,
+  );
   const [styles, setStyles] = React.useState<
     Record<string, Partial<FileIconProps>>
   >({});
@@ -323,7 +325,9 @@ const FileCardItem: React.FC<any> = ({
           },
         }}
       >
-        {((props?.isCheckbox && !isMobile) || isSelected) && (
+        {((props?.isCheckbox && !isMobile) ||
+          isSelected ||
+          isFolderSelected) && (
           <SelectionContainer>
             <CustomCheckbox
               sx={{

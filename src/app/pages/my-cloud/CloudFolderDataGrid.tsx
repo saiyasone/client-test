@@ -3,9 +3,10 @@ import ResponsivePagination from "react-responsive-pagination";
 import "styles/pagination.style.css";
 
 // material ui icon and component
-import { Box, Checkbox } from "@mui/material";
+import { Box, Checkbox, useMediaQuery } from "@mui/material";
 import { styled } from "@mui/material/styles";
-
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import FolderEmptyIcon from "assets/images/empty/folder-empty.svg?react";
 import FolderNotEmptyIcon from "assets/images/empty/folder-not-empty.svg?react";
 
@@ -23,6 +24,7 @@ import {
 import moment from "instances/moment.instance";
 import { useMemo } from "react";
 import { convertBytetoMBandGB } from "utils/storage.util";
+import { IFolderTypes } from "types/mycloudFileType";
 
 const CloudFoldersDataGridContainer = styled("div")(() => ({
   height: "100%",
@@ -31,19 +33,21 @@ const CloudFoldersDataGridContainer = styled("div")(() => ({
 }));
 
 const IconFolderContainer = styled(Box)({
-  width: "30px",
+  width: "34px",
+  display: "flex",
+  alignItems: "center",
 });
 
-function CloudFolderDataGrid(props) {
+function CloudFolderDataGrid(props: any) {
   const [hover, setHover] = useState("");
   const [_isPage, setIsPage] = useState(false);
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
   const [isLoaded, setIsloaded] = useState<any>(null);
-
-  const handlePopperOpen = (event) => {
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const handlePopperOpen = (event: any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data.find((r) => r._id === id);
+    const row = props.data.find((r: IFolderTypes) => r._id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
@@ -69,26 +73,57 @@ function CloudFolderDataGrid(props) {
     }
   }, [props?.data]);
 
+  const handleClick = (params: { row: IFolderTypes }) => {
+    if (!isMobile) {
+      return;
+    }
+    props.handleEvent("folder double click", params.row);
+  };
+
   const columns = [
     {
       field: "checkboxAction",
       headerName: "",
       editable: false,
       sortable: false,
-      width: 50,
-      renderCell: (params) => {
+      maxWidth: isMobile ? 40 : 70,
+      flex: 1,
+      renderCell: (params: { row: IFolderTypes }) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: IFolderTypes) => el?.id === _id,
+          );
         return (
-          <Checkbox
-            checked={
-              !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
-              ) && true
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => props?.handleSelection(_id)}
-          />
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: IFolderTypes) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },
@@ -96,7 +131,9 @@ function CloudFolderDataGrid(props) {
       field: "folder_name",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      minWidth: 120,
+      flex: 1,
+      renderCell: (params: { row: IFolderTypes }) => {
         return (
           <div
             style={{
@@ -105,12 +142,8 @@ function CloudFolderDataGrid(props) {
               columnGap: "6px",
             }}
           >
-            <IconFolderContainer
-              onClick={() => {
-                // handleClick(params);
-              }}
-            >
-              {params.row?.total_size > 0 ? (
+            <IconFolderContainer>
+              {parseInt(params.row?.total_size) > 0 ? (
                 <FolderNotEmptyIcon />
               ) : (
                 <FolderEmptyIcon />
@@ -120,13 +153,14 @@ function CloudFolderDataGrid(props) {
           </div>
         );
       },
-      flex: 1,
     },
     {
       field: "size",
       headerName: "Folder size",
-      renderCell: (params) => {
-        return <span>{convertBytetoMBandGB(params?.row?.total_size)}</span>;
+      renderCell: (params: { row: IFolderTypes }) => {
+        return (
+          <span>{convertBytetoMBandGB(parseInt(params?.row?.total_size))}</span>
+        );
       },
       editable: false,
       flex: 1,
@@ -135,7 +169,7 @@ function CloudFolderDataGrid(props) {
       field: "updatedAt",
       headerName: "Lasted Update",
       editable: false,
-      renderCell: (params) => {
+      renderCell: (params: { row: IFolderTypes }) => {
         return (
           <span>
             {moment(params.row.updatedAt).format("D MMM YYYY, h:mm A")}
@@ -151,14 +185,15 @@ function CloudFolderDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params) => {
+      renderCell: (params: { row: IFolderTypes }) => {
         return (
           <Action2
             params={params}
             eventActions={{
               hover,
               setHover,
-              handleEvent: (action, data) => props.handleEvent(action, data),
+              handleEvent: (action: string, data: IFolderTypes) =>
+                props.handleEvent(action, data),
             }}
             menuItems={favouriteMenuItems}
             shortMenuItems={shortMyCloudMenuItems}
@@ -171,7 +206,7 @@ function CloudFolderDataGrid(props) {
 
   const rows = useMemo(
     () =>
-      props?.data.map((row) => ({
+      props?.data.map((row: IFolderTypes) => ({
         ...row,
         id: row?._id,
       })) || [],
@@ -195,11 +230,19 @@ function CloudFolderDataGrid(props) {
               onMouseLeave: handlePopperClose,
             },
           },
-          onCellDoubleClick: (params) =>
+          onCellDoubleClick: (params: { row: IFolderTypes }) =>
             props.handleEvent("folder double click", params.row),
+          onCellClick: (params: { field: string; row: IFolderTypes }) => {
+            if (
+              params.field !== "checkboxAction" &&
+              params.field !== "action"
+            ) {
+              handleClick(params);
+            }
+          },
           columns,
           hideFooter: true,
-          getRowId: (row) => row._id,
+          getRowId: (row: IFolderTypes) => row._id,
         }}
         data={rows}
       />

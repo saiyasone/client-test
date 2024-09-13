@@ -4,6 +4,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   CircularProgress,
+  ListItemText,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -89,8 +90,14 @@ import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 import { RootState } from "stores/store";
 import { useRefreshState } from "contexts/RefreshProvider";
-import { setMenuToggle } from "stores/features/useEventSlice";
-import { IMyCloudTypes } from "types/mycloudFileType";
+import {
+  setMenuToggle,
+  setMenuToggleAsync,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
+import { IFolderIdTypes } from "types/filesType";
 
 const ITEM_PER_PAGE_GRID = 20;
 
@@ -200,7 +207,7 @@ export function MyCloud() {
   const {
     isOpenMenu: isMenu,
     isSelected,
-    isOnClicked,
+    isFolderSelected,
     isToggleMenu,
   } = useSelector((state: RootState) => state.event);
 
@@ -427,27 +434,6 @@ export function MyCloud() {
     countFilePage = k;
   }
 
-  const handleClickFolder = (
-    _e: any,
-    value: {
-      folder_type: string;
-      folder_name: SetStateAction<string>;
-      filename: SetStateAction<string>;
-      _id: SetStateAction<{}>;
-      path: SetStateAction<string>;
-    },
-  ) => {
-    if (value.folder_type === "folder") {
-      setName(value?.folder_name);
-    } else {
-      setName(value?.filename);
-    }
-
-    setChecked(value?._id);
-    setPath(value.path);
-    setOptionsValue(true);
-    setGetValue(value);
-  };
 
   const handleClose = () => {
     setOptionsValue(false);
@@ -960,7 +946,7 @@ export function MyCloud() {
   const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState: {data:IMyCloudTypes}) => ({
+        setDataForEvent((prevState: { data: IMyCloudTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -1346,6 +1332,38 @@ export function MyCloud() {
       data,
     });
   };
+
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+
+  const handleFolderClick = useCallback(
+    (e: any, data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+
+      if (
+        isMobile &&
+        !isFolderSelected &&
+        isToggleMenu.isStatus === "preview"
+      ) {
+        setDataForEvent({
+          action: "folder double click",
+          data: data,
+        });
+      } else {
+        handleMultipleFolderData(data?._id);
+   
+      }
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isFolderSelected],
+  );
+
+  const handleFolderDoubleClick = (data: IFolderTypes) => {
+    setDataForEvent({
+      action: "folder double click",
+      data: data,
+    });
+  };
   return (
     <Fragment>
       <Box
@@ -1426,19 +1444,37 @@ export function MyCloud() {
                         >
                           Folders
                         </Typography>
-                        <Typography
-                          display={
-                            folder?.folders?.data?.length > 0 ? "" : "none"
-                          }
-                          variant="h5"
-                          sx={{
-                            fontSize: "1rem",
-                            color: "initial !important",
-                            fontWeight: "normal !important",
-                          }}
-                        >
-                          {totalPages} Items
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          {isMobile && toggle !== "list" && (
+                            <Typography
+                              sx={{
+                                p: 2,
+                                fontSize: "1rem",
+                              }}
+                              onClick={() => {
+                                dispatch(
+                                  toggleFolderSelected(!isFolderSelected),
+                                );
+                                handleClearMultipleFileData();
+                              }}
+                            >
+                              {isFolderSelected ? "Unselect" : "Select"}
+                            </Typography>
+                          )}
+                          <Typography
+                            display={
+                              folder?.folders?.data?.length > 0 ? "" : "none"
+                            }
+                            variant="h5"
+                            sx={{
+                              fontSize: "1rem",
+                              color: "initial !important",
+                              fontWeight: "normal !important",
+                            }}
+                          >
+                            {totalPages} Items
+                          </Typography>
+                        </Box>
                       </Box>
                     </MUIFOLDER.TitleAndIcon>
                   )}
@@ -1495,16 +1531,10 @@ export function MyCloud() {
                                     handleMultipleFolderData
                                   }
                                   cardProps={{
-                                    onClick: (e: any) => {
-                                      handleMultipleFolderData(item?._id);
-                                      handleClickFolder(e, item);
-                                    },
-                                    onDoubleClick: () => {
-                                      setDataForEvent({
-                                        action: "folder double click",
-                                        data: item,
-                                      });
-                                    },
+                                    onClick: (e: any) =>
+                                      handleFolderClick(e, item),
+                                    onDoubleClick: () =>
+                                      handleFolderDoubleClick(item),
 
                                     ...(multiChecked.find(
                                       (id) => id === item?._id,
@@ -1614,18 +1644,33 @@ export function MyCloud() {
                     >
                       Files
                     </Typography>
-
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        display: mainFile?.length > 0 ? "" : "none",
-                        fontSize: "1rem",
-                        color: "initial !important",
-                        fontWeight: "normal !important",
-                      }}
-                    >
-                      {total} Items
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {isMobile && toggle !== "list" && (
+                        <Typography
+                          sx={{
+                            p: 2,
+                            fontSize: "1rem",
+                          }}
+                          onClick={() => {
+                            dispatch(toggleSelected(!isSelected));
+                            handleClearMultipleFileData();
+                          }}
+                        >
+                          {isSelected ? "Unselect" : "Select"}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          display: mainFile?.length > 0 ? "" : "none",
+                          fontSize: "1rem",
+                          color: "initial !important",
+                          fontWeight: "normal !important",
+                        }}
+                      >
+                        {total} Items
+                      </Typography>
+                    </Box>
                   </MUI.DivRecentFileHeader>
                   {toggle === "list" ? (
                     <Box>
@@ -1654,76 +1699,78 @@ export function MyCloud() {
                     <Box sx={{ mt: 4 }}>
                       {mainFile?.length > 0 && (
                         <FileCardContainer>
-                          {mainFile?.map((item: IMyCloudTypes, index: number) => {
-                            return (
-                              <Fragment key={index}>
-                                <FileCardItem
-                                  imagePath={
-                                    user?.newName +
-                                    "-" +
-                                    user?._id +
-                                    (item?.path
-                                      ? removeFileNameOutOfPath(item?.path)
-                                      : "") +
-                                    "/" +
-                                    item?.newFilename
-                                  }
-                                  user={user}
-                                  selectType={"file"}
-                                  path={item?.path}
-                                  isCheckbox={true}
-                                  filePassword={item?.filePassword}
-                                  id={item?._id}
-                                  favouriteIcon={{
-                                    isShow: false,
-                                    handleFavouriteOnClick: async () =>
-                                      await handleFavourite(item),
-                                    isFavourite:
-                                      item?.favorite === 1 ? true : false,
-                                  }}
-                                  fileType={getFolderName(item?.fileType)}
-                                  handleSelect={handleMultipleFileData}
-                                  name={item?.filename}
-                                  newName={item?.newFilename}
-                                  cardProps={{
-                                    onClick: isMobile
-                                      ? async () => await handleClick(item)
-                                      : undefined,
-                                    onDoubleClick: !isMobile
-                                      ? () => handleDoubleClick(item)
-                                      : undefined,
-                                  }}
-                                  menuItems={menuItems.map(
-                                    (menuItem, index) => {
-                                      return (
-                                        <MenuDropdownItem
-                                          key={index}
-                                          isFavorite={
-                                            item.favorite ? true : false
-                                          }
-                                          isPassword={
-                                            item.filePassword ||
-                                            item.access_password
-                                              ? true
-                                              : false
-                                          }
-                                          title={menuItem.title}
-                                          icon={menuItem.icon}
-                                          onClick={() => {
-                                            setDataForEvent({
-                                              data: item,
-                                              action: menuItem.action,
-                                            });
-                                            setGetValue(item);
-                                          }}
-                                        />
-                                      );
-                                    },
-                                  )}
-                                />
-                              </Fragment>
-                            );
-                          })}
+                          {mainFile?.map(
+                            (item: IMyCloudTypes, index: number) => {
+                              return (
+                                <Fragment key={index}>
+                                  <FileCardItem
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      (item?.path
+                                        ? removeFileNameOutOfPath(item?.path)
+                                        : "") +
+                                      "/" +
+                                      item?.newFilename
+                                    }
+                                    user={user}
+                                    selectType={"file"}
+                                    path={item?.path}
+                                    isCheckbox={true}
+                                    filePassword={item?.filePassword}
+                                    id={item?._id}
+                                    favouriteIcon={{
+                                      isShow: false,
+                                      handleFavouriteOnClick: async () =>
+                                        await handleFavourite(item),
+                                      isFavourite:
+                                        item?.favorite === 1 ? true : false,
+                                    }}
+                                    fileType={getFolderName(item?.fileType)}
+                                    handleSelect={handleMultipleFileData}
+                                    name={item?.filename}
+                                    newName={item?.newFilename}
+                                    cardProps={{
+                                      onClick: isMobile
+                                        ? async () => await handleClick(item)
+                                        : undefined,
+                                      onDoubleClick: !isMobile
+                                        ? () => handleDoubleClick(item)
+                                        : undefined,
+                                    }}
+                                    menuItems={menuItems.map(
+                                      (menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            key={index}
+                                            isFavorite={
+                                              item.favorite ? true : false
+                                            }
+                                            isPassword={
+                                              item.filePassword ||
+                                              item.access_password
+                                                ? true
+                                                : false
+                                            }
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                            onClick={() => {
+                                              setDataForEvent({
+                                                data: item,
+                                                action: menuItem.action,
+                                              });
+                                              setGetValue(item);
+                                            }}
+                                          />
+                                        );
+                                      },
+                                    )}
+                                  />
+                                </Fragment>
+                              );
+                            },
+                          )}
                         </FileCardContainer>
                       )}
                       {fileLoading && (

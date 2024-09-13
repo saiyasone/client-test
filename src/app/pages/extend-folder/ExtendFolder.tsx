@@ -1,10 +1,18 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { Base64 } from "js-base64";
-import { Fragment, useContext, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 // material ui icon and component
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button, Typography, useMediaQuery } from "@mui/material";
 
 // componento
 import useAuth from "../../../hooks/useAuth";
@@ -82,6 +90,13 @@ import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import { useRefreshState } from "contexts/RefreshProvider";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+} from "stores/features/useEventSlice";
+import { IFolderTypes } from "types/mycloudFileType";
+import { RootState } from "stores/store";
+import FolderGridItem from "components/FolderGridItem";
 
 // const ITEM_PER_PAGE = 10;
 const _ITEM_GRID_PER_PAGE = 20;
@@ -100,6 +115,16 @@ function ExtendFolder() {
   }, [params.id]);
   const { triggerFolder, handleTriggerFolder }: any = useContext(FolderContext);
   const { refreshAuto } = useRefreshState();
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const [isOpenMenu, setIsOpenMenu] = useState(false);
+  const [multiChecked, setMultiChecked] = useState<any[]>([]);
+  const [_checked, setChecked] = useState({});
+  const {
+    isOpenMenu: isMenu,
+    isSelected,
+    isFolderSelected,
+    isToggleMenu,
+  } = useSelector((state: RootState) => state.event);
 
   // multiple selection state
   const [isMultiplePasswordLink, setIsMultiplePasswordLink] =
@@ -114,7 +139,7 @@ function ExtendFolder() {
   const [inputSearch, setInputSearch] = useState<any>("");
   const [_inputHover, setInputHover] = useState<any>(false);
 
-  // redux slice
+  // redux sliceo
 
   const dispatch = useDispatch();
   const dataSelector = useSelector(
@@ -463,6 +488,13 @@ function ExtendFolder() {
     resetDataForEvent();
   }
 
+  const handleOpenFolder = (value: { _id: any; url: any }) => {
+    setFolderId(value?._id);
+    const url = value?.url;
+
+    const base64URL = Base64.encodeURI(url);
+    navigate(`/folder/${base64URL}`);
+  };
   useEffect(() => {
     if (dataForEvent.action && dataForEvent.data) {
       menuOnClick(dataForEvent.action);
@@ -472,6 +504,7 @@ function ExtendFolder() {
   const menuOnClick = async (action) => {
     setIsAutoClose(true);
     const checkPassword = isCheckPassword();
+    console.log(action);
 
     switch (action) {
       case "download":
@@ -560,6 +593,14 @@ function ExtendFolder() {
       case "pin":
         handleAddPin();
         break;
+      case "folder double click": {
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          handleOpenFolder(dataForEvent.data);
+        }
+        break;
+      }
       case "preview":
         setEventClick("preview");
         if (checkPassword) {
@@ -1128,7 +1169,52 @@ function ExtendFolder() {
       },
     });
   };
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+  const handleClickFolder = (
+    _e: any,
+    value: {
+      folder_type: string;
+      folder_name: SetStateAction<string>;
+      filename: SetStateAction<string>;
+      _id: SetStateAction<{}>;
+      path: SetStateAction<string>;
+    },
+  ) => {
+    if (value.folder_type === "folder") {
+      setName(value?.folder_name);
+    } else {
+      setName(value?.filename);
+    }
+  };
+  const handleFolderClick = useCallback(
+    (e: any, data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
 
+      if (
+        isMobile &&
+        !isFolderSelected &&
+        isToggleMenu.isStatus === "preview"
+      ) {
+        setDataForEvent({
+          action: "folder double click",
+          data: data,
+        });
+      } else {
+        handleMultipleFolderData(data?._id);
+        handleClickFolder(e, data);
+      }
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isFolderSelected],
+  );
+
+  const handleFolderDoubleClick = (data: IFolderTypes) => {
+    setDataForEvent({
+      action: "folder double click",
+      data: data,
+    });
+  };
   return (
     <Fragment>
       <DialogAlert
@@ -1182,8 +1268,12 @@ function ExtendFolder() {
                     inputProps={{
                       placeholder: "Search within this folder...",
                       sx: {
-                        paddingTop: (theme) => theme.spacing(0.5),
-                        paddingBottom: (theme) => theme.spacing(0.5),
+                        paddingTop: (theme: {
+                          spacing: (arg0: number) => any;
+                        }) => theme.spacing(0.5),
+                        paddingBottom: (theme: {
+                          spacing: (arg0: number) => any;
+                        }) => theme.spacing(0.5),
                         width: "200px",
                       },
                     }}
@@ -1214,6 +1304,7 @@ function ExtendFolder() {
                   >
                     {fetchSubFoldersAndFiles.apiTotal || 0} Items
                   </Typography>
+
                   <SwitchPages
                     handleToggle={handleToggle}
                     toggle={toggle === "grid" ? "grid" : "list"}
@@ -1234,9 +1325,31 @@ function ExtendFolder() {
               <Fragment>
                 {fetchSubFoldersAndFiles.folders.total > 0 && (
                   <MUI.ExtendItem>
-                    <Typography variant="h4" fontWeight="bold">
-                      Folders
-                    </Typography>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h4" fontWeight="bold">
+                        Folders
+                      </Typography>
+                      {isMobile && toggle !== "list" && (
+                        <Typography
+                          sx={{
+                            p: 2,
+                            fontSize: "1rem",
+                          }}
+                          onClick={() => {
+                            dispatch(toggleFolderSelected(!isFolderSelected));
+                            handleClearMultipleFileData();
+                          }}
+                        >
+                          {isFolderSelected ? "Unselect" : "Select"}
+                        </Typography>
+                      )}
+                    </Box>
                     <Fragment>
                       {toggle === "grid" && (
                         <Fragment>
@@ -1244,78 +1357,149 @@ function ExtendFolder() {
                             {fetchSubFoldersAndFiles.folders.data.map(
                               (data, index) => {
                                 return (
-                                  <FileCardItem
+                                  // <FileCardItem
+                                  //   cardProps={{
+                                  //     onClick: (e: any) =>
+                                  //       handleFolderClick(e, data),
+                                  //     onDoubleClick: () =>
+                                  //       handleFolderDoubleClick(data),
+                                  //     // onDoubleClick: () => {
+                                  //     //   setDataForEvent({
+                                  //     //     data,
+                                  //     //     action: "double click",
+                                  //     //   });
+                                  //     // },
+                                  //     ...(dataSelector?.selectionFileAndFolderData?.find(
+                                  //       (el) => el?.id === data?._id,
+                                  //     ) && {
+                                  //       ishas: "true",
+                                  //     }),
+                                  //   }}
+                                  //   id={data?._id}
+                                  //   isCheckbox={true}
+                                  //   selectType={"folder"}
+                                  //   isContainFiles={data.isContainsFiles}
+                                  //   fileType="folder"
+                                  //   isPinned={data.pin ? true : false}
+                                  //   name={data.name}
+                                  //   key={index}
+                                  //   handleSelect={handleMultipleFolderData}
+                                  //   menuItems={favouriteMenuItems.map(
+                                  //     (menuItem, index) => {
+                                  //       return (
+                                  //         <MenuDropdownItem
+                                  //           {...(!data.isContainsFiles
+                                  //             ? menuItem.action ===
+                                  //                 "get link" ||
+                                  //               menuItem.action === "share" ||
+                                  //               menuItem.action ===
+                                  //                 "download" ||
+                                  //               menuItem.action ===
+                                  //                 "password" ||
+                                  //               menuItem.action === "export-csv"
+                                  //               ? {
+                                  //                   disabled: true,
+                                  //                 }
+                                  //               : {
+                                  //                   onClick: () => {
+                                  //                     setDataForEvent({
+                                  //                       action: menuItem.action,
+                                  //                       type: "folder",
+                                  //                       data: {
+                                  //                         ...data,
+                                  //                         type: "folder",
+                                  //                       },
+                                  //                     });
+                                  //                   },
+                                  //                 }
+                                  //             : {
+                                  //                 onClick: () => {
+                                  //                   setDataForEvent({
+                                  //                     action: menuItem.action,
+                                  //                     type: "folder",
+                                  //                     data: {
+                                  //                       ...data,
+                                  //                       type: "folder",
+                                  //                     },
+                                  //                   });
+                                  //                 },
+                                  //               })}
+                                  //           isPinned={data.pin ? true : false}
+                                  //           isPassword={
+                                  //             data?.access_password
+                                  //               ? true
+                                  //               : false
+                                  //           }
+                                  //           key={index}
+                                  //           title={menuItem.title}
+                                  //           icon={menuItem.icon}
+                                  //         />
+                                  //       );
+                                  //     },
+                                  //   )}
+                                  // />
+                                  <FolderGridItem
+                                    open={open}
+                                    file_id={
+                                      parseInt(data?.total_size) > 0
+                                        ? true
+                                        : false
+                                    }
+                                    id={data?._id}
+                                    folder_name={data?.folder_name}
+                                    selectType={"folder"}
+                                    setIsOpenMenu={setIsOpenMenu}
+                                    isOpenMenu={isOpenMenu}
+                                    isCheckbox={true}
+                                    isPinned={data.pin ? true : false}
+                                    onOuterClick={() => {
+                                      setMultiChecked(multiChecked);
+                                      setChecked({});
+                                    }}
+                                    handleSelectionFolder={
+                                      handleMultipleFolderData
+                                    }
                                     cardProps={{
-                                      onDoubleClick: () => {
-                                        setDataForEvent({
-                                          data,
-                                          action: "double click",
-                                        });
-                                      },
+                                      onClick: (e: any) =>
+                                        handleFolderClick(e, data),
+                                      onDoubleClick: () =>
+                                        handleFolderDoubleClick(data),
+
                                       ...(dataSelector?.selectionFileAndFolderData?.find(
-                                        (el) => el?.id === data?._id,
+                                        (el: any) =>
+                                          el?.id === data?._id &&
+                                          el?.checkType === "folder",
                                       ) && {
                                         ishas: "true",
                                       }),
                                     }}
-                                    id={data?._id}
-                                    isCheckbox={true}
-                                    selectType={"folder"}
-                                    isContainFiles={data.isContainsFiles}
-                                    fileType="folder"
-                                    isPinned={data.pin ? true : false}
-                                    name={data.name}
-                                    key={index}
-                                    handleSelect={handleMultipleFolderData}
-                                    menuItems={favouriteMenuItems.map(
-                                      (menuItem, index) => {
+                                    menuItem={favouriteMenuItems?.map(
+                                      (menuItems, index) => {
                                         return (
                                           <MenuDropdownItem
-                                            {...(!data.isContainsFiles
-                                              ? menuItem.action ===
-                                                  "get link" ||
-                                                menuItem.action === "share" ||
-                                                menuItem.action ===
-                                                  "download" ||
-                                                menuItem.action ===
-                                                  "password" ||
-                                                menuItem.action === "export-csv"
-                                                ? {
-                                                    disabled: true,
-                                                  }
-                                                : {
-                                                    onClick: () => {
-                                                      setDataForEvent({
-                                                        action: menuItem.action,
-                                                        type: "folder",
-                                                        data: {
-                                                          ...data,
-                                                          type: "folder",
-                                                        },
-                                                      });
-                                                    },
-                                                  }
-                                              : {
-                                                  onClick: () => {
-                                                    setDataForEvent({
-                                                      action: menuItem.action,
-                                                      type: "folder",
-                                                      data: {
-                                                        ...data,
-                                                        type: "folder",
-                                                      },
-                                                    });
-                                                  },
-                                                })}
+                                            key={index}
+                                            disabled={
+                                              data.file_id[0]?._id ||
+                                              data.parentkey[0]?._id
+                                                ? false
+                                                : menuItems.disabled
+                                            }
+                                            className="menu-item"
                                             isPinned={data.pin ? true : false}
                                             isPassword={
-                                              data?.access_password
+                                              data.filePassword ||
+                                              data.access_password
                                                 ? true
                                                 : false
                                             }
-                                            key={index}
-                                            title={menuItem.title}
-                                            icon={menuItem.icon}
+                                            title={menuItems.title}
+                                            icon={menuItems.icon}
+                                            onClick={() => {
+                                              setDataForEvent({
+                                                data: data,
+                                                action: menuItems.action,
+                                              });
+                                            }}
                                           />
                                         );
                                       },
@@ -1369,7 +1553,7 @@ function ExtendFolder() {
                           {toggle === "grid" && (
                             <FileCardContainer>
                               {fetchSubFoldersAndFiles.files.data.map(
-                                (data, index) => {
+                                (data: any, index: number) => {
                                   return (
                                     <FileCardItem
                                       cardProps={{

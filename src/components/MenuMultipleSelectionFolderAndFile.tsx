@@ -35,7 +35,10 @@ import {
 import { FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
-import { toggleSelected } from "stores/features/useEventSlice";
+import {
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
 import { errorMessage, successMessage } from "utils/alert.util";
 
 const SelectContainer = styled("div")({
@@ -311,6 +314,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const handleClearFile = () => {
     dispatch(checkboxAction.setRemoveFileAndFolderData());
     dispatch(toggleSelected(false));
+    dispatch(toggleFolderSelected(false));
   };
 
   const handleGetLink = () => {
