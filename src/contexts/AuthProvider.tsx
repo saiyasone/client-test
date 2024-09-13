@@ -442,13 +442,13 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (username, password) => {
     setAuthLoading(!authLoading);
     try {
-      // const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
       const signInUser = await userLogin({
         variables: {
           where: {
             username: username || "",
             password: password || "",
-            ip: "",
+            ip: responseIp.data || "",
             captcha: window.__reCaptcha!,
           },
         },
