@@ -4,7 +4,6 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import {
   Backdrop,
   Box,
-  Button,
   Dialog,
   Typography,
   useMediaQuery,
@@ -20,7 +19,7 @@ import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 import useClickOutside from "hooks/useClickOutside";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { FileIcon } from "react-file-icon";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
@@ -33,11 +32,11 @@ import {
 import { ReturnMessage } from "utils/message";
 
 import LockedFilePreview from "app/pages/file/LockedFilePreview";
+import SharePrevieFile from "app/pages/file/SharePreviewFile";
 import FileRename from "components/file/FileRename";
 import FileSlideButton from "components/file/FileSlideButton";
+import { useRefreshState } from "contexts/RefreshProvider";
 import { useAllowKey } from "hooks/file/useAllowKey";
-import useManageUserFromShare from "hooks/user/useManageUserFromShare";
-import SharePrevieFile from "app/pages/file/SharePreviewFile";
 
 const CloseIconButton = styled(Box)(({ theme }) => ({
   padding: "6px",
@@ -106,10 +105,11 @@ type DialogProps = {
   handleClose: () => void;
   data: IFileTypes;
   user: IUserTypes;
-  mainFile: IFileTypes[];
+  mainFile?: IFileTypes[];
+  propsStatus: string;
 };
-export default function DialogPreviewFileSlide(props: DialogProps) {
-  const { open, handleClose, data, user, mainFile } = props;
+function DialogPreviewFileSlide(props: DialogProps) {
+  const { open, handleClose, data, user, mainFile, propsStatus } = props;
   const theme = useTheme();
   const [zoom, setZoom] = React.useState(0.5);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -123,9 +123,18 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
   const { isAutoClose, setIsAutoClose } = useMenuDropdownState();
   const [filename, setFilename] = React.useState<string>();
+  const { setRefreshAuto, refreshAuto } = useRefreshState();
+  const [newData, setNewData] = React.useState({
+    _id: "",
+    ownerId: { _id: "" },
+  });
 
-  const handleGetFolderURL = useGetUrl(data);
-  const handleDownloadUrl = useGetUrlDownload(data);
+  const handleGetFolderURL = useGetUrl(
+    propsStatus === "share" && dataForEvent == "get link"
+      ? newData
+      : isCurrentImage,
+  );
+  const handleDownloadUrl = useGetUrlDownload(isCurrentImage);
   const manageFile = useManageFile({ user });
   const { handleNext, handlePrev } = useHandlePreNext();
   const [refs, setRefs] = React.useState<React.RefObject<HTMLElement>[]>([
@@ -134,11 +143,6 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     zoomRef,
     refSlide,
   ]);
-  const manageUserFromShare = useManageUserFromShare({
-    inputFileOrFolder: data,
-    inputType: data.fileType,
-    user,
-  });
 
   React.useEffect(() => {
     if (
@@ -159,30 +163,103 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     handleClose,
     enabled: dataForEvent !== "share",
   });
-  const fileType = isCurrentImage.fileType;
+
+  const fileType = isCurrentImage?.fileType || isCurrentImage?.type;
   const [styles, setStyles] = React.useState<
     Record<string, Partial<FileIconProps>>
   >({});
-  const fileStyle = styles[fileType];
-  let real_path;
-
-  const pathToUse = isCurrentImage.path ?? data.path;
-  if (pathToUse === null || pathToUse === "") {
-    real_path = "";
-  } else {
-    real_path = removeFileNameOutOfPath(pathToUse);
-  }
-
+  const fileStyle = styles[fileType || ""];
   const newUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}preview?path=`;
-  const sourcePath = `${
-    user?.newName +
-    "-" +
-    user?._id +
-    "/" +
-    real_path +
-    (isCurrentImage?.newFilename ?? data.newFilename)
-  }`;
+  let real_path;
+  let sourcePath;
+  let pathToUse;
 
+  switch (propsStatus) {
+    case "mycloud":
+      pathToUse = isCurrentImage?.path || data?.path;
+
+      if (pathToUse === null || pathToUse === "") {
+        real_path = "";
+      } else {
+        real_path = removeFileNameOutOfPath(pathToUse);
+      }
+
+      sourcePath = `${
+        user?.newName +
+        "-" +
+        user?._id +
+        "/" +
+        real_path +
+        (isCurrentImage?.newFilename || data?.newFilename)
+      }`;
+      break;
+    case "extendFolder":
+      sourcePath = `${
+        user?.newName + "-" + user?._id + "/" + isCurrentImage?.newPath
+      }`;
+      break;
+
+    case "recent":
+    case "category":
+      if (!isCurrentImage?.newPath || isCurrentImage?.newPath == null) {
+        real_path = "";
+        sourcePath = `${
+          isCurrentImage?.createdBy?.newName +
+          "-" +
+          isCurrentImage?.createdBy?._id +
+          "/" +
+          real_path +
+          isCurrentImage?.newFilename
+        }`;
+      } else {
+        sourcePath = `${
+          isCurrentImage?.createdBy?.newName +
+          "-" +
+          isCurrentImage?.createdBy?._id +
+          "/" +
+          isCurrentImage?.newPath
+        }`;
+      }
+      break;
+    case "share":
+      if (
+        !isCurrentImage.fileId?.newPath ||
+        isCurrentImage.fileId?.newPath == null
+      ) {
+        real_path = "";
+        sourcePath = `${
+          isCurrentImage.ownerId?.newName +
+          "-" +
+          isCurrentImage.ownerId?._id +
+          "/" +
+          real_path +
+          isCurrentImage?.fileId?.newFilename
+        }`;
+      } else {
+        sourcePath = `${
+          isCurrentImage.ownerId.newName +
+          "-" +
+          isCurrentImage.ownerId._id +
+          "/" +
+          isCurrentImage?.fileId?.newPath
+        }`;
+      }
+
+      break;
+    case "extendshare":
+      sourcePath = `${
+        isCurrentImage.createdBy.newName +
+        "-" +
+        isCurrentImage.createdBy._id +
+        "/" +
+        isCurrentImage?.newPath
+      }`;
+
+      break;
+
+    default:
+      return;
+  }
   const handleZoomIn = () => {
     setZoom((prevZoom) => Math.min(prevZoom + 0.1, 2));
   };
@@ -191,22 +268,53 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     setZoom((prevZoom) => Math.max(prevZoom - 0.1, 0.2));
   };
 
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   React.useEffect(() => {
-    if (dataForEvent == "download") {
-      handleDownloadUrl?.(data);
+    if (dataForEvent === "download") {
+      handleDownloadUrl?.(isCurrentImage);
+
+      if (propsStatus === "share") {
+        setNewData((prevData) => ({
+          ...prevData,
+          ...isCurrentImage.fileId,
+          ownerId: {
+            _id: isCurrentImage.ownerId._id,
+          },
+        }));
+      }
       setDataForEvent("");
     }
-    if (dataForEvent == "get link") {
+
+    if (dataForEvent === "get link") {
+      handleGetFolderURL?.(isCurrentImage);
+
+      if (propsStatus === "share") {
+        setNewData((prevData) => ({
+          ...prevData,
+          _id: isCurrentImage.fileId._id,
+          ownerId: {
+            _id: isCurrentImage.ownerId._id,
+          },
+        }));
+      }
       setDataForEvent("");
-      handleGetFolderURL?.(data);
     }
-  }, [dataForEvent]);
+  }, [dataForEvent, isCurrentImage, propsStatus]);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   React.useEffect(() => {
     if (data) {
-      setIsCurrentImage(data);
-      setType(getFolderName(data.fileType)!);
+      if (propsStatus !== "share") {
+        setIsCurrentImage(data);
+        setType(getFolderName(data.fileType)!);
+      }
+      if (propsStatus === "share") {
+        setType(getFolderName(data?.fileId?.fileType || ""));
+      }
     }
-  }, [data, isAutoClose]);
+  }, [data, propsStatus, isAutoClose]);
+
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   React.useEffect(() => {
     if (!open) {
       setZoom(0.5);
@@ -217,32 +325,43 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     if (isMobile) {
       setZoom(1);
     }
-  }, [!open, isMobile]);
+  }, [open, isMobile]);
 
   const handleNextView = () => {
+    if (!mainFile) return;
     if (!dataForEvent) {
       const newImage = handleNext({
         currentFile: isCurrentImage ?? data,
         mainFile,
       });
-      if (newImage) {
+      if (newImage && propsStatus !== "share") {
         setIsCurrentImage(newImage ?? isCurrentImage);
         setType(getFolderName(newImage.fileType)!);
+      }
+      if (newImage && propsStatus == "share") {
+        setIsCurrentImage(newImage ?? isCurrentImage);
+        setType(getFolderName(newImage?.fileId?.fileType));
       }
     }
   };
   const handlePrevView = () => {
+    if (!mainFile) return;
     if (!dataForEvent) {
       const prevImage = handlePrev({
         currentFile: isCurrentImage ?? data,
         mainFile,
       });
-      if (prevImage) {
+      if (prevImage && propsStatus !== "share") {
         setIsCurrentImage(prevImage ?? isCurrentImage);
         setType(getFolderName(prevImage.fileType)!);
       }
+      if (prevImage && propsStatus == "share") {
+        setIsCurrentImage(prevImage ?? isCurrentImage);
+        setType(getFolderName(prevImage?.fileId?.fileType));
+      }
     }
   };
+  // eslint-disable-next-line react-hooks/rules-of-hooks
   useAllowKey({
     handlePrevView,
     handleNextView,
@@ -251,24 +370,32 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   });
   const handleFavorite = async () => {
     try {
-      const newFavoriteStatus = data.favorite ? 0 : 1;
-      await manageFile.handleFavoriteFile(data._id, newFavoriteStatus, {
-        onSuccess: async () => {
-          data.favorite = newFavoriteStatus;
+      const newFavoriteStatus = isCurrentImage.favorite ? 0 : 1;
+      await manageFile.handleFavoriteFile(
+        isCurrentImage._id,
+        newFavoriteStatus,
+        {
+          onSuccess: async () => {
+            isCurrentImage.favorite = newFavoriteStatus;
+            setRefreshAuto({ isAutoClose: true, isStatus: "favourite" });
+          },
+          onFailed: async () => {},
         },
-        onFailed: async () => {},
-      });
+      );
     } catch (error: any) {
       errorMessage(error, 1000);
     }
   };
 
   const handleDeleteFile = async () => {
-    await manageFile.handleDeleteFile(data._id, {
+    await manageFile.handleDeleteFile(isCurrentImage._id, {
       onSuccess: () => {
         successMessage(ReturnMessage.DeleteFile, 1000);
         handleClose();
-        setIsAutoClose(true);
+        setRefreshAuto({
+          isAutoClose: true,
+          isStatus: propsStatus,
+        });
       },
       onFailed: (error: string) => {
         errorMessage(error, 3000);
@@ -278,13 +405,21 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
   const handleDownloadFile = async () => {
     const newFileData = [
       {
-        id: data?._id,
+        id:
+          propsStatus !== "share"
+            ? isCurrentImage?._id
+            : isCurrentImage.fileId?._id,
         checkType: "file",
-        newPath: data?.newPath ? data.newPath : "",
-        newFilename: data?.newFilename || "",
+        newPath:
+          propsStatus !== "share"
+            ? isCurrentImage?.newPath || ""
+            : isCurrentImage?.fileId?.newPath || "",
+        newFilename: isCurrentImage?.newFilename || "",
         createdBy: {
-          _id: data?.createdBy._id,
-          newName: data?.createdBy?.newName,
+          _id: isCurrentImage?.createdBy._id || isCurrentImage?.ownerId?._id,
+          newName:
+            isCurrentImage?.createdBy?.newName ||
+            isCurrentImage?.ownerId?.newName,
         },
       },
     ];
@@ -309,7 +444,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         handleFavorite();
         break;
       case "password":
-        if (user.packageId.lockFile === "on") {
+        if (user.packageId.lockFile !== "on") {
           setDataForEvent(event);
         } else {
           setDataForEvent("");
@@ -323,7 +458,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         handleDeleteFile();
         break;
       case "download":
-        if (user.packageId.category === "free") {
+        if (user?.packageId?.category !== "free") {
           setDataForEvent(event);
         } else {
           handleDownloadFile();
@@ -333,7 +468,11 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         setDataForEvent(event);
         break;
       case "rename":
-        setFilename(isCurrentImage.filename);
+        setFilename(
+          propsStatus !== "share"
+            ? isCurrentImage?.filename
+            : isCurrentImage?.fileId,
+        );
         break;
       case "share":
         setDataForEvent(event);
@@ -358,10 +497,11 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
             <Box ref={navRef}>
               <FilePreviewNav
                 filename={filename}
-                data={data}
+                data={isCurrentImage}
                 handleEvents={handleEvents}
                 handleClose={handleClose}
                 setDataForEvent={setDataForEvent}
+                propStatus={propsStatus}
               />
             </Box>
             <ContainerImage>
@@ -373,7 +513,9 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 <img
                   ref={imageRef}
                   src={newUrl + sourcePath}
-                  alt={isCurrentImage.filename}
+                  alt={
+                    isCurrentImage?.filename || isCurrentImage?.fileId?.filename
+                  }
                   loading="lazy"
                   style={{
                     transform: `scale(${zoom})`,
@@ -385,20 +527,28 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
               ) : type ? (
                 <Box ref={imageRef} style={{ width: "250px" }}>
                   <FileIcon
-                    extension={getFileType(isCurrentImage.newFilename) || ""}
+                    extension={
+                      getFileType(
+                        isCurrentImage.newFilename ||
+                          isCurrentImage.fileId.newFilename,
+                      ) || ""
+                    }
                     {...fileStyle}
                   />
                 </Box>
               ) : null}
             </ContainerImage>
-            {dataForEvent !== "detail" && dataForEvent !== "lock" && (
-              <Box ref={refSlide}>
-                <FileSlideButton
-                  handlePrevView={handlePrevView}
-                  handleNextView={handleNextView}
-                />
-              </Box>
-            )}
+            {dataForEvent !== "detail" &&
+              dataForEvent !== "lock" &&
+              mainFile?.length &&
+              mainFile?.length > 1 && (
+                <Box ref={refSlide}>
+                  <FileSlideButton
+                    handlePrevView={handlePrevView}
+                    handleNextView={handleNextView}
+                  />
+                </Box>
+              )}
             <ContainerZoon ref={zoomRef}>
               <RemoveIcon
                 onClick={handleZoomIn}
@@ -472,16 +622,30 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 <FileLock data={isCurrentImage} handleClose={handleClose} />
               ) : dataForEvent === "rename" ? (
                 <FileRename
-                  data={isCurrentImage}
+                  data={
+                    propsStatus !== "share"
+                      ? isCurrentImage
+                      : isCurrentImage.fileId
+                  }
                   filename={filename}
                   setFilename={setFilename}
                   user={user}
                   setDataForEvent={setDataForEvent}
                 />
               ) : dataForEvent === "share" ? (
-                <SharePrevieFile user={user} data={isCurrentImage} />
+                <SharePrevieFile
+                  user={user}
+                  data={isCurrentImage}
+                  propsStatus={propsStatus}
+                />
               ) : (
-                <FileDetails data={isCurrentImage} />
+                <FileDetails
+                  data={
+                    propsStatus !== "share"
+                      ? isCurrentImage
+                      : isCurrentImage.fileId
+                  }
+                />
               )}
             </ContainerDetails>
           )}
@@ -490,3 +654,5 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
     </div>
   );
 }
+
+export default DialogPreviewFileSlide;

@@ -5,12 +5,20 @@ interface IStateTypes {
   isOpenMenu: boolean;
   isSelected: boolean;
   isOnClicked: boolean;
+  isToggleMenu: {
+    isToggle: boolean;
+    isStatus: string | null;
+  };
 }
 
 const initialState: IStateTypes = {
   isOpenMenu: false,
   isSelected: false,
   isOnClicked: false,
+  isToggleMenu: {
+    isToggle: false,
+    isStatus: "preview",
+  },
 };
 
 const eventSlice = createSlice({
@@ -26,9 +34,19 @@ const eventSlice = createSlice({
     setOnClicked: (state, action: PayloadAction<boolean>) => {
       state.isOnClicked = action.payload;
     },
+    setMenuToggle: (state, action: PayloadAction<{ isStatus: string }>) => {
+      const { isStatus } = action.payload;
+      state.isToggleMenu.isStatus = isStatus;
+      if (action.payload.isStatus == "preview") {
+        state.isToggleMenu.isToggle = false;
+      } else {
+        state.isToggleMenu.isToggle = true;
+      }
+    },
   },
 });
 
-export const { toggleMenu, toggleSelected, setOnClicked } = eventSlice.actions;
+export const { toggleMenu, toggleSelected, setOnClicked, setMenuToggle } =
+  eventSlice.actions;
 
 export default eventSlice.reducer;

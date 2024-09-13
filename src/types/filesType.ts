@@ -1,5 +1,8 @@
 export interface IFileTypes {
   _id: string;
+  fileId: any;
+  permission: string | undefined;
+  ownerId: any;
   actionDate: Date;
   actionStatus: string;
   aproveDownloadPublic: number;
@@ -18,6 +21,7 @@ export interface IFileTypes {
   favorite: number;
   filePassword: string | null;
   fileType: string;
+  type?: string;
   filename: string;
   folder_id: IFolderIdTypes;
   getLinkBy: string | null;
@@ -44,6 +48,7 @@ export interface IFileTypes {
   uploadStatus: string | null;
   url: string;
   urlAll: string | null;
+  newName?: string
 }
 
 export interface ICreateByTypes {

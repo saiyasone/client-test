@@ -36,6 +36,7 @@ import Trash from "./pages/trash/Trash";
 import UppyUpload from "components/UppyUpload";
 import ConfirmPayment from "./pages/confirm-payment/Confirmpayment";
 import ResetPassword from "./pages/reset-password/ResetPassword";
+import { RefreshProvider } from "contexts/RefreshProvider";
 
 const routes: RouteObject[] = [
   {
@@ -86,7 +87,9 @@ const routes: RouteObject[] = [
             <ClientAuthGuard>
               <PackageCheckerProvider>
                 <MenuDropdownProvider>
-                  <ClientDashboardLayout />
+                  <RefreshProvider>
+                    <ClientDashboardLayout />
+                  </RefreshProvider>
                 </MenuDropdownProvider>
               </PackageCheckerProvider>
             </ClientAuthGuard>

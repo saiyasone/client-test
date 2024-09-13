@@ -35,7 +35,6 @@ import DialogCreateFilePassword from "components/dialog/DialogCreateFilePassword
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import { ENV_KEYS } from "constants/env.constant";
@@ -72,6 +71,8 @@ import ExtendFileDataGrid from "../extend-folder/ExtendFileDataGrid";
 import ExtendFolderDataGrid from "../extend-folder/ExtendFolderDataGrid";
 import useFetchShareFolder from "hooks/folder/useFetchShareFolder";
 import { TitleAndSwitch } from "styles/clientPage.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const ITEM_PER_PAGE = 10;
 
@@ -83,6 +84,7 @@ function ExtendShare() {
   const navigate = useNavigate();
   const [toggle, setToggle] = useState<any>(null);
   const parentFolderUrl: any = Base64.decode(params.id);
+  const { refreshAuto } = useRefreshState();
 
   const handleToggle = (value) => {
     setToggle(value);
@@ -108,11 +110,17 @@ function ExtendShare() {
   const { data: parentFolder } = useFetchShareFolder({
     folderUrl: parentFolderUrl,
   });
-
+  const [fileshare, setFileshare] = useState<any>(null);
   const fetchSubFoldersAndFiles = useFetchSharedSubFolderAndFile(
     parentFolder?._id,
     userAuth,
   );
+
+  useEffect(() => {
+    if (fetchSubFoldersAndFiles.data) {
+      setFileshare(fetchSubFoldersAndFiles?.data?.files?.data);
+    }
+  }, [fetchSubFoldersAndFiles.data]);
 
   // for detect file password
   const [filePassword, setFilePassword] = useState<any>("");
@@ -181,6 +189,7 @@ function ExtendShare() {
   const [userPackage, setUserPackage] = useState<any>(null);
   const [dataDownloadURL, setDataDownloadURL] = useState<any>(null);
   const handleDownloadUrl = useGetUrlExtendFolderDownload(dataDownloadURL);
+
   useEffect(() => {
     if (dataDownloadURL) {
       handleDownloadUrl?.(dataDownloadURL);
@@ -205,6 +214,11 @@ function ExtendShare() {
         action: "",
       };
     });
+  };
+
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
   };
 
   useEffect(() => {
@@ -264,7 +278,10 @@ function ExtendShare() {
     if (eventUploadTrigger.triggerData.isTriggered && parentFolder?._id) {
       fetchSubFoldersAndFiles.refetch();
     }
-  }, [eventUploadTrigger.triggerData]);
+    if (refreshAuto?.isStatus === "extendshare") {
+      fetchSubFoldersAndFiles.refetch();
+    }
+  }, [eventUploadTrigger.triggerData, refreshAuto?.isAutoClose]);
 
   useEffect(() => {
     const shareData =
@@ -1015,26 +1032,13 @@ function ExtendShare() {
       )}
 
       {showPreview && (
-        <DialogPreviewFile
+        <DialogPreviewFileSlide
           open={showPreview}
-          handleClose={() => {
-            resetDataForEvents();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            setDataForEvent((prev) => {
-              return {
-                ...prev,
-                action: "download",
-              };
-            });
-          }}
-          filename={dataForEvent.data.name}
-          permission={dataForEvent.data.permission}
-          newFilename={dataForEvent.data.newName}
-          fileType={dataForEvent.data.type}
-          path={dataForEvent.data.newPath}
-          user={dataForEvent.data?.createdBy}
+          handleClose={handleClosePreview}
+          data={dataForEvent.data}
+          user={userAuth}
+          mainFile={fileshare}
+          propsStatus="extendshare"
         />
       )}
 

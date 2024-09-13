@@ -9,6 +9,7 @@ type DetailsTypes = {
 function FileDetails(props: DetailsTypes) {
   const theme = useTheme();
   const { data } = props;
+
   return (
     <>
       <Box sx={{ p: 4 }}>

@@ -80,6 +80,8 @@ import useFirstRender from "../../../hooks/useFirstRender";
 import ExtendFileDataGrid from "./ExtendFileDataGrid";
 import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const _ITEM_GRID_PER_PAGE = 20;
 
@@ -96,6 +98,7 @@ function ExtendFolder() {
     return Base64.decode(params.id);
   }, [params.id]);
   const { triggerFolder, handleTriggerFolder }: any = useContext(FolderContext);
+  const { refreshAuto } = useRefreshState();
 
   // multiple selection state
   const [isMultiplePasswordLink, setIsMultiplePasswordLink] =
@@ -189,7 +192,11 @@ function ExtendFolder() {
     } else {
       fetchSubFoldersAndFiles.queryGridDataFileAndFolder();
     }
-  }, [triggerFolder]);
+    if (refreshAuto?.isStatus === "extendfolder") {
+      fetchSubFoldersAndFiles.queryGridDataFileAndFolder();
+      fetchSubFoldersAndFiles.queryListDataFileAndFolder();
+    }
+  }, [triggerFolder, refreshAuto?.isAutoClose]);
 
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
 
@@ -221,6 +228,12 @@ function ExtendFolder() {
     folderName: " ",
   });
   const csvRef: any = useRef();
+
+  const handleClosePreview = () => {
+    resetDataForEvent();
+    setShowPreview(false);
+  };
+
   const useDataExportCSV = useExportCSV({
     folderId: csvFolder.folderId,
     exportRef: csvRef,
@@ -1674,7 +1687,7 @@ function ExtendFolder() {
         data={dataForEvent.data}
       />
 
-      {showPreview && (
+      {/* {showPreview && (
         <DialogPreviewFile
           open={showPreview}
           handleClose={() => {
@@ -1697,8 +1710,17 @@ function ExtendFolder() {
           path={dataForEvent.data.newPath}
           user={user}
         />
+      )} */}
+      {showPreview && (
+        <DialogPreviewFileSlide
+          open={showPreview}
+          handleClose={handleClosePreview}
+          data={dataForEvent.data}
+          user={user}
+          mainFile={fetchSubFoldersAndFiles.files.data}
+          propsStatus="extendFolder"
+        />
       )}
-
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {

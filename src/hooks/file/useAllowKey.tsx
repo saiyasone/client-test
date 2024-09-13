@@ -5,7 +5,7 @@ type PrevAndNextProps = {
   handlePrevView: () => void;
   handleNextView: () => void;
   currentFile: IFileTypes;
-  mainFile: IFileTypes[];
+  mainFile?: IFileTypes[];
 };
 const useAllowKey = ({
   handlePrevView,

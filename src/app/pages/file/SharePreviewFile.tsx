@@ -1,6 +1,8 @@
 import { useMutation } from "@apollo/client";
 import DownloadDoneIcon from "@mui/icons-material/DownloadDone";
 import {
+  Alert,
+  AlertTitle,
   AvatarGroup,
   Box,
   Button,
@@ -50,13 +52,19 @@ const TextInputdShare = styled("div")(({ theme }) => ({
 interface fileTypes {
   data: IFileTypes;
   user: IUserTypes;
+  propsStatus: string;
 }
 
-export default function SharePrevieFile({ user, data }: fileTypes) {
+export default function SharePrevieFile({
+  user,
+  data,
+  propsStatus,
+}: fileTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [message, setMessage] = React.useState<string>("");
   const [statusShare, setStatusShare] = React.useState("view");
   const [shareAccount, setShareAccount] = React.useState<string>("");
+  const [checkAlert, setcheckAlert] = React.useState<boolean>(false);
   const [shareAccountList, setShareAccountList] = React.useState<
     IUserToAccountTypes[]
   >([]);
@@ -85,12 +93,13 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
   React.useEffect(() => {
     let createdById = "";
     let fileId = "";
-    const ownerData = data?.createdBy?._id;
+    const ownerData =
+      propsStatus !== "share" ? data?.createdBy?._id : data.ownerId._id;
     const newNameData = data?.createdBy?.newName;
 
     fileId = base64Encode(
       {
-        _id: data?._id,
+        _id: propsStatus !== "share" ? data?._id : data.fileId._id,
         type: "file",
       },
       encodeKey,
@@ -107,7 +116,9 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
       getVshareUrl = url.toString();
       setGetURL(getVshareUrl);
     } else {
-      setGetURL(data?.shortUrl);
+      setGetURL(
+        propsStatus !== "share" ? data?.shortUrl : data.fileId?.shortUrl,
+      );
     }
   }, [data, user, accessStatusShare]);
 
@@ -262,7 +273,12 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
           fontSize={isMobile ? "0.8rem" : "1rem"}
           variant="h6"
         >
-          Share {cutStringWithEllipsis(data.filename, isMobile ? 35 : 30)}"
+          Share &nbsp;
+          {cutStringWithEllipsis(
+            propsStatus !== "share" ? data.filename : data.fileId.filename,
+            isMobile ? 35 : 30,
+          )}
+          "
         </Typography>
 
         <Box sx={{ mt: 5 }}>
@@ -315,7 +331,12 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
             _handleIsGlobal={handleIsGlobal}
           />
         </Box>
-        <Box sx={{ mt: 5 }}>
+        {accessStatusShare !== "private" && checkAlert && (
+          <Alert sx={{ mt: 3, boxShadow: theme.shadows[2] }} severity="error">
+            Your information will be shared privately
+          </Alert>
+        )}
+        <Box sx={{ mt: 3}}>
           <Typography
             variant="h6"
             sx={{
@@ -336,9 +357,16 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
               placeholder="example@gmail.com"
               required={true}
               value={shareAccount}
-              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-                setShareAccount(event.target.value)
-              }
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
+                const checkIsEmail = event.target.value.endsWith(".com");
+                console.log(checkIsEmail);
+                if (checkIsEmail) {
+                  setcheckAlert(true);
+                } else {
+                  setcheckAlert(false);
+                }
+                setShareAccount(event.target.value);
+              }}
             />
             {accessStatusShare === "private" && (
               <ActionCreateShare
@@ -360,6 +388,7 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
             </Typography>
           )}
         </Box>
+
         <Box sx={{ mt: 5 }}>
           <Button
             type="submit"
@@ -375,7 +404,12 @@ export default function SharePrevieFile({ user, data }: fileTypes) {
         <Box sx={{ py: 4, mt: 5 }}>
           <Divider sx={{ mb: 3 }} />
           <Typography variant="h6">Who has access</Typography>
-          <Typography component="p">By {data.createdBy?.email}</Typography>
+          <Typography component="p">
+            By &nbsp;
+            {propsStatus !== "share"
+              ? data.createdBy?.email
+              : data.ownerId.email}
+          </Typography>
 
           <Box
             sx={{

@@ -16,6 +16,8 @@ import "./languages/i18n";
 
 const emotionCache = createCache({ key: "css" });
 
+
+
 function App() {
   const content = useRoutes(routes);
   const location = useLocation();

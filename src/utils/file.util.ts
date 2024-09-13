@@ -91,7 +91,7 @@ export const readBlob = (blobURL, callback) => {
 
 export function getFolderName(path: string) {
   if (!path) {
-    return null;
+    return "";
   }
   const str = path;
   const parts = str.split("/");
