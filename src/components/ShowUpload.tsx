@@ -449,7 +449,6 @@ export default function ShowUpload(props: Props) {
           let newFilePath = "";
 
           if (folderId > 0) {
-            console.log("first");
             const queryfolderPath = await queryPath({
               variables: {
                 where: {

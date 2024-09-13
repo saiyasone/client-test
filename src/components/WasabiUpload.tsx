@@ -196,7 +196,7 @@ function WasabiUpload(props: Props) {
         const uppy = new Uppy({
           id: "upload-file-id",
           restrictions: {
-            maxNumberOfFiles: user?.packageId?.numberOfFileUpload || 1,
+            maxNumberOfFiles: user?.packageId?.numberOfFileUpload || 10,
           },
           autoProceed: false,
           allowMultipleUploadBatches: true,
@@ -288,6 +288,7 @@ function WasabiUpload(props: Props) {
               FILENAME: file.newFilename,
               PATH: `${subPath}`,
             };
+
             const _encryptHeader = await encryptData(headers);
             const formData = new FormData();
             formData.append("partNumber", partNumber.toString());
@@ -319,9 +320,10 @@ function WasabiUpload(props: Props) {
             };
             const _encryptHeader = await encryptData(headers);
             const formData = new FormData();
+
+            formData.append("FILENAME", file.newFilename);
             formData.append("parts", JSON.stringify(parts));
             formData.append("uploadId", uploadId);
-            formData.append("FILENAME", file.newFileName);
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}complete-multipart-upload`,
               {
@@ -346,7 +348,7 @@ function WasabiUpload(props: Props) {
     };
 
     initializeUppy();
-  }, [subPath]);
+  }, [subPath, user]);
 
   useEffect(() => {
     async function querySubFolder() {
@@ -369,11 +371,14 @@ function WasabiUpload(props: Props) {
         } catch (error) {
           console.log({ error });
         }
+      } else {
+        setSubPath("");
+        setNewFilePath("");
       }
     }
 
     querySubFolder();
-  }, [folderId]);
+  }, [folderId, user]);
 
   useEffect(() => {
     if (selectFiles.length > 0) {
@@ -406,14 +411,7 @@ function WasabiUpload(props: Props) {
                     dropHint: "Drop your files here",
                   },
                 }}
-                plugins={[
-                  "Webcam",
-                  "AudioFile",
-                  "Dropbox",
-                  "Instagram",
-                  "Url",
-                  "PauseResumeButton",
-                ]}
+                plugins={["Webcam", "AudioFile"]}
                 hideUploadButton={true}
                 proudlyDisplayPoweredByUppy={false}
               />
