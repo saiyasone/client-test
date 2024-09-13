@@ -308,6 +308,7 @@ const FileCardItem: React.FC<any> = ({
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
+          onClick,
           ischecked: cardDataProps?.ischecked?.toString(),
           sx: {
             ...(!isNormalCard && {
@@ -350,6 +351,7 @@ const FileCardItem: React.FC<any> = ({
                 />
               }
               aria-label={"checkbox" + props?.id}
+              onClick={handleItemClick}
             />
           </SelectionContainer>
         )}
