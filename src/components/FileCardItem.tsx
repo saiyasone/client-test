@@ -308,7 +308,6 @@ const FileCardItem: React.FC<any> = ({
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
-          onClick,
           ischecked: cardDataProps?.ischecked?.toString(),
           sx: {
             ...(!isNormalCard && {
