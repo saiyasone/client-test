@@ -417,7 +417,6 @@ function WasabiUpload(props: Props) {
         open={props.open}
         onClose={canClose ? () => {} : handleCloseDialog}
       >
-        {JSON.stringify(fileIdRef.current)}
         <MUI.UploadUppyContainer>
           <MUI.UppyHeader>
             <Typography variant="h2">Upload and attach files</Typography>
