@@ -411,6 +411,10 @@ export const ButtonUploadAction = styled("button")({
   "&:hover": {
     backgroundColor: "#10524a",
   },
+
+  "&:disabled": {
+    cursor: "not-allowed",
+  },
 });
 
 // ========== Files ============= //

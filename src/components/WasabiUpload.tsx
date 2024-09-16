@@ -50,7 +50,7 @@ function WasabiUpload(props: Props) {
   const [subPath, setSubPath] = useState("");
   const [newFilePath, setNewFilePath] = useState("");
 
-  const [uppyInstance, setUppyInstance] = useState<any>(() => new Uppy());
+  const [uppyInstance, setUppyInstance] = useState(() => new Uppy());
   const selectFileRef = useRef(selectFiles);
   const fileIdRef = useRef<any>(fileId);
 
@@ -77,6 +77,33 @@ function WasabiUpload(props: Props) {
 
   const manageGraphError = useManageGraphqlError();
 
+  async function handleAllCancelUpload() {
+    const dataFiles = selectFileRef.current;
+
+    try {
+      const deletePromise = await dataFiles.map(async (_, index) => {
+        const _id = fileIdRef.current[index];
+
+        await deleteFile({
+          variables: { id: _id },
+          onCompleted: () => {},
+        });
+      });
+
+      await Promise.all(deletePromise);
+      handleDoneUpload();
+    } catch (error: any) {
+      handleDoneUpload();
+      const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+      errorMessage(
+        manageGraphError.handleErrorMessage(
+          cutErr || "Something wrong please try again !",
+        ) as string,
+        3000,
+      );
+    }
+  }
+
   async function handleUploadToStorage() {
     const dataFiles = uppyInstance.getFiles() as any[];
 
@@ -84,6 +111,7 @@ function WasabiUpload(props: Props) {
       return;
     }
 
+    setCanClose(true);
     try {
       const uploadPromise = dataFiles.map(async (file, index) => {
         const filePath = newFilePath + "/" + getFileNameExtension(file.name);
@@ -113,14 +141,13 @@ function WasabiUpload(props: Props) {
           };
 
           setFileId(fileIdRef.current);
-          setCanClose(true);
         }
       });
 
       await Promise.all(uploadPromise);
       await uppyInstance.upload();
     } catch (error: any) {
-      //
+      errorMessage(error, 3000);
     }
   }
 
@@ -169,7 +196,7 @@ function WasabiUpload(props: Props) {
     setFileId({});
     setSelectFiles([]);
     setCanClose(false);
-    fileIdRef.current.value = null;
+    fileIdRef.current = {};
     selectFileRef.current = [];
 
     const files = uppyInstance.getFiles();
@@ -177,11 +204,6 @@ function WasabiUpload(props: Props) {
     files.forEach((file) => {
       uppyInstance.removeFile(file.id);
     });
-
-    const dashboard = uppyInstance.getPlugin("Dashboard");
-    if (dashboard) {
-      dashboard.close();
-    }
   }
 
   function getIndex(fileId) {
@@ -232,6 +254,7 @@ function WasabiUpload(props: Props) {
         });
 
         uppy.on("cancel-all", () => {
+          handleAllCancelUpload();
           handleDoneUpload();
         });
         uppy.on("complete", () => {
@@ -266,6 +289,7 @@ function WasabiUpload(props: Props) {
               FILENAME: file.newFilename,
               PATH: `${subPath}`,
             };
+
             const _encryptHeader = await encryptData(headers);
             return fetch(
               `${ENV_KEYS.VITE_APP_LOAD_URL}initiate-multipart-upload`,
@@ -338,7 +362,6 @@ function WasabiUpload(props: Props) {
         });
 
         setUppyInstance(uppy);
-
         return () => {
           uppy.close();
         };
@@ -348,7 +371,7 @@ function WasabiUpload(props: Props) {
     };
 
     initializeUppy();
-  }, [subPath, user]);
+  }, [subPath, user, fileIdRef]);
 
   useEffect(() => {
     async function querySubFolder() {
@@ -372,7 +395,8 @@ function WasabiUpload(props: Props) {
           console.log({ error });
         }
       } else {
-        setSubPath("");
+        const newPath = `${user?.newName}-${user?._id}`;
+        setSubPath(newPath);
         setNewFilePath("");
       }
     }
@@ -393,6 +417,7 @@ function WasabiUpload(props: Props) {
         open={props.open}
         onClose={canClose ? () => {} : handleCloseDialog}
       >
+        {JSON.stringify(fileIdRef.current)}
         <MUI.UploadUppyContainer>
           <MUI.UppyHeader>
             <Typography variant="h2">Upload and attach files</Typography>
@@ -424,7 +449,10 @@ function WasabiUpload(props: Props) {
                   >
                     Cancel
                   </MUI.ButtonCancelAction>
-                  <MUI.ButtonUploadAction onClick={handleUploadToStorage}>
+                  <MUI.ButtonUploadAction
+                    onClick={handleUploadToStorage}
+                    disabled={canClose}
+                  >
                     Upload now
                   </MUI.ButtonUploadAction>
                 </MUI.ButtonActionContainer>
