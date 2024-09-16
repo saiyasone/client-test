@@ -72,7 +72,7 @@ export default function TicketForm() {
         return newName;
       }) || [""];
       // ["a.png", "b.png", "c.png]
-      const fileUploads = [...files] || [];
+      const fileUploads = files || [];
 
       const typeResult = await createTypeTicket({
         variables: {
