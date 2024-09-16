@@ -151,17 +151,19 @@ const MostDownloadDataGrid = (props) => {
         disableColumnMenu
         getRowId={(row) => row._id}
         components={{
-          BaseCheckbox: React.forwardRef((props, ref) => {
-            return (
-              <Checkbox
-                ref={ref}
-                {...props}
-                sx={{
-                  color: "#A5A3AE",
-                }}
-              />
-            );
-          }),
+          BaseCheckbox: React.forwardRef(
+            (props, ref: React.ForwardedRef<HTMLButtonElement>) => {
+              return (
+                <Checkbox
+                  ref={ref}
+                  {...props}
+                  sx={{
+                    color: "#A5A3AE",
+                  }}
+                />
+              );
+            },
+          ),
           ColumnSortedAscendingIcon: () => {
             return (
               <Box
