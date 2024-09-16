@@ -33,7 +33,7 @@ const useFetchFile = ({ user }: any = {}) => {
     "cfg",
     "conf",
   ];
-  const [getData, { data: dataFetching }] = useLazyQuery(QUERY_FILE, {
+  const [getData, { data: dataFetching, loading: dataLoading }] = useLazyQuery(QUERY_FILE, {
     fetchPolicy: "no-cache",
   });
 
@@ -145,6 +145,7 @@ const useFetchFile = ({ user }: any = {}) => {
 
   return {
     data,
+    dataLoading,
     getData: getCustomFiles,
   };
 };

@@ -213,12 +213,9 @@ export const QUERY_FILE_SHARE_PUBLIC = gql`
 
 export const MUTATION_CREATE_SHARE = gql`
   mutation CreateShare($body: ShareInput) {
-    createShareTest(body: $body) {
+    createShare(body: $body) {
       _id
     }
-    # createShare(body: $body) {
-    #   _id
-    # }
   }
 `;
 
@@ -236,7 +233,7 @@ export const MUTATION_UPDATE_SHARE = gql`
 
 export const MUTATION_CREATE_SHARE_FROM_SHARING = gql`
   mutation HandleOnlyShare($body: OnlyShareInput) {
-    createShareTest(body: $body) {
+    createShare(body: $body) {
       _id
     }
     # handleOnlyShare(body: $body) {

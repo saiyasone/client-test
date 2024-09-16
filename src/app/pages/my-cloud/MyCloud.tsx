@@ -9,11 +9,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
-import {
-  MUTATION_ACTION_FILE,
-  QUERY_FILE,
-  QUERY_FILE_CATEGORY,
-} from "api/graphql/file.graphql";
+import { MUTATION_ACTION_FILE, QUERY_FILE } from "api/graphql/file.graphql";
 import { MUTATION_CREATE_FILE_DROP_URL_PRIVATE } from "api/graphql/fileDrop.graphql";
 import {
   MUTATION_UPDATE_FOLDER,
@@ -105,12 +101,6 @@ export function MyCloud() {
   });
   const manageFolder = useManageFolder({ user });
   const manageFile = useManageFile({ user });
-  const [getCategoryAll, { loading: countLoading }] = useLazyQuery(
-    QUERY_FILE_CATEGORY,
-    {
-      fetchPolicy: "no-cache",
-    },
-  );
 
   const [createFileDropLink] = useMutation(
     MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
@@ -960,7 +950,7 @@ export function MyCloud() {
   const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState: {data:IMyCloudTypes}) => ({
+        setDataForEvent((prevState: { data: IMyCloudTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -1394,12 +1384,12 @@ export function MyCloud() {
                 {isMobile ? (
                   <FileCardSlider
                     fileCategory={dataFiles.data}
-                    countLoading={countLoading}
+                    countLoading={dataFiles.dataLoading}
                   />
                 ) : (
                   <MediaCard
                     fileCategory={dataFiles.data}
-                    countLoading={countLoading}
+                    countLoading={dataFiles.dataLoading}
                   />
                 )}
                 <MUI.DivFolders>
@@ -1650,76 +1640,78 @@ export function MyCloud() {
                     <Box sx={{ mt: 4 }}>
                       {mainFile?.length > 0 && (
                         <FileCardContainer>
-                          {mainFile?.map((item: IMyCloudTypes, index: number) => {
-                            return (
-                              <Fragment key={index}>
-                                <FileCardItem
-                                  imagePath={
-                                    user?.newName +
-                                    "-" +
-                                    user?._id +
-                                    (item?.path
-                                      ? removeFileNameOutOfPath(item?.path)
-                                      : "") +
-                                    "/" +
-                                    item?.newFilename
-                                  }
-                                  user={user}
-                                  selectType={"file"}
-                                  path={item?.path}
-                                  isCheckbox={true}
-                                  filePassword={item?.filePassword}
-                                  id={item?._id}
-                                  favouriteIcon={{
-                                    isShow: false,
-                                    handleFavouriteOnClick: async () =>
-                                      await handleFavourite(item),
-                                    isFavourite:
-                                      item?.favorite === 1 ? true : false,
-                                  }}
-                                  fileType={getFolderName(item?.fileType)}
-                                  handleSelect={handleMultipleFileData}
-                                  name={item?.filename}
-                                  newName={item?.newFilename}
-                                  cardProps={{
-                                    onClick: isMobile
-                                      ? async () => await handleClick(item)
-                                      : undefined,
-                                    onDoubleClick: !isMobile
-                                      ? () => handleDoubleClick(item)
-                                      : undefined,
-                                  }}
-                                  menuItems={menuItems.map(
-                                    (menuItem, index) => {
-                                      return (
-                                        <MenuDropdownItem
-                                          key={index}
-                                          isFavorite={
-                                            item.favorite ? true : false
-                                          }
-                                          isPassword={
-                                            item.filePassword ||
-                                            item.access_password
-                                              ? true
-                                              : false
-                                          }
-                                          title={menuItem.title}
-                                          icon={menuItem.icon}
-                                          onClick={() => {
-                                            setDataForEvent({
-                                              data: item,
-                                              action: menuItem.action,
-                                            });
-                                            setGetValue(item);
-                                          }}
-                                        />
-                                      );
-                                    },
-                                  )}
-                                />
-                              </Fragment>
-                            );
-                          })}
+                          {mainFile?.map(
+                            (item: IMyCloudTypes, index: number) => {
+                              return (
+                                <Fragment key={index}>
+                                  <FileCardItem
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      (item?.path
+                                        ? removeFileNameOutOfPath(item?.path)
+                                        : "") +
+                                      "/" +
+                                      item?.newFilename
+                                    }
+                                    user={user}
+                                    selectType={"file"}
+                                    path={item?.path}
+                                    isCheckbox={true}
+                                    filePassword={item?.filePassword}
+                                    id={item?._id}
+                                    favouriteIcon={{
+                                      isShow: false,
+                                      handleFavouriteOnClick: async () =>
+                                        await handleFavourite(item),
+                                      isFavourite:
+                                        item?.favorite === 1 ? true : false,
+                                    }}
+                                    fileType={getFolderName(item?.fileType)}
+                                    handleSelect={handleMultipleFileData}
+                                    name={item?.filename}
+                                    newName={item?.newFilename}
+                                    cardProps={{
+                                      onClick: isMobile
+                                        ? async () => await handleClick(item)
+                                        : undefined,
+                                      onDoubleClick: !isMobile
+                                        ? () => handleDoubleClick(item)
+                                        : undefined,
+                                    }}
+                                    menuItems={menuItems.map(
+                                      (menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            key={index}
+                                            isFavorite={
+                                              item.favorite ? true : false
+                                            }
+                                            isPassword={
+                                              item.filePassword ||
+                                              item.access_password
+                                                ? true
+                                                : false
+                                            }
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                            onClick={() => {
+                                              setDataForEvent({
+                                                data: item,
+                                                action: menuItem.action,
+                                              });
+                                              setGetValue(item);
+                                            }}
+                                          />
+                                        );
+                                      },
+                                    )}
+                                  />
+                                </Fragment>
+                              );
+                            },
+                          )}
                         </FileCardContainer>
                       )}
                       {fileLoading && (
