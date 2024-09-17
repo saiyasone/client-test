@@ -38,7 +38,6 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import { ENV_KEYS } from "constants/env.constant";
