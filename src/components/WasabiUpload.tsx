@@ -202,18 +202,12 @@ function WasabiUpload(props: Props) {
     props.onClose?.();
   }
 
-  function handleDoneUpload() {
+  async function handleDoneUpload() {
     setFileId({});
     setSelectFiles([]);
     setCanClose(false);
     fileIdRef.current = {};
     selectFileRef.current = [];
-
-    const files = uppyInstance.getFiles();
-
-    files.forEach((file) => {
-      uppyInstance.removeFile(file.id);
-    });
   }
 
   function getIndex(fileId) {
@@ -235,22 +229,18 @@ function WasabiUpload(props: Props) {
         });
 
         uppy.on("file-added", async (file: any) => {
-          try {
-            setSelectFiles((prev: any) => [
-              ...prev,
-              {
-                id: file.id,
-                name: file.name,
-                size: file.size,
-                type: file.data.type,
-              },
-            ]);
+          setSelectFiles((prev: any) => [
+            ...prev,
+            {
+              id: file.id,
+              name: file.name,
+              size: file.size,
+              type: file.data.type,
+            },
+          ]);
 
-            const newFilename = await fetchRandomData();
-            file.newFilename = newFilename + getFileNameExtension(file.name);
-          } catch (error) {
-            //
-          }
+          const newFilename = await fetchRandomData();
+          file.newFilename = newFilename + getFileNameExtension(file.name);
         });
         uppy.on("file-removed", (file) => {
           try {
@@ -267,9 +257,10 @@ function WasabiUpload(props: Props) {
           handleAllCancelUpload();
           handleDoneUpload();
         });
+
         uppy.on("complete", () => {
-          eventUploadTrigger?.trigger();
           handleDoneUpload();
+          eventUploadTrigger?.trigger();
         });
 
         uppy.use(Webcam, {});
