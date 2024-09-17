@@ -16,5 +16,11 @@ export enum ReturnFileLockedMessage {
 export enum RenameFileMessage {
   UpdateSuccess = "Update file successful",
   UpdateFailed = "Update file failed",
+}
 
+
+export enum RenameFavouriteMessage {
+  AddFavorite = "Add one favorite success",
+  RemoveFavorite = "Remove one favorite success",
+  FavoriteFailed = "Add or remove one favorite failed",
 }

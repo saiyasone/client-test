@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import "styles/pagination.style.css";
 
 // material ui icon and component
-import { Box, Checkbox } from "@mui/material";
+import { Box, Checkbox, useMediaQuery } from "@mui/material";
 import ResponsivePagination from "react-responsive-pagination";
 
 import { styled } from "@mui/material/styles";
@@ -12,6 +12,7 @@ import FileDataGrid from "components/file/FileDataGrid";
 import moment from "moment";
 import { combineOldAndNewFileNames, getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
+import { IFileTypes } from "types/filesType";
 const FileTypeDataGridContainer = styled("div")(() => ({
   height: "100%",
   display: "flex",
@@ -25,15 +26,18 @@ const FileIconContainer = styled("div")(() => ({
   alignItems: "center",
 }));
 
-function FileTypeDataGrid(props) {
+function FileTypeDataGrid(props: any) {
   const { pagination, total, handleSelect } = props;
   const [hover, setHover] = useState("");
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
-
-  const handlePopperOpen = (event) => {
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const [styles, setStyles] = React.useState<
+    Record<string, Partial<FileIconProps>>
+  >({});
+  const handlePopperOpen = (event: any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data?.find((r) => r.id === id);
+    const row = props.data?.find((r: any) => r.id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
@@ -46,6 +50,12 @@ function FileTypeDataGrid(props) {
     setAnchorEvent(null);
   };
 
+  const handleClick = (params: { row: IFileTypes }) => {
+    if (!isMobile) {
+      return;
+    }
+    props.handleEvent("preview", params.row);
+  };
   const columns = [
     {
       field: "checkboxAction",
@@ -53,14 +63,14 @@ function FileTypeDataGrid(props) {
       editable: false,
       sortable: false,
       width: 50,
-      renderCell: (params) => {
+      renderCell: (params: { row: IFileTypes }) => {
         const { _id } = params?.row || {};
 
         return (
           <Checkbox
             checked={
               !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
+                (el: any) => el?.id === _id,
               ) && true
             }
             aria-label={"checkbox" + _id}
@@ -73,7 +83,7 @@ function FileTypeDataGrid(props) {
       field: "filename",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      renderCell: (params: { row: IFileTypes }) => {
         const { filename } = params.row;
         return (
           <div
@@ -85,8 +95,8 @@ function FileTypeDataGrid(props) {
           >
             <FileIconContainer>
               <FileIcon
-                extension={getFileType(filename)}
-                {...{ ...defaultStyles[getFileType(filename) as string] }}
+                extension={getFileType(filename) ?? ""}
+                {...{ ...styles[getFileType(filename) as string] }}
               />
             </FileIconContainer>
             <div className="file_name">
@@ -100,7 +110,7 @@ function FileTypeDataGrid(props) {
     {
       field: "size",
       headerName: "Size",
-      renderCell: (params) => convertBytetoMBandGB(params.row.size),
+      renderCell: (params:{row:IFileTypes}) => convertBytetoMBandGB(parseInt(params.row.size)),
       editable: false,
       flex: 1,
     },
@@ -108,7 +118,7 @@ function FileTypeDataGrid(props) {
       field: "updatedAt",
       headerName: "Date",
       editable: false,
-      renderCell: (params) =>
+      renderCell: (params:{row:IFileTypes}) =>
         moment(params.row.updatedAt).format("D MMM YYYY, h:mm A"),
       flex: 1,
     },
@@ -120,14 +130,14 @@ function FileTypeDataGrid(props) {
       align: "center",
       editable: false,
       sortable: false,
-      renderCell: (params) => {
+      renderCell: (params:{row:IFileTypes}) => {
         return (
           <Action
             params={params}
             eventActions={{
               hover,
               setHover,
-              handleEvent: (action, data) => {
+              handleEvent: (action:string, data:IFileTypes) => {
                 props.handleEvent(action, data);
               },
             }}
@@ -154,8 +164,16 @@ function FileTypeDataGrid(props) {
               onMouseLeave: handlePopperClose,
             },
           },
-          onRowDoubleClick: (params) => {
+          onRowDoubleClick: (params:{row:IFileTypes}) => {
             props.handleEvent("preview", params.row);
+          },
+          onCellClick: (params: { field: string; row: IFileTypes }) => {
+            if (
+              params.field !== "checkboxAction" &&
+              params.field !== "action"
+            ) {
+              handleClick(params);
+            }
           },
           columns,
           hideFooter: true,

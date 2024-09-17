@@ -46,7 +46,9 @@ export default function Action(props) {
                 eventActions.handleEvent("favourite", params?.row);
               }}
             >
-              {params?.row?.favorite || params?.row?.fileId?.favorite ? (
+              {params?.row?.favorite ||
+              params?.row?.fileId?.favorite ||
+              params?.favorite ? (
                 <MdFavorite size="18px" fill="#17766B" />
               ) : (
                 <MdOutlineFavoriteBorder size="18px" />
@@ -67,12 +69,14 @@ export default function Action(props) {
               return (
                 <MenuDropdownItem
                   isFavorite={
-                    params?.row?.favorite || params.row.fileId?.favorite
+                    params?.row?.favorite ||
+                    params.row.fileId?.favorite ||
+                    params?.favorite
                       ? true
                       : false
                   }
                   isPassword={
-                    params?.filePassword||
+                    params?.filePassword ||
                     params?.row.filePassword ||
                     params?.row.password ||
                     params?.row.access_passwordFolder
@@ -105,12 +109,14 @@ export default function Action(props) {
             return (
               <MenuDropdownItem
                 isFavorite={
-                  params?.row?.favorite || params.row?.fileId?.favorite
+                  params?.row?.favorite ||
+                  params.row?.fileId?.favorite ||
+                  params?.favorite
                     ? true
                     : false
                 }
                 isPassword={
-                  params?.filePassword||
+                  params?.filePassword ||
                   params?.row?.filePassword ||
                   params?.row?.access_password ||
                   params?.row?.access_passwordFolder

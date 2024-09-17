@@ -32,10 +32,10 @@ const useResizeImage = ({
 
   useEffect(() => {
     if (fileType === "image") {
-      const fetchResizeImage = async (imagePath, userId) => {
+      const fetchResizeImage = async (imagePath: string, userId: string) => {
         try {
           const enData = encryptData({
-            path: imagePath, 
+            path: imagePath,
             createdBy: isPublic ? "0" : userId,
             width: `${width}`,
             height: `${height}`,
@@ -67,6 +67,7 @@ const useResizeImage = ({
           setImageFound(false);
         }
       };
+
       if (imagePath && user?._id) {
         fetchResizeImage(imagePath, user?._id);
       } else {

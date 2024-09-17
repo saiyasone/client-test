@@ -139,7 +139,8 @@ function CloudFolderDataGrid(props: any) {
             style={{
               display: "flex",
               alignItems: "center",
-              columnGap: "6px",
+              overflow: "hidden",
+              columnGap: "12px",
             }}
           >
             <IconFolderContainer>

@@ -92,7 +92,6 @@ import { RootState } from "stores/store";
 import { useRefreshState } from "contexts/RefreshProvider";
 import {
   setMenuToggle,
-  setMenuToggleAsync,
   toggleFolderSelected,
   toggleSelected,
 } from "stores/features/useEventSlice";
@@ -433,7 +432,6 @@ export function MyCloud() {
   for (let k = 1; k <= Math.ceil(total / rowFilePage); k++) {
     countFilePage = k;
   }
-
 
   const handleClose = () => {
     setOptionsValue(false);
@@ -1338,7 +1336,7 @@ export function MyCloud() {
   };
 
   const handleFolderClick = useCallback(
-    (e: any, data: any) => {
+    (data: any) => {
       dispatch(setMenuToggle({ isStatus: "preview" }));
 
       if (
@@ -1352,10 +1350,15 @@ export function MyCloud() {
         });
       } else {
         handleMultipleFolderData(data?._id);
-   
       }
     },
-    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isFolderSelected],
+    [
+      dispatch,
+      isMobile,
+      isToggleMenu.isStatus,
+      isToggleMenu.isToggle,
+      isFolderSelected,
+    ],
   );
 
   const handleFolderDoubleClick = (data: IFolderTypes) => {
@@ -1522,17 +1525,17 @@ export function MyCloud() {
                                   selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
                                   isOpenMenu={isOpenMenu}
+                                  isCheckbox={true}
                                   isPinned={item.pin ? true : false}
                                   onOuterClick={() => {
                                     setMultiChecked(multiChecked);
                                     setChecked({});
                                   }}
-                                  handleSelectionFolder={
-                                    handleMultipleFolderData
-                                  }
                                   cardProps={{
-                                    onClick: (e: any) =>
-                                      handleFolderClick(e, item),
+                                    onClick: () =>
+                                      isMobile
+                                        ? handleFolderClick(item)
+                                        : handleMultipleFolderData(item._id),
                                     onDoubleClick: () =>
                                       handleFolderDoubleClick(item),
 
@@ -1656,7 +1659,7 @@ export function MyCloud() {
                             handleClearMultipleFileData();
                           }}
                         >
-                          {isSelected ? "Unselect" : "Select"}
+                          {isSelected ? "Deselect" : "Select"}
                         </Typography>
                       )}
                       <Typography

@@ -4,13 +4,11 @@ import {
   createTheme,
   OutlinedInput,
   styled,
-  Tooltip,
-  tooltipClasses,
-  useMediaQuery,
+  useMediaQuery
 } from "@mui/material";
-import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
-import React, { useMemo, useRef } from "react";
+import React from "react";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
 import { errorMessage, successMessage } from "utils/alert.util";
@@ -27,6 +25,7 @@ const FormLabel = styled("label")({
 interface RenameTypes {
   data: IFileTypes;
   filename?: string;
+  propsStatus?: string;
   setFilename: (value: string) => void;
   user: IUserTypes;
   setDataForEvent: (value: string) => void;
@@ -38,19 +37,24 @@ export default function FileRname({
   setFilename,
   user,
   setDataForEvent,
+  propsStatus,
 }: RenameTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
-  const { setIsAutoClose } = useMenuDropdownState();
   const manageFile = useManageFile({ user });
   const [newData, setNewData] = React.useState("");
   const defaultValueExtension = getFileNameExtension(data.filename);
-
+  const { setRefreshAuto } = useRefreshState();
   const handleUpdateFile = async () => {
     await manageFile.handleRenameFile({ id: data._id }, filename, {
       onSuccess: () => {
-        setIsAutoClose(true);
         successMessage(RenameFileMessage.UpdateSuccess, 2000);
         setDataForEvent("");
+        if (propsStatus) {
+          setRefreshAuto({
+            isAutoClose: true,
+            isStatus: propsStatus || "recent",
+          });
+        }
       },
       onFailed: () => {
         errorMessage(RenameFileMessage.UpdateFailed, 2000);

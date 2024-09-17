@@ -92,15 +92,11 @@ const IconFolderContainer = styled("div")({
   minHeight: "201.58px",
 });
 
-interface IFolderPropsType {
-  onOuterClick: () => void;
-  cardProps: any;
-}
 export default function FolderGridItem({
   onOuterClick,
   cardProps,
   ...props
-}: IFolderPropsType) {
+}: any) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const itemRef = useRef(null);
   const isFolderItemHover = useHover(itemRef);
@@ -140,6 +136,7 @@ export default function FolderGridItem({
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
+
           ischecked: cardDataProps?.ischecked?.toString(),
         }}
       >
@@ -168,7 +165,7 @@ export default function FolderGridItem({
                     ? "block"
                     : "none" // On mobile, show if folder is selected
                   : !!dataSelector?.selectionFileAndFolderData?.find(
-                      (el) =>
+                      (el: any) =>
                         el?.id === props?.id &&
                         el.checkType === props?.selectType,
                     )
