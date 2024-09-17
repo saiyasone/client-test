@@ -35,7 +35,7 @@ const useResizeImage = ({
       const fetchResizeImage = async (imagePath, userId) => {
         try {
           const enData = encryptData({
-            path: imagePath,
+            path: imagePath, 
             createdBy: isPublic ? "0" : userId,
             width: `${width}`,
             height: `${height}`,
@@ -74,7 +74,7 @@ const useResizeImage = ({
       }
 
       return () => {
-        source.cancel("Operation canceled due to route change.");
+        // source.cancel("Operation canceled due to route change.");
       };
     }
   }, [imagePath, user, fileType, location]);

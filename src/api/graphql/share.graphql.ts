@@ -98,6 +98,36 @@ export const QUERY_SHARE = gql`
   }
 `;
 
+export const QUERY_USER_SHARE = gql`
+  query GetShareDetail(
+    $where: ShareWhereInput
+    $orderBy: OrderByInput
+    $skip: Int
+    $limit: Int
+    $noLimit: Boolean
+  ) {
+    getShareDetail(
+      where: $where
+      orderBy: $orderBy
+      skip: $skip
+      limit: $limit
+      noLimit: $noLimit
+    ) {
+      total
+      items
+      data {
+        _id
+        email
+        newName
+        profile
+        permission
+        isPublic
+        shareId
+      }
+    }
+  }
+`;
+
 export const QUERY_FOLDER_SHARE_PUBLIC = gql`
   query FolderPublic($id: ID!) {
     folderPublic(ID: $id) {

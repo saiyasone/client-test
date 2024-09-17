@@ -54,6 +54,7 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
   
 
 export const handleDownloadQRCode = (event: React.MouseEvent<HTMLButtonElement>, qrCodeRef: React.RefObject<HTMLElement | any>, text: {title: string, description: string}) => {
+  event.preventDefault();
   const fileName = text.title || "download-qr";
   const svgElement = qrCodeRef.current.querySelector("svg");
   if (!svgElement) return;

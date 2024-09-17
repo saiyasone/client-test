@@ -25,7 +25,7 @@ const PackagePlan = () => {
       ).toLocaleString()}`;
 
 
-      setActualPrice(price ?? packagePrice);
+      setActualPrice(price || packagePrice);
     }
   },[actualPrice, country, exchangeRate, activePaymentMethod])
 

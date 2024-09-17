@@ -27,7 +27,7 @@ const TextField = styled(MuiTextField)(spacing);
 function BaseSignUp(props) {
   const theme = createTheme();
   const { signUpCaptcha, hideSignUp, handleSignUpFailure } = props;
-  const { signUp, authLoading }: any = useAuth();
+  const { signUp }: any = useAuth();
   const [captcha, setCaptcha] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const mobileScreen = useMediaQuery(theme.breakpoints.down("sm"));
@@ -99,6 +99,12 @@ function BaseSignUp(props) {
               values.password,
             );
             setIsLoading(false);
+
+            /* reset captcha and button */
+            if (window.grecaptcha) {
+              window.grecaptcha?.reset();
+              setCaptcha(true);
+            }
           }
         } catch (error: any) {
           setIsLoading(false);

@@ -1,0 +1,65 @@
+name: Deploy to Linode
+
+on:
+  push:
+    branches:
+      - deploy-staging
+      - deploy-production
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        uses: webfactory/ssh-agent@v0.5.3
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Determine Branch and Set Variables
+        run: |
+          case "${{ github.ref }}" in
+            'refs/heads/deploy-production')
+              echo "BRANCH=deploy-production" >> $GITHUB_ENV
+              echo "VERSION=production" >> $GITHUB_ENV
+              echo "DEPLOY_PATH=/var/www/vshare.net/frontend-landing" >> $GITHUB_ENV
+              echo "IP_ADDRESS=root@${{ secrets.PRODUCTION_IP_ADDRESS }}" >> $GITHUB_ENV
+              ;;
+            'refs/heads/deploy-staging')
+              echo "BRANCH=deploy-staging" >> $GITHUB_ENV
+              echo "VERSION=staging" >> $GITHUB_ENV
+              echo "DEPLOY_PATH=/var/www/staging.vshare.net/frontend-landing" >> $GITHUB_ENV
+              echo "IP_ADDRESS=root@${{ secrets.STAGING_IP_ADDRESS }}" >> $GITHUB_ENV
+              ;;
+            *)
+              echo "Branch not recognized for deployment"
+              exit 1
+              ;;
+          esac
+
+      - name: Show Variables
+        run: |
+          echo "Branch: ${{ env.BRANCH }}"
+          echo "Version: ${{ env.VERSION }}"
+          echo "Path: ${{ env.DEPLOY_PATH }}"
+          echo "Path: ${{ env.IP_ADDRESS }}"
+
+      - name: Test SSH Connection
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.IP_ADDRESS }} 'echo "SSH Connection Successful"'
+
+      - name: Deploy to VM
+        run: |
+          ssh -o StrictHostKeyChecking=no ${{ env.IP_ADDRESS }} << EOF
+            set -e  # Exit on any error
+            cd ${{ env.DEPLOY_PATH }}
+            git fetch
+            git checkout ${{ env.BRANCH }}
+            git pull
+            yarn install
+            # docker network create share-container-network || true
+            yarn run build:${{ env.VERSION }}
+          EOF

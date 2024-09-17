@@ -874,11 +874,11 @@ function FavouriteFile() {
           data: {
             id: optionValue?._id,
             name: optionValue?.filename,
-            newPath: optionValue?.newPath ?? "",
-            newFilename: optionValue?.newFilename ?? "",
+            newPath: optionValue?.newPath || "",
+            newFilename: optionValue?.newFilename || "",
             totalDownload: optionValue?.totalDownload || 0,
             checkType: "file",
-            dataPassword: optionValue?.filePassword ?? "",
+            dataPassword: optionValue?.filePassword || "",
             shortLink: optionValue?.shortUrl,
             createdBy: {
               _id: optionValue?.createdBy?._id,
@@ -898,10 +898,10 @@ function FavouriteFile() {
         data: {
           id: optionValue?._id,
           name: optionValue.filename,
-          newFilename: optionValue?.newFilename ?? "",
-          newPath: optionValue?.newPath ?? "",
+          newFilename: optionValue?.newFilename || "",
+          newPath: optionValue?.newPath || "",
           checkType: "file",
-          dataPassword: optionValue?.filePassword ?? "",
+          dataPassword: optionValue?.filePassword || "",
           totalDownload: optionValue?.totalDownload || 0,
           shortLink: optionValue?.shortUrl,
           createdBy: {

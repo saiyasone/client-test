@@ -189,7 +189,6 @@ const DialogCreateShare = (props) => {
             ...user,
             title: `${user.firstName} ${user.lastName}`,
             thumbnailSrc:
-              ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
               user?.newName +
               "-" +
               user?._id +
@@ -199,7 +198,6 @@ const DialogCreateShare = (props) => {
               getFilenameWithoutExtension(user?.profile) +
               `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
             src:
-              ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
               user?.newName +
               "-" +
               user?._id +
@@ -240,8 +238,8 @@ const DialogCreateShare = (props) => {
 
     const dataType =
       data?.folder_type || data?.folderId?._id ? "folder" : "file";
-    const ownerData = data?.createdBy?._id ?? data?.ownerId?._id;
-    const newNameData = data?.createdBy?.newName ?? data?.ownerId?.newName;
+    const ownerData = data?.createdBy?._id || data?.ownerId?._id;
+    const newNameData = data?.createdBy?.newName || data?.ownerId?.newName;
 
     fileId = base64Encode(
       {
@@ -735,7 +733,6 @@ const DialogCreateShare = (props) => {
                         ...user,
                         title: `${user.firstName} ${user.lastName}`,
                         thumbnailSrc:
-                          ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
                           user?.newName +
                           "-" +
                           user?._id +
@@ -745,7 +742,6 @@ const DialogCreateShare = (props) => {
                           getFilenameWithoutExtension(user?.profile) +
                           `.${ENV_KEYS.VITE_APP_THUMBNAIL_EXTENSION}`,
                         src:
-                          ENV_KEYS.VITE_APP_BUNNY_PULL_ZONE +
                           user?.newName +
                           "-" +
                           user?._id +

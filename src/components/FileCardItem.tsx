@@ -255,6 +255,12 @@ const FileCardItem: React.FC<any> = ({
     setIsDropdownOpen(isOpen);
   };
 
+  const handleItemClick = () => {
+    if (props?.isCheckbox) {
+      handleSelect(props?.id);
+    }
+  };
+
   useEffect(() => {
     setIsOpenMenu(isFileCardItemHover);
   }, [isFileCardItemHover]);
@@ -284,6 +290,7 @@ const FileCardItem: React.FC<any> = ({
       <Item
         ref={itemRef}
         className="card-item"
+        onClick={handleItemClick}
         {...{
           ...(styleSelectedCard && {
             isstyledselectedcard: styleSelectedCard,
@@ -332,7 +339,6 @@ const FileCardItem: React.FC<any> = ({
                 />
               }
               aria-label={"checkbox" + props?.id}
-              onClick={() => handleSelect(props?.id)}
             />
           </SelectionContainer>
         )}

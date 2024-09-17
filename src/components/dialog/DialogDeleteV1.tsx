@@ -47,7 +47,7 @@ const DialogDeleteV1 = (props) => {
             color: (theme) => theme.palette.primaryTheme!.brown(),
           }}
         >
-          {props?.title ?? t("_delete_title")}
+          {props?.title || t("_delete_title")}
         </Typography>
         <Box
           sx={{

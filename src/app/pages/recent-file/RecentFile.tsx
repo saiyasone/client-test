@@ -36,7 +36,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
@@ -106,7 +105,6 @@ function RecentFile() {
   );
 
   const [userPackage, setUserPackage] = useState<any>(null);
-  const [progressing, setProgressing] = useState<any>(0);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
   const [procesing, setProcesing] = useState<any>(true);
   const [showProgressing, setShowProgressing] = useState<any>(false);
@@ -286,10 +284,10 @@ function RecentFile() {
           id: optionValue?._id,
           checkType: "file",
           name: optionValue.filename,
-          newPath: optionValue?.newPath ?? "",
-          newFilename: optionValue?.newFilename ?? "",
+          newPath: optionValue?.newPath || "",
+          newFilename: optionValue?.newFilename || "",
           totalDownload: optionValue?.totalDownload || 0,
-          dataPassword: optionValue?.filePassword ?? "",
+          dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
           createdBy: {
             _id: optionValue?.createdBy?._id,
@@ -384,7 +382,10 @@ function RecentFile() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             handleDownloadFile();
@@ -497,7 +498,10 @@ function RecentFile() {
         break;
       case "download":
         handleCloseDecryptedPassword();
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleGetDownloadLink();
         } else {
           handleDownloadFile();
@@ -799,7 +803,10 @@ function RecentFile() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: async () => {
-                if (userPackage?.downLoadOption === "another") {
+                if (
+                  userPackage?.downLoadOption === "another" ||
+                  userPackage?.category === "free"
+                ) {
                   handleGetDownloadLink();
                 } else {
                   handleDownloadFile();
@@ -818,7 +825,10 @@ function RecentFile() {
             resetDataForEvents();
           }}
           onClick={() => {
-            if (userPackage?.downLoadOption === "another") {
+            if (
+              userPackage?.downLoadOption === "another" ||
+              userPackage?.category === "free"
+            ) {
               handleGetDownloadLink();
             } else {
               handleDownloadFile();
@@ -890,10 +900,6 @@ function RecentFile() {
           "If you click yes " + dataForEvent.data.filename + " will be deleted?"
         }
       />
-
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
       <MUI.TitleAndSwitch sx={{ my: 2 }}>
         {dataSelector?.selectionFileAndFolderData?.length ? (

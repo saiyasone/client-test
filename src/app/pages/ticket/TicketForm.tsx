@@ -201,7 +201,11 @@ export default function TicketForm() {
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.title && errors.title)}
-                helperText={touched.title && errors.title}
+                helperText={
+                  touched.title && typeof errors.title === "string"
+                    ? errors.title
+                    : undefined
+                }
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.title}
@@ -218,7 +222,11 @@ export default function TicketForm() {
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.email && errors.email)}
-                helperText={touched.email && errors.email}
+                helperText={
+                  touched.email && typeof errors.email === "string"
+                    ? errors.email
+                    : undefined
+                }
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.email}
@@ -236,7 +244,11 @@ export default function TicketForm() {
                 rows={7}
                 fullWidth={true}
                 error={Boolean(touched.message && errors.message)}
-                helperText={touched.message && errors.message}
+                helperText={
+                  touched.message && typeof errors.message === "string"
+                    ? errors.message
+                    : undefined
+                }
                 onBlur={handleBlur}
                 onChange={handleChange}
                 value={values.message}

@@ -7,6 +7,7 @@ import DescriptionIcon from "@mui/icons-material/Description";
 import PeopleAltOutlinedIcon from "@mui/icons-material/PeopleAltOutlined";
 import VerifiedUserOutlinedIcon from "@mui/icons-material/VerifiedUserOutlined";
 import {
+  Box,
   Breadcrumbs,
   Button,
   Divider,
@@ -30,6 +31,7 @@ import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import useManageSetting from "hooks/useManageSetting";
 import { errorMessage, successMessage } from "utils/alert.util";
+import NoProfileIcon from "assets/images/no-profile.svg?react";
 import {
   getFileNameExtension,
   getFilenameWithoutExtension,
@@ -93,6 +95,9 @@ function AccountInfo() {
     deactiveUser: "DUAUDTA",
     rememberDevice: "RMBMEEB",
   };
+
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath = user?.newName + "-" + user?._id + "/user_profile/";
 
   function findDataSetting(productKey) {
     const dataSetting = useDataSetting.data?.find(
@@ -256,6 +261,8 @@ function AccountInfo() {
         createdBy: user?._id,
       };
 
+      console.log({ headers });
+
       const encryptedData = encryptData(headers);
 
       const source = axios.CancelToken.source();
@@ -303,23 +310,28 @@ function AccountInfo() {
           : newFile && selectedImageType === "image"
           ? newFile
           : null;
+
       const selectedFileExtension = `.${selectedFile?.name?.split(".")?.pop()}`;
 
       //delete a file
       if (selectedFile instanceof File && userAccount?.profile) {
-        const headers = {
-          PATH: `${userAccount?.newName}-${userAccount?._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}`,
-          FILENAME: userAccount?.profile,
-          createdBy: user?._id,
-        };
+        try {
+          const headers = {
+            PATH: `${sourcePath}/${userAccount?.profile}`,
+            FILENAME: userAccount?.profile,
+            createdBy: user?._id,
+          };
 
-        const encryptedData = encryptData(headers);
-        await axios.delete(LOAD_DELETE_URL, {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            encryptedHeaders: encryptedData,
-          },
-        });
+          const encryptedData = encryptData(headers);
+          await axios.delete(LOAD_DELETE_URL, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+              encryptedHeaders: encryptedData,
+            },
+          });
+        } catch (error) {
+          console.log("No path specified");
+        }
       }
 
       const userData = await updateUser({
@@ -504,7 +516,7 @@ function AccountInfo() {
                           <>
                             <img
                               src={`data:image/svg+xml;utf8,${encodeURIComponent(
-                                selectedSvgCode,
+                                selectedSvgCode || "",
                               )}`}
                               alt="user_avatar_image"
                               style={{
@@ -516,11 +528,42 @@ function AccountInfo() {
                         ) : (
                           <>
                             {userAccount?.profile ? (
+                              <Fragment>
+                                {isProfileImageFound ? (
+                                  <img
+                                    src={
+                                      newUrl + sourcePath + userAccount?.profile
+                                    }
+                                    onError={() =>
+                                      setIsProfileImageFound(false)
+                                    }
+                                    alt="profile"
+                                    style={{
+                                      objectFit: "fill",
+                                      borderRadius: "8px",
+                                      boxShadow:
+                                        "brgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                                    }}
+                                  />
+                                ) : (
+                                  <Box
+                                    sx={{
+                                      width: "80px",
+                                      height: "80px",
+                                      borderRadius: "8px",
+                                      boxShadow:
+                                        "brgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
+                                    }}
+                                  >
+                                    <NoProfileIcon />
+                                  </Box>
+                                )}
+                              </Fragment>
+                            ) : (
                               <>
                                 <img
-                                  src={isProfileImageFound}
-                                  onError={() => setIsProfileImageFound(false)}
-                                  alt="profile"
+                                  src={noProfile || ""}
+                                  alt="user_no_image"
                                   style={{
                                     objectFit: "fill",
                                     borderRadius: "8px",
@@ -529,17 +572,6 @@ function AccountInfo() {
                                   }}
                                 />
                               </>
-                            ) : (
-                              <img
-                                src={noProfile}
-                                alt="user_no_image"
-                                style={{
-                                  objectFit: "fill",
-                                  borderRadius: "8px",
-                                  boxShadow:
-                                    "brgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px",
-                                }}
-                              />
                             )}
                           </>
                         )}

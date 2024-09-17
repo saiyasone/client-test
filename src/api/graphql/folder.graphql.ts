@@ -1,7 +1,7 @@
 import { gql } from "@apollo/client";
 
 export const QUERY_FOLDER = gql`
-  query Data(
+  query GetFolder(
     $where: FoldersWhereInput
     $orderBy: OrderByInput
     $limit: Int

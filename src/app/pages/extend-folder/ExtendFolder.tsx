@@ -375,9 +375,9 @@ function ExtendFolder() {
             id: optionValue?._id,
             name: optionValue?.name,
             checkType: "file",
-            newPath: optionValue?.newPath ?? "",
-            newFilename: optionValue?.newFilename ?? "",
-            dataPassword: optionValue?.filePassword ?? "",
+            newPath: optionValue?.newPath || "",
+            newFilename: optionValue?.newFilename || "",
+            dataPassword: optionValue?.filePassword || "",
             totalDownload: optionValue?.totalDownload || 0,
             shortLink: optionValue?.shortUrl,
             createdBy: {
@@ -465,7 +465,10 @@ function ExtendFolder() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             if (dataForEvent.type === "folder") {
@@ -618,7 +621,10 @@ function ExtendFolder() {
   async function handleSubmitDecryptedPassword() {
     switch (eventClick) {
       case "download":
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleCloseDecryptedPassword();
           await handleGetDownloadLink();
         } else {
@@ -1622,7 +1628,7 @@ function ExtendFolder() {
         dataValue={dataForEvent.data}
         isUpdate={isUpdate}
         filename={dataForEvent.data?.name}
-        checkType={dataForEvent.data?.folder_type ?? "file"}
+        checkType={dataForEvent.data?.folder_type || "file"}
         onConfirm={() => {
           customGetSubFoldersAndFiles();
         }}

@@ -396,8 +396,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       await adminLogin({
         variables: {
           where: {
-            username: username ?? "",
-            password: password ?? "",
+            username: username || "",
+            password: password || "",
           },
         },
         onCompleted: async (data) => {
@@ -446,9 +446,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       const signInUser = await userLogin({
         variables: {
           where: {
-            username: username ?? "",
-            password: password ?? "",
-            ip: responseIp.data ?? "",
+            username: username || "",
+            password: password || "",
+            ip: responseIp.data || "",
             captcha: window.__reCaptcha!,
           },
         },
@@ -503,7 +503,8 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       } else if (cutErr === "ACCOUNT_LOCKED_UNTIL:ວັນທີເດືອນປີ") {
         warningMessage("You account was locked until tomorrow!", 3000);
       } else {
-        warningMessage(error.message);
+        //errorMessage(error.message, 3000);
+        warningMessage(error.message, 3000);
       }
     }
   };
@@ -574,6 +575,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             password: password,
             email: email,
             ip: responseIp.data,
+            captcha: window.__reCaptcha!
           },
         },
       });
@@ -649,11 +651,14 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const handleForgetPassword = async (email) => {
+    /* reset captcha */
+    window.grecaptcha?.reset();
+
     try {
       await userForgotPasword({
         variables: {
           email: email,
-          captcha: window.__reCaptcha,
+          captcha: window.__reCaptcha!,
         },
         onCompleted: (data) => {
           if (data?.forgotPassword?.token) {
@@ -709,7 +714,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         resetForgetPassword,
         authentication2FA,
         permission:
-          permissionData?.role_staffs?.data[0]?.permision ?? localPermission,
+          permissionData?.role_staffs?.data[0]?.permision || localPermission,
       }}
     >
       {children}

@@ -621,6 +621,13 @@
     "_create_new_feature_title": "Add new feature",
     "_content": "Content",
     "_content_placeholder": "Enter content....",
-    "_update_new_feature_title": "Update new feature"
+    "_update_new_feature_title": "Update new feature",
+    "//":"###################################### FEED #############################",
+    "_feed":{
+      "header_short": "SHORT",
+      "for_you": {
+        
+      }
+    }
   }
 }

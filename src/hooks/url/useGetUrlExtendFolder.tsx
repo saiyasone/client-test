@@ -21,7 +21,7 @@ const useGetUrlExtendFolder = (data) => {
   const [_copied, setCoppied] = useState(false);
   if (data) {
     const handleGetFolderURL = async (data) => {
-      const dataType = data?.folder_type ?? "file";
+      const dataType = data?.folder_type || "file";
       const ownerData = data?.createdBy?._id;
       const dataUrl = {
         _id: data?._id,

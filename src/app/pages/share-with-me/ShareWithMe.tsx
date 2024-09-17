@@ -38,7 +38,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import {
   shareWithMeFileMenuItems,
   shareWithMeFolderMenuItems,
@@ -125,14 +124,11 @@ function ShareWithMe() {
   const [folderDrop, setFolderDrop] = useState<any>("");
 
   //dialog
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
   const [fileDetailsOpen, setFileDetailsOpen] = useState<any>(false);
   const [renameDialogOpen, setRenameDialogOpen] = useState<any>(false);
   const { setIsAutoClose } = useMenuDropdownState();
   const [shareDialog, setShareDialog] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [shareData, setShareData] = useState<any>(null);
   const [total, setTotal] = useState<any>(0);
   const { limitScroll } = useScroll({ total, limitData: 0 });
@@ -291,25 +287,25 @@ function ShareWithMe() {
     const valueOption = item?.find((el) => el?._id === selected);
 
     const dataName =
-      valueOption?.fileId?.filename ?? valueOption?.folderId?.folder_name;
+      valueOption?.fileId?.filename || valueOption?.folderId?.folder_name;
     const newFilename = valueOption?.fileId?._id
       ? valueOption?.fileId?.newFilename
       : valueOption?.folderId?.newFolder_name;
     const newPath =
-      valueOption?.fileId?.newPath ?? valueOption?.folderId?.newPath;
+      valueOption?.fileId?.newPath || valueOption?.folderId?.newPath;
 
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
           id: valueOption?._id,
-          dataId: valueOption?.fileId?._id ?? valueOption?.folderId?._id,
+          dataId: valueOption?.fileId?._id || valueOption?.folderId?._id,
           name: dataName,
           checkType: valueOption?.fileId?._id ? "file" : "folder",
           permission: valueOption?.permission,
           newFilename,
           newPath,
           dataPassword:
-            valueOption?.fileId?.filePassword ??
+            valueOption?.fileId?.filePassword ||
             valueOption?.folderId?.access_password,
           createdBy: {
             _id: valueOption?.fromAccount?._id,
@@ -499,7 +495,10 @@ function ShareWithMe() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             handleDownloadFileAndFolder();
@@ -981,7 +980,7 @@ function ShareWithMe() {
                                       data: {
                                         ...data,
                                         _id:
-                                          data?.fileId?._id ??
+                                          data?.fileId?._id ||
                                           data?.folderId?._id,
                                       },
                                     });
@@ -1036,8 +1035,13 @@ function ShareWithMe() {
                                           );
                                         }}
                                         cardProps={{
-                                          onClick: (e) =>
-                                            handleClickFolder(e, data),
+                                          onClick: (e) => {
+                                            handleMultipleData(
+                                              data?._id,
+                                              listItem?.data,
+                                            );
+                                            handleClickFolder(e, data);
+                                          },
                                           onDoubleClick: () => {
                                             setDataForEvent({
                                               data,
@@ -1101,7 +1105,7 @@ function ShareWithMe() {
                                                                   ...data,
                                                                   _id:
                                                                     data?.fileId
-                                                                      ?._id ??
+                                                                      ?._id ||
                                                                     data
                                                                       ?.folderId
                                                                       ?._id,
@@ -1130,7 +1134,7 @@ function ShareWithMe() {
                                                                 ...data,
                                                                 _id:
                                                                   data?.fileId
-                                                                    ?._id ??
+                                                                    ?._id ||
                                                                   data?.folderId
                                                                     ?._id,
                                                               },
@@ -1301,9 +1305,6 @@ function ShareWithMe() {
               </Fragment>
             )}
 
-            {showProgressing && (
-              <ProgressingBar procesing={procesing} progressing={progressing} />
-            )}
             {shareDialog && (
               <DialogCreateShare
                 onDeletedUserFromShareSave={handleDeletedUserFromShareOnSave}
@@ -1313,7 +1314,7 @@ function ShareWithMe() {
                 data={{
                   ...dataForEvent.data,
                   _id:
-                    dataForEvent.data?.folderId?._id ??
+                    dataForEvent.data?.folderId?._id ||
                     dataForEvent.data?.fileId?._id,
                   folder_name: dataForEvent.data?.folderId?.folder_name,
                   folder_type: dataForEvent.data?.folderId?.folder_type,

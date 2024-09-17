@@ -40,7 +40,6 @@ import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import FileCardItemIcon from "components/file/FileCardItemIcon";
-import ProgressingBar from "components/loading/ProgressingBar";
 import menuItems, { favouriteMenuItems } from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { FolderContext } from "contexts/FolderProvider";

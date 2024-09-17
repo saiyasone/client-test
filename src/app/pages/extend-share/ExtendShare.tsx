@@ -127,7 +127,6 @@ function ExtendShare() {
 
   const manageFile = useManageFile({ user });
   const breadCrumbData = useBreadcrumbData(parentFolder?.path, "");
-  const [progressing, setProgressing] = useState<any>(0);
   const [procesing, setProcesing] = useState<any>(true);
   const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
@@ -322,7 +321,10 @@ function ExtendShare() {
   async function handleSubmitDecryptedPassword() {
     switch (eventClick) {
       case "download":
-        if (userPackage?.downLoadOption === "another") {
+        if (
+          userPackage?.downLoadOption === "another" ||
+          userPackage?.category === "free"
+        ) {
           handleCloseDecryptedPassword();
           handleGetDownloadLink();
         } else {
@@ -413,7 +415,10 @@ function ExtendShare() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             if (dataForEvent.type === "folder") {
@@ -560,27 +565,6 @@ function ExtendShare() {
         },
       },
     );
-
-    // await manageFolder.handleDownloadFolder(
-    //   {
-    //     id: dataForEvent.data?._id,
-    //     folderName: dataForEvent.data?.name,
-    //     newPath: dataForEvent.data.newPath,
-    //   },
-    //   {
-    //     onFailed: async (error) => {
-    //       errorMessage(error, 2000);
-    //     },
-    //     onSuccess: async () => {
-    //       successMessage("Download successful", 2000);
-    //     },
-    //     onClosure: async () => {
-    //       setShowProgressing(false);
-    //       setIsAutoClose(false);
-    //       resetDataForEvents();
-    //     },
-    //   },
-    // );
   };
 
   const handleCreateFileDrop = async (link, date) => {
@@ -803,12 +787,12 @@ function ExtendShare() {
             dataId: selectOptions?._id,
             shareId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             newFilename: selectOptions?.newFilename,
             permission: selectOptions?.permission,
             checkType: selectOptions?.checkTypeItem,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -842,13 +826,13 @@ function ExtendShare() {
             id: selectOptions?._id,
             dataId: selectOptions?.sharedId,
             name: selectOptions?.name,
-            newPath: selectOptions.newPath ?? "",
+            newPath: selectOptions.newPath || "",
             checkType: selectOptions?.checkTypeItem,
-            permission: selectOptions?.permission ?? "view",
+            permission: selectOptions?.permission || "view",
             newFilename: selectOptions?.newFolder_name,
             totalSize: selectOptions?.isContainsFiles ? 1 : 0,
             dataPassword:
-              selectOptions?.filePassword ??
+              selectOptions?.filePassword ||
               selectOptions?.folderId?.access_password,
             createdBy: {
               _id: selectOptions?.createdBy?._id,
@@ -1093,9 +1077,6 @@ function ExtendShare() {
           " will be deleted?"
         }
       />
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
       <MUI.ExtendContainer>
         <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
