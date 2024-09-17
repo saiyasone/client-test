@@ -46,7 +46,11 @@ function WasabiUpload(props: Props) {
   const [canClose, setCanClose] = useState(false);
 
   const [fileId, setFileId] = useState({});
+  const [uploadedFileIds, setUploadedFileIds] = useState<{
+    [key: number]: string;
+  }>({});
   const [selectFiles, setSelectFiles] = useState<any>([]);
+
   const [subPath, setSubPath] = useState("");
   const [newFilePath, setNewFilePath] = useState("");
 
@@ -82,12 +86,14 @@ function WasabiUpload(props: Props) {
 
     try {
       const deletePromise = await dataFiles.map(async (_, index) => {
-        const _id = fileIdRef.current[index];
+        const fileId = fileIdRef.current[index];
 
-        await deleteFile({
-          variables: { id: _id },
-          onCompleted: () => {},
-        });
+        if (fileId && !uploadedFileIds[index]) {
+          await deleteFile({
+            variables: { id: fileId },
+            onCompleted: () => {},
+          });
+        }
       });
 
       await Promise.all(deletePromise);
@@ -135,6 +141,10 @@ function WasabiUpload(props: Props) {
         const fileId = await uploading.data?.createFiles?._id;
 
         if (fileId) {
+          setUploadedFileIds((prev) => ({
+            ...prev,
+            [index]: fileId,
+          }));
           fileIdRef.current = {
             ...fileIdRef.current,
             [index]: fileId,

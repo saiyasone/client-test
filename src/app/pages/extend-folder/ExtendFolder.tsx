@@ -1173,6 +1173,7 @@ function ExtendFolder() {
                 folderId={parentFolder?._id}
                 handleNavigate={handleFolderNavigate}
               />
+
               {(fetchSubFoldersAndFiles.folders.isDataFound ||
                 fetchSubFoldersAndFiles.files.isDataFound ||
                 inputSearch) && (
