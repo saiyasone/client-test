@@ -46,7 +46,11 @@ function WasabiUpload(props: Props) {
   const [canClose, setCanClose] = useState(false);
 
   const [fileId, setFileId] = useState({});
+  const [uploadedFileIds, setUploadedFileIds] = useState<{
+    [key: number]: string;
+  }>({});
   const [selectFiles, setSelectFiles] = useState<any>([]);
+
   const [subPath, setSubPath] = useState("");
   const [newFilePath, setNewFilePath] = useState("");
 
@@ -82,12 +86,14 @@ function WasabiUpload(props: Props) {
 
     try {
       const deletePromise = await dataFiles.map(async (_, index) => {
-        const _id = fileIdRef.current[index];
+        const fileId = fileIdRef.current[index];
 
-        await deleteFile({
-          variables: { id: _id },
-          onCompleted: () => {},
-        });
+        if (fileId && !uploadedFileIds[index]) {
+          await deleteFile({
+            variables: { id: fileId },
+            onCompleted: () => {},
+          });
+        }
       });
 
       await Promise.all(deletePromise);
@@ -135,6 +141,10 @@ function WasabiUpload(props: Props) {
         const fileId = await uploading.data?.createFiles?._id;
 
         if (fileId) {
+          setUploadedFileIds((prev) => ({
+            ...prev,
+            [index]: fileId,
+          }));
           fileIdRef.current = {
             ...fileIdRef.current,
             [index]: fileId,
@@ -192,18 +202,12 @@ function WasabiUpload(props: Props) {
     props.onClose?.();
   }
 
-  function handleDoneUpload() {
+  async function handleDoneUpload() {
     setFileId({});
     setSelectFiles([]);
     setCanClose(false);
     fileIdRef.current = {};
     selectFileRef.current = [];
-
-    const files = uppyInstance.getFiles();
-
-    files.forEach((file) => {
-      uppyInstance.removeFile(file.id);
-    });
   }
 
   function getIndex(fileId) {
@@ -225,22 +229,18 @@ function WasabiUpload(props: Props) {
         });
 
         uppy.on("file-added", async (file: any) => {
-          try {
-            setSelectFiles((prev: any) => [
-              ...prev,
-              {
-                id: file.id,
-                name: file.name,
-                size: file.size,
-                type: file.data.type,
-              },
-            ]);
+          setSelectFiles((prev: any) => [
+            ...prev,
+            {
+              id: file.id,
+              name: file.name,
+              size: file.size,
+              type: file.data.type,
+            },
+          ]);
 
-            const newFilename = await fetchRandomData();
-            file.newFilename = newFilename + getFileNameExtension(file.name);
-          } catch (error) {
-            //
-          }
+          const newFilename = await fetchRandomData();
+          file.newFilename = newFilename + getFileNameExtension(file.name);
         });
         uppy.on("file-removed", (file) => {
           try {
@@ -257,9 +257,10 @@ function WasabiUpload(props: Props) {
           handleAllCancelUpload();
           handleDoneUpload();
         });
+
         uppy.on("complete", () => {
-          eventUploadTrigger?.trigger();
           handleDoneUpload();
+          eventUploadTrigger?.trigger();
         });
 
         uppy.use(Webcam, {});

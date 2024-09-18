@@ -25,7 +25,6 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import menuItems from "constants/menuItem.constant";
@@ -163,7 +162,7 @@ function FileType() {
     resetDataForEvents();
     setShowPreview(false);
   };
-  
+
   const queryFileGrid = async () => {
     if (toggle === "grid") {
       try {
@@ -181,8 +180,8 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
-              console.log(queryData);
-              setMainFileTypes(queryData)
+
+              setMainFileTypes(queryData);
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -239,7 +238,7 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
-              setMainFileTypes(queryData)
+              setMainFileTypes(queryData);
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -678,7 +677,6 @@ function FileType() {
       }
     }
   }, [dataForEvent.action]);
-
 
   const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
     const result = await getFolders({
