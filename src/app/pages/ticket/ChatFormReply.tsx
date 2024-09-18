@@ -50,6 +50,9 @@ export default function ChatFormReply(props: Props) {
 
     multiple: true,
     maxFiles: 4,
+    accept: {
+      "image/*": [],
+    },
   });
 
   const handleIsFileClose = () => {

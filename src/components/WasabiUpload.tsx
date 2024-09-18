@@ -12,7 +12,6 @@ import Webcam from "@uppy/webcam";
 import * as MUI from "../styles/uppyStyle.style";
 
 // uppy css
-import "@uppy/audio/dist/style.min.css";
 import "@uppy/core/dist/style.css";
 import "@uppy/core/dist/style.min.css";
 import "@uppy/dashboard/dist/style.min.css";
@@ -36,6 +35,7 @@ import { UAParser } from "ua-parser-js";
 import { errorMessage } from "utils/alert.util";
 import { getFileNameExtension } from "utils/file.util";
 import { encryptData } from "utils/secure.util";
+import useUnloadHandler from "hooks/useUnloadHandler";
 
 type Props = {
   open: boolean;
@@ -70,6 +70,13 @@ function WasabiUpload(props: Props) {
     ? trackingFolderData?.createdBy
     : userAuth;
 
+  useUnloadHandler({
+    isData: canClose,
+    onReload: () => {
+      console.log("User is reloading...");
+    },
+  });
+
   //   graphql
   const [uploadFileAction] = useMutation<{ createFiles: { _id?: string } }>(
     MUTATION_CREATE_FILE,
@@ -88,7 +95,7 @@ function WasabiUpload(props: Props) {
       const deletePromise = await dataFiles.map(async (_, index) => {
         const fileId = fileIdRef.current[index];
 
-        if (fileId && !uploadedFileIds[index]) {
+        if (fileId) {
           await deleteFile({
             variables: { id: fileId },
             onCompleted: () => {},
@@ -102,9 +109,7 @@ function WasabiUpload(props: Props) {
       handleDoneUpload();
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(
-        manageGraphError.handleErrorMessage(
-          cutErr || "Something wrong please try again !",
-        ) as string,
+        manageGraphError.handleErrorMessage(cutErr || error.message) as string,
         3000,
       );
     }
@@ -157,7 +162,8 @@ function WasabiUpload(props: Props) {
       await Promise.all(uploadPromise);
       await uppyInstance.upload();
     } catch (error: any) {
-      errorMessage(error, 3000);
+      setCanClose(false);
+      errorMessage(error.message, 3000);
     }
   }
 
@@ -198,14 +204,19 @@ function WasabiUpload(props: Props) {
   }
 
   function handleCloseDialog() {
+    const dataFiles = uppyInstance.getFiles();
+    dataFiles.forEach((file) => {
+      uppyInstance.removeFile(file.id);
+    });
+
     handleDoneUpload();
     props.onClose?.();
   }
 
   async function handleDoneUpload() {
+    setCanClose(false);
     setFileId({});
     setSelectFiles([]);
-    setCanClose(false);
     fileIdRef.current = {};
     selectFileRef.current = [];
   }
@@ -222,7 +233,7 @@ function WasabiUpload(props: Props) {
         const uppy = new Uppy({
           id: "upload-file-id",
           restrictions: {
-            maxNumberOfFiles: user?.packageId?.numberOfFileUpload || 10,
+            maxNumberOfFiles: userAuth?.packageId?.numberOfFileUpload || 10,
           },
           autoProceed: false,
           allowMultipleUploadBatches: true,
@@ -258,9 +269,14 @@ function WasabiUpload(props: Props) {
           handleDoneUpload();
         });
 
-        uppy.on("complete", () => {
-          handleDoneUpload();
-          eventUploadTrigger?.trigger();
+        uppy.on("complete", async (result) => {
+          const updatePromise = result.successful.map((file) => {
+            uppy.removeFile(file.id);
+          });
+
+          await Promise.all(updatePromise);
+          await eventUploadTrigger?.trigger();
+          await handleDoneUpload();
         });
 
         uppy.use(Webcam, {});
@@ -372,7 +388,7 @@ function WasabiUpload(props: Props) {
     };
 
     initializeUppy();
-  }, [subPath, user, fileIdRef]);
+  }, [subPath, user, userAuth, fileIdRef]);
 
   useEffect(() => {
     async function querySubFolder() {

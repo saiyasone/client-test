@@ -1117,7 +1117,6 @@ export function MyCloud() {
         break;
       }
       case "password": {
-        console.log({ dataEvent: dataForEvent.data, userPackage });
         if (dataForEvent.data?.folder_type) {
           if (userPackage?.lockFolder === "on") {
             handleOpenPassword();
@@ -1129,7 +1128,7 @@ export function MyCloud() {
             );
           }
         } else {
-          if (userPackage?.lockFile !== "on") {
+          if (userPackage?.lockFile === "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
