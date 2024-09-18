@@ -4,6 +4,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   CircularProgress,
+  ListItemText,
   Typography,
   useMediaQuery,
 } from "@mui/material";
@@ -85,8 +86,13 @@ import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 import { RootState } from "stores/store";
 import { useRefreshState } from "contexts/RefreshProvider";
-import { setMenuToggle } from "stores/features/useEventSlice";
-import { IMyCloudTypes } from "types/mycloudFileType";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
+import { IFolderIdTypes } from "types/filesType";
 
 const ITEM_PER_PAGE_GRID = 20;
 
@@ -190,7 +196,7 @@ export function MyCloud() {
   const {
     isOpenMenu: isMenu,
     isSelected,
-    isOnClicked,
+    isFolderSelected,
     isToggleMenu,
   } = useSelector((state: RootState) => state.event);
 
@@ -416,28 +422,6 @@ export function MyCloud() {
   for (let k = 1; k <= Math.ceil(total / rowFilePage); k++) {
     countFilePage = k;
   }
-
-  const handleClickFolder = (
-    _e: any,
-    value: {
-      folder_type: string;
-      folder_name: SetStateAction<string>;
-      filename: SetStateAction<string>;
-      _id: SetStateAction<{}>;
-      path: SetStateAction<string>;
-    },
-  ) => {
-    if (value.folder_type === "folder") {
-      setName(value?.folder_name);
-    } else {
-      setName(value?.filename);
-    }
-
-    setChecked(value?._id);
-    setPath(value.path);
-    setOptionsValue(true);
-    setGetValue(value);
-  };
 
   const handleClose = () => {
     setOptionsValue(false);
@@ -1333,6 +1317,43 @@ export function MyCloud() {
       data,
     });
   };
+
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+
+  const handleFolderClick = useCallback(
+    (data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+
+      if (
+        isMobile &&
+        !isFolderSelected &&
+        isToggleMenu.isStatus === "preview"
+      ) {
+        setDataForEvent({
+          action: "folder double click",
+          data: data,
+        });
+      } else {
+        handleMultipleFolderData(data?._id);
+      }
+    },
+    [
+      dispatch,
+      isMobile,
+      isToggleMenu.isStatus,
+      isToggleMenu.isToggle,
+      isFolderSelected,
+    ],
+  );
+
+  const handleFolderDoubleClick = (data: IFolderTypes) => {
+    setDataForEvent({
+      action: "folder double click",
+      data: data,
+    });
+  };
   return (
     <Fragment>
       <Box
@@ -1412,19 +1433,37 @@ export function MyCloud() {
                         >
                           Folders
                         </Typography>
-                        <Typography
-                          display={
-                            folder?.folders?.data?.length > 0 ? "" : "none"
-                          }
-                          variant="h5"
-                          sx={{
-                            fontSize: "1rem",
-                            color: "initial !important",
-                            fontWeight: "normal !important",
-                          }}
-                        >
-                          {totalPages} Items
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          {isMobile && toggle !== "list" && (
+                            <Typography
+                              sx={{
+                                p: 2,
+                                fontSize: "1rem",
+                              }}
+                              onClick={() => {
+                                dispatch(
+                                  toggleFolderSelected(!isFolderSelected),
+                                );
+                                handleClearMultipleFileData();
+                              }}
+                            >
+                              {isFolderSelected ? "Unselect" : "Select"}
+                            </Typography>
+                          )}
+                          <Typography
+                            display={
+                              folder?.folders?.data?.length > 0 ? "" : "none"
+                            }
+                            variant="h5"
+                            sx={{
+                              fontSize: "1rem",
+                              color: "initial !important",
+                              fontWeight: "normal !important",
+                            }}
+                          >
+                            {totalPages} Items
+                          </Typography>
+                        </Box>
                       </Box>
                     </MUIFOLDER.TitleAndIcon>
                   )}
@@ -1472,25 +1511,19 @@ export function MyCloud() {
                                   selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
                                   isOpenMenu={isOpenMenu}
+                                  isCheckbox={true}
                                   isPinned={item.pin ? true : false}
                                   onOuterClick={() => {
                                     setMultiChecked(multiChecked);
                                     setChecked({});
                                   }}
-                                  handleSelectionFolder={
-                                    handleMultipleFolderData
-                                  }
                                   cardProps={{
-                                    onClick: (e: any) => {
-                                      handleMultipleFolderData(item?._id);
-                                      handleClickFolder(e, item);
-                                    },
-                                    onDoubleClick: () => {
-                                      setDataForEvent({
-                                        action: "folder double click",
-                                        data: item,
-                                      });
-                                    },
+                                    onClick: () =>
+                                      isMobile
+                                        ? handleFolderClick(item)
+                                        : handleMultipleFolderData(item._id),
+                                    onDoubleClick: () =>
+                                      handleFolderDoubleClick(item),
 
                                     ...(multiChecked.find(
                                       (id) => id === item?._id,
@@ -1600,18 +1633,33 @@ export function MyCloud() {
                     >
                       Files
                     </Typography>
-
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        display: mainFile?.length > 0 ? "" : "none",
-                        fontSize: "1rem",
-                        color: "initial !important",
-                        fontWeight: "normal !important",
-                      }}
-                    >
-                      {total} Items
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {isMobile && toggle !== "list" && (
+                        <Typography
+                          sx={{
+                            p: 2,
+                            fontSize: "1rem",
+                          }}
+                          onClick={() => {
+                            dispatch(toggleSelected(!isSelected));
+                            handleClearMultipleFileData();
+                          }}
+                        >
+                          {isSelected ? "Deselect" : "Select"}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          display: mainFile?.length > 0 ? "" : "none",
+                          fontSize: "1rem",
+                          color: "initial !important",
+                          fontWeight: "normal !important",
+                        }}
+                      >
+                        {total} Items
+                      </Typography>
+                    </Box>
                   </MUI.DivRecentFileHeader>
                   {toggle === "list" ? (
                     <Box>

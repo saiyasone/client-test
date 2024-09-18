@@ -253,7 +253,9 @@ const FileCardItem: React.FC<any> = ({
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
   );
-  const { isSelected } = useSelector((state: RootState) => state.event);
+  const { isSelected, isFolderSelected } = useSelector(
+    (state: RootState) => state.event,
+  );
   const [styles, setStyles] = React.useState<
     Record<string, Partial<FileIconProps>>
   >({});
@@ -296,7 +298,7 @@ const FileCardItem: React.FC<any> = ({
       <Item
         ref={itemRef}
         className="card-item"
-        onClick={handleItemClick}
+        // onClick={handleItemClick}
         {...{
           ...(styleSelectedCard && {
             isstyledselectedcard: styleSelectedCard,
@@ -310,6 +312,7 @@ const FileCardItem: React.FC<any> = ({
           }),
           onClick,
           ischecked: cardDataProps?.ischecked?.toString(),
+
           sx: {
             ...(!isNormalCard && {
               ":hover": {

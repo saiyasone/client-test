@@ -512,14 +512,11 @@ function FavouriteFile() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (
-            userPackage?.downLoadOption === "another" ||
-            userPackage?.category === "free"
-          ) {
-            handleGetDownloadLink();
-          } else {
+          // if (userPackage?.downLoadOption !== "another") {
+          //   handleGetDownloadLink();
+          // } else {
             await handleDownloadFiles();
-          }
+          // }
         }
         break;
       case "delete":
@@ -1275,7 +1272,7 @@ function FavouriteFile() {
                               dispatch(toggleSelected(!isSelected));
                               handleClearMultipleFileData();
                             }}
-                            primary={isSelected ? "Unselect" : "Select"}
+                            primary={isSelected ? "Deselect" : "Select"}
                           />
                         )}
                       </Box>

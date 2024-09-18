@@ -1,5 +1,7 @@
 export interface IFileTypes {
   _id: string;
+  access_password: string | null;
+  password: string | null;
   fileId: any;
   permission: string | undefined;
   ownerId: any;

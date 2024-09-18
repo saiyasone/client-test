@@ -68,6 +68,7 @@ Props) => {
           setImageFound(false);
         }
       };
+
       if (imagePath && user?._id) {
         fetchResizeImage(imagePath, user?._id);
       } else {

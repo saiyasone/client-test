@@ -3,6 +3,14 @@ import { QUERY_FILE } from "api/graphql/file.graphql";
 import { QUERY_FOLDER } from "api/graphql/folder.graphql";
 import { useEffect, useState } from "react";
 
+interface ISearchTypesISearchTypes {
+  id: string;
+  limit?: number;
+  toggle?: string;
+  limitScroll?: number;
+  name?: string;
+  currentPage?: number;
+}
 const useFetchSubFolderAndFile = ({
   id: parentId,
   limit,
@@ -10,7 +18,7 @@ const useFetchSubFolderAndFile = ({
   toggle,
   limitScroll,
   name,
-}) => {
+}: ISearchTypesISearchTypes) => {
   const [isFolderDataFound, setFolderDataFound] = useState<any>(null);
   const [isFileDataFound, setFileDataFound] = useState<any>(null);
   const [folderData, setFolderData] = useState<any>(null);
@@ -40,7 +48,9 @@ const useFetchSubFolderAndFile = ({
   const queryListDataFileAndFolder = async () => {
     if (parentId) {
       if (toggle === "list") {
-        const skip = (currentPage - 1) * limit;
+        let page = currentPage || 1;
+        let newLimit = limit || 10;
+        const skip = (page - 1) * newLimit;
         await getFolder({
           variables: {
             where: {
@@ -57,7 +67,7 @@ const useFetchSubFolderAndFile = ({
           onCompleted: (data) => {
             if (data?.folders?.data?.length > 0) {
               setFolderData(
-                data?.folders?.data?.map((folder) => {
+                data?.folders?.data?.map((folder: any) => {
                   return {
                     ...folder,
                     name: folder.folder_name,
@@ -71,7 +81,7 @@ const useFetchSubFolderAndFile = ({
                   };
                 }) || [],
               );
-              console.log(data?.folders?.total)
+
               setFolderTotal(data?.folders?.total);
               setFolderDataFound(true);
             } else {
@@ -95,7 +105,7 @@ const useFetchSubFolderAndFile = ({
           onCompleted: (data) => {
             if (data?.files?.data?.length > 0) {
               setFileData(
-                data?.files?.data?.map((file) => {
+                data?.files?.data?.map((file: any) => {
                   return {
                     ...file,
                     name: file.filename,
@@ -137,7 +147,7 @@ const useFetchSubFolderAndFile = ({
           onCompleted: (data) => {
             if (data?.folders?.data?.length > 0) {
               setFolderData(
-                data?.folders?.data?.map((folder) => {
+                data?.folders?.data?.map((folder: any) => {
                   return {
                     ...folder,
                     name: folder.folder_name,
@@ -173,7 +183,7 @@ const useFetchSubFolderAndFile = ({
           onCompleted: (data) => {
             if (data?.files?.data?.length > 0) {
               setFileData(
-                data?.files?.data?.map((file) => {
+                data?.files?.data?.map((file: any) => {
                   return {
                     ...file,
                     name: file.filename,
@@ -212,6 +222,8 @@ const useFetchSubFolderAndFile = ({
     },
     total: (fileData?.length || 0) + (folderData?.length || 0),
     apiTotal: folderTotal + fileTotal,
+    folderTotal,
+    fileTotal,
     queryGridDataFileAndFolder,
     queryListDataFileAndFolder,
     resetFolderData,

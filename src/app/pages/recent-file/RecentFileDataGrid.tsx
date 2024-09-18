@@ -2,7 +2,7 @@ import { createTheme, styled } from "@mui/material/styles";
 import React, { useState } from "react";
 import { FileIcon, FileIconProps } from "react-file-icon";
 //function
-import { Checkbox, useMediaQuery } from "@mui/material";
+import { Box, Checkbox, useMediaQuery } from "@mui/material";
 import Action from "components/action-table/Action";
 import FileDataGrid from "components/file/FileDataGrid";
 import moment from "moment";
@@ -10,6 +10,9 @@ import { IFavouriteTypes } from "types/favouriteType";
 import { getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import { IRecentTypes } from "types/recentFileType";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+
 const theme = createTheme();
 const RecentDataGridContainer = styled("div")(() => ({
   height: "100%",
@@ -62,17 +65,40 @@ function RecentFileDataGrid(props: any) {
       flex: 1,
       renderCell: (params: { row: IFavouriteTypes }) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: IFavouriteTypes) => el?.id === _id,
+          );
         return (
-          <Checkbox
-            checked={
-              !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el: IFavouriteTypes) => el?.id === _id,
-              ) && true
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => props?.handleSelection(_id)}
-          />
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: IFavouriteTypes) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },

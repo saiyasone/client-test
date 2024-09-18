@@ -20,7 +20,9 @@ import { Base64 } from "js-base64";
 import moment from "moment";
 import { useNavigate } from "react-router-dom";
 import { convertBytetoMBandGB } from "utils/storage.util";
-
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
+import { IFolderTypes } from "types/mycloudFileType";
 const ExtendFolderDataGridContainer = styled("div")(() => ({
   height: "100%",
   display: "flex",
@@ -88,22 +90,54 @@ function ExtendFolderDataGrid(props) {
       headerName: "",
       editable: false,
       sortable: false,
-      width: 50,
-      renderCell: (params) => {
+      maxWidth: isMobile ? 40 : 70,
+      renderCell: (params:{row:IFolderTypes}) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: IFolderTypes) => el?.id === _id,
+          );
         return (
-          <Checkbox
-            checked={
-              props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
-              )
-                ? true
-                : false
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => props?.handleSelection(_id)}
-          />
+          // <Checkbox
+          //   checked={
+          //     props?.dataSelector?.selectionFileAndFolderData?.find(
+          //       (el) => el?.id === _id,
+          //     )
+          //       ? true
+          //       : false
+          //   }
+          //   aria-label={"checkbox" + _id}
+          //   onClick={() => props?.handleSelection(_id)}
+          // />
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: IFolderTypes) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },
@@ -111,7 +145,8 @@ function ExtendFolderDataGrid(props) {
       field: "name",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      minWidth: 120,
+      renderCell: (params:any) => {
         const { name, isContainsFiles, _id } = params.row || {};
         return (
           <div
@@ -156,7 +191,7 @@ function ExtendFolderDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params) => {
+      renderCell: (params:any) => {
         const { isContainsFiles } = params.row || {};
 
         return (
@@ -167,7 +202,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action, data) =>
+                  handleEvent: (action:string, data:any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={shareWithMeFolderMenuItems}
@@ -182,7 +217,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action, data) =>
+                  handleEvent: (action:string, data:any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={favouriteMenuItems}

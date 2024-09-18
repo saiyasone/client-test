@@ -108,6 +108,8 @@ const useManageFile = ({ user }) => {
   };
 
   const handleActionFile = async ({ event, userId, id }) => {
+    console.log("total download");
+
     try {
       await fileAction({
         variables: {
@@ -339,11 +341,12 @@ const useManageFile = ({ user }) => {
 
   // download single file
   const handleDownloadSingleFile = async (
-    { multipleData },
-    { onSuccess, onFailed, onClosure },
+    { multipleData}:any,
+    { onSuccess, onFailed, onClosure }:any,
   ) => {
+    const { id, createdBy } = multipleData[0];
     try {
-      const newModelData = multipleData.map((file) => {
+      const newModelData = multipleData.map((file:any) => {
         let real_path = "";
         if (file.newPath) {
           real_path = removeFileNameOutOfPath(file?.newPath);
@@ -368,6 +371,11 @@ const useManageFile = ({ user }) => {
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
       startDownload({ baseUrl });
+      await handleActionFile({
+        id: id,
+        event: "download",
+        userId: createdBy?._id,
+      });
       onSuccess();
     } catch (error) {
       onFailed?.(error);
@@ -377,11 +385,11 @@ const useManageFile = ({ user }) => {
   };
 
   const handleSingleFileDropDownload = async (
-    { multipleData },
-    { onSuccess, onFailed, onClosure },
+    { multipleData }:any,
+    { onSuccess, onFailed, onClosure }:any,
   ) => {
     try {
-      const newModelData = multipleData.map((file) => {
+      const newModelData = multipleData.map((file:any) => {
         let real_path = "";
         if (file.createdBy?._id !== "0") {
           real_path = removeFileNameOutOfPath(file?.newPath);

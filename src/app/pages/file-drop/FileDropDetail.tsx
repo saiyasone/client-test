@@ -2,14 +2,14 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import FileEmpty from "assets/images/empty/file-empty.svg?react";
 import { Base64 } from "js-base64";
 import moment from "moment";
-import React, { Fragment, useEffect, useState } from "react";
+import React, { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { UAParser } from "ua-parser-js";
 import { v4 as uuidv4 } from "uuid";
 import * as Mui from "./styles/fileDropDetail.style";
 
 // components
-import { Card } from "@mui/material";
+import { Card, ListItemText, useMediaQuery } from "@mui/material";
 import Breadcrumbs from "@mui/material/Breadcrumbs";
 import Link from "@mui/material/Link";
 import {
@@ -56,6 +56,10 @@ import { convertBytetoMBandGB } from "utils/storage.util";
 import FileDropDataGrid from "./FileDropDataGrid";
 import useFetchFile from "./hooks/useFetchFile";
 import { decryptDataLink } from "utils/secure.util";
+import { RootState } from "stores/store";
+import { setMenuToggle, toggleSelected } from "stores/features/useEventSlice";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 const ITEM_PER_PAGE = 10;
 
@@ -80,6 +84,11 @@ function FileDropDetail() {
   const [eventClick, setEventClick] = useState<any>(false);
   const [userPackage, setUserPackage] = useState<any>(null);
   const [showPreview, setShowPreview] = useState<any>(false);
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const { refreshAuto } = useRefreshState();
+  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+    (state: RootState) => state.event,
+  );
 
   const [getFolders] = useLazyQuery(QUERY_FOLDER, { fetchPolicy: "no-cache" });
   const [deleteFile] = useMutation(MUTATION_DELETE_FILE);
@@ -169,6 +178,11 @@ function FileDropDetail() {
   useEffect(() => {
     handleClearSelection();
   }, [dispatch]);
+  useEffect(() => {
+    if (refreshAuto?.isStatus == "filedrop") {
+      customGetFiles();
+    }
+  }, [refreshAuto?.isAutoClose]);
 
   useEffect(() => {
     setUserPackage(user?.packageId);
@@ -224,6 +238,10 @@ function FileDropDetail() {
     }
   }, [dataDownloadURL]);
 
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+
   const handleGetDownloadLink = async () => {
     setDataDownloadURL(dataForEvent.data);
     setDataForEvent((prev) => {
@@ -237,7 +255,10 @@ function FileDropDetail() {
   const customGetFiles = () => {
     fetchFiles.customgetFiles();
   };
-
+  const handleClosePreview = () => {
+    resetDataForEvent();
+    setShowPreview(false);
+  };
   const resetDataForEvent = () => {
     setDataForEvent((state) => ({
       ...state,
@@ -482,7 +503,7 @@ function FileDropDetail() {
       }
     } catch (err) {
       resetDataForEvent();
-      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
+      errorMessage("Sorry! Something went wrong. Please try again!", 2000);
     }
   };
 
@@ -594,6 +615,28 @@ function FileDropDetail() {
     }
   }
 
+  const handleClick = useCallback(
+    async (data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: any) => {
+    setDataForEvent({
+      action: "preview",
+      data,
+    });
+  };
+
   return (
     <React.Fragment>
       <Mui.FileTypeContainer>
@@ -636,6 +679,20 @@ function FileDropDetail() {
                   file drop details
                 </Link>
               </Breadcrumbs>
+              {isMobile && toggle !== "list" && (
+                <ListItemText
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
+                  onClick={() => {
+                    dispatch(toggleSelected(!isSelected));
+                    handleClearMultipleFileData();
+                  }}
+                  primary={isSelected ? "Deselect" : "Select"}
+                />
+              )}
               {fetchFiles.isDataFound !== null && fetchFiles.isDataFound && (
                 <SwitchPages
                   handleToggle={handleToggle}
@@ -667,12 +724,12 @@ function FileDropDetail() {
                           return (
                             <FileCardItem
                               cardProps={{
-                                onDoubleClick: () => {
-                                  setDataForEvent({
-                                    action: "preview",
-                                    data,
-                                  });
-                                },
+                                onClick: isMobile
+                                  ? async () => await handleClick(data)
+                                  : undefined,
+                                onDoubleClick: !isMobile
+                                  ? () => handleDoubleClick(data)
+                                  : undefined,
                               }}
                               id={data?._id}
                               imagePath={
@@ -826,7 +883,7 @@ function FileDropDetail() {
         <ProgressingBar procesing={procesing} progressing={progressing} />
       )}
 
-      {showPreview && (
+      {/* {showPreview && (
         <DialogPreviewFile
           open={showPreview}
           isPublicPath={
@@ -850,8 +907,16 @@ function FileDropDetail() {
           user={user}
           userId={user?._id}
         />
-      )}
+      )} */}
 
+      <DialogPreviewFileSlide
+        open={showPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={fetchFiles?.data}
+        propsStatus="filedrop"
+      />
       <DialogValidateFilePassword
         isOpen={showEncryptPassword}
         filename={dataForEvent.data?.filename}
