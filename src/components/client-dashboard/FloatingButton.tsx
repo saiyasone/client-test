@@ -270,7 +270,7 @@ export default function FloatingButton() {
         </SpeedDial>
       </Box>
 
-      {selectFiles && (
+      {/* {selectFiles && (
         <ShowUpload
           open={open}
           data={selectFiles}
@@ -282,7 +282,7 @@ export default function FloatingButton() {
           parentComponent="floatingButton"
           getType={getType}
         />
-      )}
+      )} */}
 
       <Dialog
         open={folderOpen}

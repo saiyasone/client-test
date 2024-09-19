@@ -33,8 +33,8 @@ function ReplyPanel(props) {
         {
           id: file?._id,
           checkType: "file",
-          newPath: "",
-          newFilename: "chat-message/" + file.newNameImage,
+          newPath: "chat-message",
+          newFilename: file.newNameImage,
           createdBy: { _id: user?._id, newName: user?.newName },
         },
       ];
@@ -56,7 +56,6 @@ function ReplyPanel(props) {
     <Box className="chat-panel" ref={messagesEndRef}>
       {chat?.createdByStaff?._id ? (
         <MUI.ChatListContainer className="chat-user">
-          {/* <img src={iconPerson} alt="icon-person" /> */}
           <MUI.ChatBoxListContainer>
             <MUI.ChatBoxContainer>
               <MUI.ChatBoxCardContainer className="box-card-user">
@@ -127,19 +126,6 @@ function ReplyPanel(props) {
                           </Box>
                           <Typography component="span">{file.image}</Typography>
                         </Box>
-                        {/* <IconButton
-                            aria-label="download-file"
-                            size="small"
-                            color="default"
-                            onClick={() => onDownloadFile(chat, file)}
-                          >
-                            <FileDownload
-                              className="icon-download-user"
-                              sx={{
-                                fontSize: "1rem",
-                              }}
-                            />
-                          </IconButton> */}
                       </MUI.ChatBoxFileItem>
                     ) : null;
                   })
@@ -175,11 +161,6 @@ function ReplyPanel(props) {
                   </Box>
                 </MUI.ChatBoxCard>
               </MUI.ChatBoxCardContainer>
-              {/* <Box className="timeDate owner">
-                <Typography component="small">
-                  {moment(chat.createdAt).format("HH:mm")}
-                </Typography>
-              </Box> */}
             </MUI.ChatBoxContainer>
 
             {/* Chat Files */}
@@ -220,7 +201,6 @@ function ReplyPanel(props) {
                 : null}
             </MUI.ChatBoxFileListContainer>
           </MUI.ChatBoxListContainer>
-          {/* <img src={iconPerson} alt="icon-person" /> */}
         </MUI.ChatListContainer>
       )}
     </Box>

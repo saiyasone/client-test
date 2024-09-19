@@ -111,7 +111,7 @@ function DialogUploadChatFile(props) {
           const uploadPromises = chatSelector?.files.map(
             async (file, index) => {
               const headers = {
-                PATH: `${user?.newName}-${user?._id}/chat-message/${imageAccess[index]?.newNameImage}`,
+                PATH: `${user?.newName}-${user?._id}/chat-message`,
                 FILENAME: `${imageAccess[index]?.newNameImage}`,
                 createdBy: user?._id,
               };
