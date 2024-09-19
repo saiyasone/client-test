@@ -42,7 +42,7 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import {
@@ -52,6 +52,7 @@ import {
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { FolderContext } from "contexts/FolderProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
@@ -59,6 +60,12 @@ import useManageGraphqlError from "hooks/useManageGraphqlError";
 import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 import * as MUI from "styles/clientPage.style";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
@@ -71,14 +78,6 @@ import useAuth from "../../../hooks/useAuth";
 import useBreadcrumbData from "../../../hooks/useBreadcrumbData";
 import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
-import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
-import { useRefreshState } from "contexts/RefreshProvider";
-import {
-  setMenuToggle,
-  toggleFolderSelected,
-  toggleSelected,
-} from "stores/features/useEventSlice";
-import { RootState } from "stores/store";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
@@ -94,6 +93,7 @@ function ShareWithMe() {
 
   const [getFolders] = useLazyQuery(QUERY_FOLDER, { fetchPolicy: "no-cache" });
   const [updateFile] = useMutation(MUTATION_UPDATE_FILE);
+
   const [deleteShareFileAndFolder] = useMutation(MUTATION_DELETE_SHARE, {
     fetchPolicy: "no-cache",
   });
@@ -118,7 +118,6 @@ function ShareWithMe() {
 
   const [name, setName] = useState<any>("");
   const [_checked, setChecked] = useState<any>({});
-  const [multiSelectId, setMultiSelectId] = useState<any>([]);
   const [multiChecked, setMultiChecked] = useState<any>([]);
   const [isOpenMenu, setIsOpenMenu] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
@@ -847,9 +846,42 @@ function ShareWithMe() {
           queryGetShare();
         },
       });
+      // if (dataForEvent.data?.folderId?._id) {
+      //   // folder
+      //   await updateFolder({
+      //     variables: {
+      //       where: {
+      //         _id: parseInt(dataForEvent.data.folderId._id),
+      //       },
+      //       data: {
+      //         status: "deleted",
+      //       },
+      //     },
+      //     onCompleted: () => {
+      //       queryGetShare();
+      //       successMessage("Delete folder successful !", 2000);
+      //     },
+      //   });
+      // } else {
+      //   // file
+      //   await updateFile({
+      //     variables: {
+      //       where: {
+      //         _id: parseInt(dataForEvent.data.fileId._id),
+      //       },
+      //       data: {
+      //         status: "deleted",
+      //       },
+      //     },
+
+      //     onCompleted: () => {
+      //       queryGetShare();
+      //       successMessage("Delete file successful !", 2000);
+      //     },
+      //   });
+      // }
     } catch (error: any) {
-      errorMessage(error, 3000);
-      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
+      errorMessage(error.message, 3000);
     }
   };
 
@@ -1165,9 +1197,7 @@ function ShareWithMe() {
                                                   listItem?.data,
                                                 ),
                                           onDoubleClick: () =>
-                                            handleFolderDoubleClick(
-                                              data,
-                                            ),
+                                            handleFolderDoubleClick(data),
                                           ...(multiChecked.find(
                                             (id) => id === data?.folderId?._id,
                                           ) && {

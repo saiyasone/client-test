@@ -116,8 +116,6 @@ function ExtendShare() {
     parentFolder?._id,
     userAuth,
   );
-
-  console.log(parentFolder?._id);
   
   useEffect(() => {
     if (fetchSubFoldersAndFiles.data) {

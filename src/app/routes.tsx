@@ -183,7 +183,6 @@ const routes: RouteObject[] = [
         path: "file/:user/:fileType/:status",
         element: <File />,
       },
-      ///Feed
       {
         path: "feed-for-you",
         element: <ForyouView />,
@@ -206,10 +205,10 @@ const routes: RouteObject[] = [
       }
     ],
   },
-  {
-    path: "uppy",
-    element: <UppyUpload />,
-  },
+  // {
+  //   path: "uppy",
+  //   element: <UppyUpload />,
+  // },
   {
     path: "confirm",
     element: <ConfirmPayment />,

@@ -1,4 +1,5 @@
 import { useMutation } from "@apollo/client";
+import { LoadingButton } from "@mui/lab";
 import { Button, Typography, styled, useMediaQuery } from "@mui/material";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -13,7 +14,7 @@ import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { MuiChipsInput } from "mui-chips-input";
-import React, { Fragment } from "react";
+import React, { Fragment, useState } from "react";
 import "styles/chipInput.style.css";
 import * as MUI from "styles/share.style";
 import { errorMessage, successMessage } from "utils/alert.util";
@@ -50,6 +51,7 @@ const DialogCreateMultipleShare = (props) => {
   const [chipData, setChipData] = React.useState([]);
   const eventUploadTrigger = React.useContext(EventUploadTriggerContext);
   const { setIsAutoClose } = useMenuDropdownState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (newChip) => {
     setChipData(newChip);
@@ -68,6 +70,7 @@ const DialogCreateMultipleShare = (props) => {
     try {
       if (dataSelector?.length > 0) {
         if (chipData.length > 0) {
+          setIsLoading(true);
           const sharePromise = dataSelector?.map(async (item) => {
             if (item.checkType === "folder") {
               for (let i = 0; i < chipData.length; i++) {
@@ -156,10 +159,14 @@ const DialogCreateMultipleShare = (props) => {
         } else {
           onClose();
         }
+      } else {
+        onClose?.();
       }
     } catch (error: any) {
       // const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(error.message as string, 3000);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -242,7 +249,7 @@ const DialogCreateMultipleShare = (props) => {
               >
                 Done
               </Button>
-              <Button
+              <LoadingButton
                 sx={{
                   borderRadius: "6px",
                   padding: "8px 25px",
@@ -250,10 +257,19 @@ const DialogCreateMultipleShare = (props) => {
                 type="button"
                 variant="contained"
                 color="primaryTheme"
-                onClick={handleShareStatus}
+                loading={isLoading}
+                {...{
+                  ...(isGlobals === "private" && chipData?.length > 0
+                    ? {
+                        onClick: handleShareStatus,
+                      }
+                    : {
+                        disabled: true,
+                      }),
+                }}
               >
                 Send
-              </Button>
+              </LoadingButton>
             </ActionContainer>
           </DialogContent>
         </Fragment>
