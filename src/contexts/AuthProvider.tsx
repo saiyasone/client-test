@@ -442,7 +442,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (username, password) => {
     setAuthLoading(!authLoading);
     try {
-      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
       const signInUser = await userLogin({
         variables: {
           where: {
@@ -563,7 +567,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signUp = async (firstName, lastName, username, email, password) => {
     setAuthLoading(true);
-    const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+    const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
     try {
       const signUpUser = await register({
         variables: {

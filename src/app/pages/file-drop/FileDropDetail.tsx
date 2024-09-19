@@ -209,7 +209,11 @@ function FileDropDetail() {
     const fetchIPAddress = async () => {
       try {
         setCountry("other");
-        // const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+        const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+          headers: {
+            "Cache-Control": "no-cache",
+          },
+        });
         // const ip = responseIp?.data;
         // if (ip) {
         //   const res = await axios.get(
@@ -360,7 +364,11 @@ function FileDropDetail() {
   const handleSaveToCloud = async () => {
     try {
       const randomName = uuidv4();
-      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const uploading = await uploadFiles({
         variables: {
           data: {

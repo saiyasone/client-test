@@ -341,12 +341,12 @@ const useManageFile = ({ user }) => {
 
   // download single file
   const handleDownloadSingleFile = async (
-    { multipleData}:any,
-    { onSuccess, onFailed, onClosure }:any,
+    { multipleData }: any,
+    { onSuccess, onFailed, onClosure }: any,
   ) => {
     const { id, createdBy } = multipleData[0];
     try {
-      const newModelData = multipleData.map((file:any) => {
+      const newModelData = multipleData.map((file: any) => {
         let real_path = "";
         if (file.newPath) {
           real_path = removeFileNameOutOfPath(file?.newPath);
@@ -385,11 +385,11 @@ const useManageFile = ({ user }) => {
   };
 
   const handleSingleFileDropDownload = async (
-    { multipleData }:any,
-    { onSuccess, onFailed, onClosure }:any,
+    { multipleData }: any,
+    { onSuccess, onFailed, onClosure }: any,
   ) => {
     try {
-      const newModelData = multipleData.map((file:any) => {
+      const newModelData = multipleData.map((file: any) => {
         let real_path = "";
         if (file.createdBy?._id !== "0") {
           real_path = removeFileNameOutOfPath(file?.newPath);
@@ -578,7 +578,11 @@ const useManageFile = ({ user }) => {
     { onSuccess, onFailed },
   ) => {
     try {
-      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
 
       multipleData.map(async (file) => {
         const randomName = uuidv4();
