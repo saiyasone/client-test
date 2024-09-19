@@ -25,6 +25,11 @@ const SidebarNavSection = (props: any) => {
   } = props;
 
   return (
+    title === 'SHORT' ?
+    <Component {...rest}>
+      {title && <Title variant="subtitle2" style={{opacity: 0.6, marginTop: 5, marginBottom: 3, userSelect: 'none'}}>{title}</Title>}
+    </Component>
+    :
     <Component {...rest}>
       {title && <Title variant="subtitle2">{title}</Title>}
       <SidebarNavList pages={pages} depth={0} />

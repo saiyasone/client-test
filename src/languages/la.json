@@ -617,6 +617,13 @@
     "_create_new_feature_title": "ສ້າງຟິວເຈີໃໝ໋",
     "_content": "ເນື້ອໃນ",
     "_content_placeholder": "ປ້ອນເນື້ອໃນ....",
-    "_update_new_feature_title": "ແກ້ໄຂຟິວເຈີ"
+    "_update_new_feature_title": "ແກ້ໄຂຟິວເຈີ",
+    "//":"###################################### FEED #############################",
+    "_feed":{
+      "header_short": "SHORT",
+      "for_you": {
+        
+      }
+    }
   }
 }
