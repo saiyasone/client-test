@@ -35,7 +35,6 @@ import { UAParser } from "ua-parser-js";
 import { errorMessage } from "utils/alert.util";
 import { getFileNameExtension } from "utils/file.util";
 import { encryptData } from "utils/secure.util";
-import useUnloadHandler from "hooks/useUnloadHandler";
 
 type Props = {
   open: boolean;
