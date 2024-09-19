@@ -70,12 +70,12 @@ function WasabiUpload(props: Props) {
     ? trackingFolderData?.createdBy
     : userAuth;
 
-  useUnloadHandler({
-    isData: canClose,
-    onReload: () => {
-      console.log("User is reloading...");
-    },
-  });
+  // useUnloadHandler({
+  //   isData: canClose,
+  //   onReload: () => {
+  //     console.log("User is reloading...");
+  //   },
+  // });
 
   //   graphql
   const [uploadFileAction] = useMutation<{ createFiles: { _id?: string } }>(

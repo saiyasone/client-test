@@ -44,14 +44,13 @@ const menuItems = [
 export const shareWithMeFolderMenuItems = [
   { icon: <FiShare2 />, title: "Share", action: "share", disabled: true },
   { icon: <FiLink />, title: "Get Link", action: "get link", disabled: true },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
   {
     icon: <FiDownload />,
     title: "Download",
     action: "download",
     disabled: true,
   },
-  // { icon: <FiFile />, title: "File Drop", action: "filedrop" },
   { icon: <HiOutlineTrash />, title: "Delete", action: "delete" },
 ];
 
@@ -59,7 +58,7 @@ export const shareWithMeFileMenuItems = [
   { icon: <FiEye />, title: "Details", action: "detail" },
   { icon: <FiShare2 />, title: "Share", action: "share", disabled: true },
   { icon: <FiLink />, title: "Get Link", action: "get link", disabled: true },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
   {
     icon: <FiDownload />,
     title: "Download",
@@ -145,7 +144,7 @@ export const shortFavouriteMenuItems = [
     action: "download",
     disabled: true,
   },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
 ];
 
 export const shortMyCloudMenuItems = [
@@ -194,7 +193,7 @@ export const shortFileShareMenu = [
     action: "download",
     disabled: true,
   },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
 ];
 
 export const multipleSelectionFileItems = [

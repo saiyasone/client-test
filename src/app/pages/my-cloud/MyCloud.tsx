@@ -1467,6 +1467,7 @@ export function MyCloud() {
                                       : false
                                   }
                                   id={item?._id}
+                                  password={item?.access_password}
                                   folder_name={item?.folder_name}
                                   selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
@@ -1731,7 +1732,6 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    // fileViewMore < total &&
                     limitScroll < total &&
                     toggle === "grid" && (
                       <Box
@@ -1763,7 +1763,6 @@ export function MyCloud() {
                 </>
               </MUI.DivRecentFile>
 
-              {/* create share popup */}
               {openShare && (
                 <DialogCreateShare
                   onDeletedUserFromShareSave={handleDeletedUserFromShareOnSave}
@@ -1826,7 +1825,6 @@ export function MyCloud() {
                     "YYYY-MM-DD h:mm:ss",
                   )}
                   totalDownload={getValue?.totalDownload}
-                  // totalDownload={dataForEvent.data?.totalDownload}
                   isOpen={fileDetailsDialog}
                   onClose={() => {
                     setFileDetailsDialog(false);

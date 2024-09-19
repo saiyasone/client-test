@@ -1180,7 +1180,6 @@ function ShareWithMe() {
                                     </Fragment>
                                   );
                                 }
-
                                 // Files
                                 else {
                                   if (data?.fileId?.filename) {
@@ -1435,12 +1434,7 @@ function ShareWithMe() {
                 user={dataForEvent.data.ownerId}
                 {...{
                   favouriteIcon: {
-                    isShow: true,
-                    handleFavouriteOnClick: async () =>
-                      await handleAddFavourite(),
-                    isFavourite: dataForEvent.data.fileId?.favorite
-                      ? true
-                      : false,
+                    isShow: false,
                   },
                   downloadIcon: {
                     isShow:

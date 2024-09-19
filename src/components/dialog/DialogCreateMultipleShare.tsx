@@ -68,65 +68,88 @@ const DialogCreateMultipleShare = (props) => {
     try {
       if (dataSelector?.length > 0) {
         if (chipData.length > 0) {
-          dataSelector?.map(async (item) => {
+          const sharePromise = dataSelector?.map(async (item) => {
             if (item.checkType === "folder") {
               for (let i = 0; i < chipData.length; i++) {
-                if (item?.share?.isFromShare) {
-                  await createShareFromSharing({
-                    variables: {
-                      body: {
-                        shareId: item?.share._id,
-                        toAccount: chipData[i],
-                        permission: statusShare,
-                      },
+                await createShare({
+                  variables: {
+                    body: {
+                      folderId: item?.id,
+                      toAccount: chipData[i],
+                      isPublic: isGlobals,
+                      permission: statusShare,
                     },
-                  });
-                } else {
-                  await createShare({
-                    variables: {
-                      body: {
-                        folderId: item?.id,
-                        toAccount: chipData[i],
-                        isPublic: isGlobals,
-                        permission: statusShare,
-                      },
-                    },
-                  });
-                }
+                  },
+                });
+                // if (item?.share?.isFromShare) {
+                //   await createShareFromSharing({
+                //     variables: {
+                //       body: {
+                //         shareId: item?.share._id,
+                //         toAccount: chipData[i],
+                //         permission: statusShare,
+                //       },
+                //     },
+                //   });
+                // } else {
+                //   await createShare({
+                //     variables: {
+                //       body: {
+                //         folderId: item?.id,
+                //         toAccount: chipData[i],
+                //         isPublic: isGlobals,
+                //         permission: statusShare,
+                //       },
+                //     },
+                //   });
+                // }
               }
             } else {
               let shareCount = 0;
               for (let i = 0; i < chipData.length; i++) {
-                if (item?.share?.isFromShare) {
-                  shareCount += 1;
-                  await createShareFromSharing({
-                    variables: {
-                      body: {
-                        permission: statusShare,
-                        toAccount: chipData[i],
-                        shareId: item?.share._id,
-                      },
+                shareCount += 1;
+                await createShare({
+                  variables: {
+                    body: {
+                      fileId: item?.id,
+                      toAccount: chipData[i],
+                      isPublic: isGlobals,
+                      permission: statusShare,
                     },
-                  });
-                } else {
-                  shareCount += 1;
-                  await createShare({
-                    variables: {
-                      body: {
-                        fileId: item?.id,
-                        toAccount: chipData[i],
-                        isPublic: isGlobals,
-                        permission: statusShare,
-                      },
-                    },
-                  });
-                }
+                  },
+                });
+                // if (item?.share?.isFromShare) {
+                //   shareCount += 1;
+                //   await createShareFromSharing({
+                //     variables: {
+                //       body: {
+                //         permission: statusShare,
+                //         toAccount: chipData[i],
+                //         shareId: item?.share._id,
+                //       },
+                //     },
+                //   });
+                // } else {
+                //   shareCount += 1;
+                //   await createShare({
+                //     variables: {
+                //       body: {
+                //         fileId: item?.id,
+                //         toAccount: chipData[i],
+                //         isPublic: isGlobals,
+                //         permission: statusShare,
+                //       },
+                //     },
+                //   });
+                // }
               }
               if (shareCount === chipData.length) {
                 eventUploadTrigger.trigger();
               }
             }
           });
+
+          await Promise.all(sharePromise);
           successMessage("Share file successful", 3000);
           await handleClearChipData();
           await onClose();
@@ -135,11 +158,8 @@ const DialogCreateMultipleShare = (props) => {
         }
       }
     } catch (error: any) {
-      const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
-      errorMessage(
-        manageGraphqlError.handleErrorMessage(cutErr) as string,
-        3000,
-      );
+      // const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+      errorMessage(error.message as string, 3000);
     }
   };
 

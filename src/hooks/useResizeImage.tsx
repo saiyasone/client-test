@@ -44,6 +44,7 @@ const useResizeImage = ({
             {
               responseType: "arraybuffer",
               cancelToken,
+              headers: { "Cache-Control": "no-cache" },
             },
           );
           if (_.isArrayBuffer(res.data)) {
@@ -70,10 +71,6 @@ const useResizeImage = ({
       } else {
         setImageFound(false);
       }
-
-      return () => {
-        // source.cancel("Operation canceled due to route change.");
-      };
     }
   }, [imagePath, user, fileType]);
 

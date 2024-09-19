@@ -14,6 +14,7 @@ import useHover from "hooks/useHover";
 import { useEffect, useRef, useState } from "react";
 import { BsPinAngleFill } from "react-icons/bs";
 import * as MUI from "styles/clientPage.style";
+import lockIcon from "assets/images/lock-icon.png";
 
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import MenuDropdown from "components/MenuDropdown";
@@ -27,6 +28,18 @@ const CustomCheckbox: any = styled(Checkbox)({
     fontSize: 25,
     fontWeight: "300",
   },
+});
+
+const BoxImage = styled("div")({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const ImageIcon = styled("img")({
+  width: "70px",
+  height: "70px",
+  objectFit: "cover",
 });
 
 const Item = styled(Paper)(({ theme, ...props }: any) => ({
@@ -174,13 +187,19 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
           </MUI.SelectionContainer>
 
           <MUI.Folder>
-            <IconFolderContainer>
-              {props?.isContainFiles || props?.file_id ? (
-                <FolderNotEmptyIcon />
-              ) : (
-                <FolderEmptyIcon />
-              )}
-            </IconFolderContainer>
+            {props?.password ? (
+              <BoxImage>
+                <ImageIcon src={lockIcon} alt="lock-icon" />
+              </BoxImage>
+            ) : (
+              <IconFolderContainer>
+                {props?.isContainFiles || props?.file_id ? (
+                  <FolderNotEmptyIcon />
+                ) : (
+                  <FolderEmptyIcon />
+                )}
+              </IconFolderContainer>
+            )}
 
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               {props.folder_name.length > 10 ? (

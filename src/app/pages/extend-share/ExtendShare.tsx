@@ -824,13 +824,14 @@ function ExtendShare() {
     const selectOptions = fetchSubFoldersAndFiles.data?.folders?.data?.find(
       (el) => el?._id === data,
     );
+    console.log(selectOptions);
 
     if (selectOptions) {
       dispatch(
         checkboxAction.setFileAndFolderData({
           data: {
             id: selectOptions?._id,
-            dataId: selectOptions?.sharedId,
+            dataId: selectOptions?._id,
             name: selectOptions?.name,
             newPath: selectOptions.newPath || "",
             checkType: selectOptions?.checkTypeItem,
@@ -1012,9 +1013,7 @@ function ExtendShare() {
           user={dataForEvent.data?.createdBy}
           {...{
             favouriteIcon: {
-              isShow: true,
-              handleFavouriteOnClick: async () => await handleAddFavourite(),
-              isFavourite: dataForEvent.data.favorite ? true : false,
+              isShow: false,
             },
             downloadIcon: {
               isShow: dataForEvent.data.permission === "edit" ? true : false,

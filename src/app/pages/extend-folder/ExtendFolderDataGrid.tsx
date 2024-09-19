@@ -198,16 +198,16 @@ function ExtendFolderDataGrid(props) {
 
   function handleDoubleClick() {
     if (dataForEvents.data) {
-      const { id } = dataForEvents.data || {};
+      const { url, id } = dataForEvents.data || {};
       if (props.user.permission) {
         const base64URL = Base64.encodeURI(
-          // props.user?._id +
-          //   "/" +
-          //   props.user?.newName +
-          //   "/" +
-          //   props.user.permission +
-          //   "/" +
-          id,
+          props.user?._id +
+            "/" +
+            props.user?.newName +
+            "/" +
+            props.user.permission +
+            "/" +
+            url,
         );
         if (props?.isShare) {
           navigate(`/folder/share/${base64URL}`);
@@ -215,10 +215,11 @@ function ExtendFolderDataGrid(props) {
           navigate(`/folder/${base64URL}`);
         }
       } else {
-        const base64URL = Base64.encodeURI(id);
         if (props?.isShare) {
+          const base64URL = Base64.encodeURI(id);
           navigate(`/folder/share/${base64URL}`);
         } else {
+          const base64URL = Base64.encodeURI(url);
           navigate(`/folder/${base64URL}`);
         }
       }

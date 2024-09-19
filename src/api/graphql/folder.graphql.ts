@@ -83,6 +83,7 @@ export const MUTATION_CREATE_FOLDER = gql`
   mutation CreateFolders($data: FoldersInput!) {
     createFolders(data: $data) {
       _id
+      newPath
     }
   }
 `;

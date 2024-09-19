@@ -31,7 +31,6 @@ function ReplyPanel(props) {
     try {
       const multipleData: any = [
         {
-          id: file?._id,
           checkType: "file",
           newPath: "chat-message",
           newFilename: file.newNameImage,
@@ -39,8 +38,8 @@ function ReplyPanel(props) {
         },
       ];
 
-      manageFile.handleMultipleDownloadFileAndFolder(
-        { multipleData, isShare: false },
+      manageFile.handleMultipleDownloadTicketFileAndFolder(
+        { multipleData },
         { onSuccess: () => {}, onFailed: () => {} },
       );
     } catch (err) {
