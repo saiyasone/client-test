@@ -2,7 +2,7 @@ import { useLazyQuery, useMutation } from "@apollo/client";
 import React, { Fragment, useState } from "react";
 
 // component
-import { Box, Typography } from "@mui/material";
+import { Box, ListItemText, Typography, useMediaQuery } from "@mui/material";
 
 //icons
 import {
@@ -35,6 +35,8 @@ import {
 import TrashDataGrid from "./TrashDataGrid";
 import * as MUI_TRASH from "./styles/deletedFile.style";
 import * as MUI from "./styles/trash.style";
+import { toggleSelected } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 
 function Trash() {
   const manageGraphqlError = useManageGraphqlError();
@@ -42,7 +44,10 @@ function Trash() {
   const [totalItems, setTotalItems] = useState<any>(0);
   const { setIsAutoClose } = useMenuDropdownState();
   const { user }: any = useAuth();
-
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+    (state: RootState) => state.event,
+  );
   // redux store
   const dispatch = useDispatch();
   const dataSelector = useSelector(
@@ -193,7 +198,7 @@ function Trash() {
           setIsDeleteOpen(false);
         },
         onError: async () => {
-          errorMessage("Something went wrong", 3000);
+          errorMessage("Something went wrong", 2000);
         },
       });
     }
@@ -203,7 +208,7 @@ function Trash() {
         onSuccess: () => {
           successMessage(
             `Delete ${dataForEvents.data.name} successfully`,
-            3000,
+            2000,
           );
           customGetDeletedFolderFile();
           setIsDeleteOpen(false);
@@ -211,6 +216,9 @@ function Trash() {
         },
       });
     }
+  };
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
   };
 
   const handleMultipleListData = (selected, dataDeletedFile) => {
@@ -232,7 +240,7 @@ function Trash() {
     }
   };
 
-  const handleMultipleGridData = (selected, item) => {
+  const handleMultipleGridData = (selected: any, item: any) => {
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
@@ -331,7 +339,7 @@ function Trash() {
         message={"Note: Any deleted files or folders will not restore again!."}
       />
 
-      <MUI.TitleAndSwitch sx={{ my: 2 }}>
+      <MUI.TitleAndSwitch>
         {dataSelector?.selectionFileAndFolderData?.length ? (
           <MenuMultipleSelectionFolderAndFile
             isTrash={true}
@@ -387,9 +395,33 @@ function Trash() {
                     <React.Fragment key={index}>
                       {dataDeletedFile.data.length > 0 && (
                         <MUI_TRASH.TrashFilesItem>
-                          <Typography variant="h4" fontWeight="bold">
-                            {dataDeletedFile.title}
-                          </Typography>
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <Typography variant="h4" fontWeight="bold">
+                              {dataDeletedFile.title}
+                            </Typography>
+                            {isMobile &&
+                              toggle !== "list" &&
+                              dataDeletedFile?.title == "Today" && (
+                                <ListItemText
+                                  sx={{
+                                    p: 2,
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                  }}
+                                  onClick={() => {
+                                    dispatch(toggleSelected(!isSelected));
+                                    handleClearMultipleFileData();
+                                  }}
+                                  primary={isSelected ? "Deselect" : "Select"}
+                                />
+                              )}
+                          </Box>
                           {toggle === "grid" && (
                             <FileCardContainer>
                               {dataDeletedFile.data.map((data, index) => {

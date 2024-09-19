@@ -108,8 +108,6 @@ const useManageFile = ({ user }) => {
   };
 
   const handleActionFile = async ({ event, userId, id }) => {
-    console.log("total download");
-
     try {
       await fileAction({
         variables: {

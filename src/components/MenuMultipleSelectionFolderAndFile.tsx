@@ -45,6 +45,7 @@ const SelectContainer = styled("div")({
   width: "100%",
   padding: "0 16px",
   borderRadius: "6px",
+  // backgroundColor: "gray",
   backgroundColor: "#E9EDEF",
   paddingBottom: "8px",
   paddingTop: "6px",

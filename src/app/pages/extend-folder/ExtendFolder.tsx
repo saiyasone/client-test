@@ -112,7 +112,7 @@ function ExtendFolder() {
   const [isUpdate, setIsUpdate] = useState<any>(false);
   const [_viewMore, _setViewMore] = useState<any>(20);
   const parentFolderUrl = useMemo(() => {
-    return Base64.decode(params.id);
+    return Base64?.decode(params?.id);
   }, [params.id]);
   const { triggerFolder, handleTriggerFolder }: any = useContext(FolderContext);
   const { refreshAuto } = useRefreshState();
@@ -344,6 +344,11 @@ function ExtendFolder() {
     };
   }, [parentFolder]);
 
+  useEffect(() => {
+    if (params) {
+      handleCloseSearch();
+    }
+  }, [params]);
   /* folders pagination */
   useEffect(() => {
     if (!isFirstRender) {
@@ -1296,7 +1301,7 @@ function ExtendFolder() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {isMobile && (
                 <span style={{ marginTop: "8px" }}>
-                  <CiSearch size={20} onClick={() => setSearchOpen(true)} />
+                  <CiSearch size={24} onClick={() => setSearchOpen(true)} />
                 </span>
               )}
               {fetchSubFoldersAndFiles.folders.isDataFound !== null &&
@@ -1771,7 +1776,7 @@ function ExtendFolder() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: async () => {
-                setDataForEvent((prev) => {
+                setDataForEvent((prev: any) => {
                   return {
                     ...prev,
                     action: "download",
@@ -1855,27 +1860,6 @@ function ExtendFolder() {
         data={dataForEvent.data}
       />
 
-      {/* {showPreview && (
-        <DialogPreviewFile
-          open={showPreview}
-          handleClose={() => {
-            resetDataForEvent();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            if (dataForEvent.type === "folder") {
-              handleDownloadFolder();
-            } else {
-              handleDownloadFile();
-            }
-          }}
-          filename={dataForEvent.data.name}
-          newFilename={dataForEvent.data.newName}
-          fileType={dataForEvent.data.type}
-          path={dataForEvent.data.newPath}
-          user={user}
-        />
-      )} */}
       {showPreview && (
         <DialogPreviewFileSlide
           open={showPreview}

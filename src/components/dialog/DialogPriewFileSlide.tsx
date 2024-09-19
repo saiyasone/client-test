@@ -421,7 +421,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         });
       },
       onFailed: (error: string) => {
-        errorMessage(error, 3000);
+        errorMessage(error, 1000);
       },
     });
   };
@@ -479,10 +479,10 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
       { multipleData },
       {
         onSuccess: async () => {
-          successMessage("Download successful", 3000);
+          successMessage("Download successful", 1000);
         },
         onFailed: async () => {
-          errorMessage("Download failed! Please try again!", 3000);
+          errorMessage("Download failed! Please try again!", 1000);
         },
         onClosure: () => {},
       },
@@ -509,7 +509,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
         handleDeleteFile();
         break;
       case "download":
-        if (user?.packageId?.category !== "free") {
+        if (user?.packageId?.category === "free") {
           setDataForEvent(event);
         } else if (propsStatus !== "filedrop") {
           handleDownloadFile();
@@ -604,7 +604,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
               )}
             <ContainerZoon ref={zoomRef}>
               <RemoveIcon
-                onClick={handleZoomIn}
+                onClick={handleZoomOut}
                 sx={{
                   cursor: "pointer",
                   "&:hover": {
@@ -617,7 +617,7 @@ export default function DialogPreviewFileSlide(props: DialogProps) {
                 }}
               />
               <AddIcon
-                onClick={handleZoomOut}
+                onClick={handleZoomIn}
                 sx={{
                   cursor: "pointer",
                   "&:hover": {

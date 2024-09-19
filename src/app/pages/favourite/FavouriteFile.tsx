@@ -517,11 +517,11 @@ function FavouriteFile() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          // if (userPackage?.downLoadOption !== "another") {
-          //   handleGetDownloadLink();
-          // } else {
+          if (userPackage?.downLoadOption !== "another") {
+            handleGetDownloadLink();
+          } else {
             await handleDownloadFiles();
-          // }
+          }
         }
         break;
       case "delete":
@@ -547,7 +547,7 @@ function FavouriteFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile === "on") {
+        if (userPackage?.lockFile !== "on") {
           handleOpenPasswordLink();
         } else {
           errorMessage(

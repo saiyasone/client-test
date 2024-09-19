@@ -1149,10 +1149,10 @@ export function MyCloud() {
         break;
       }
       case "preview": {
+        setEventClick(action);
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          setEventClick("preview");
           handleDataPreview();
         }
 
@@ -1461,7 +1461,7 @@ export function MyCloud() {
                                 handleClearMultipleFileData();
                               }}
                             >
-                              {isFolderSelected ? "Unselect" : "Select"}
+                              {isFolderSelected ? "Deselect" : "Select"}
                             </Typography>
                           )}
                           <Typography

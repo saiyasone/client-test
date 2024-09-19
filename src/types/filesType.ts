@@ -1,4 +1,5 @@
 export interface IFileTypes {
+  checkTypeItem: string;
   _id: string;
   access_password: string | null;
   password: string | null;

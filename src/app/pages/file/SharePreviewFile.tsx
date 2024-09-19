@@ -50,15 +50,17 @@ const TextInputdShare = styled("div")(({ theme }) => ({
 }));
 
 interface fileTypes {
-  data: IFileTypes;
+  data: any;
   user: IUserTypes;
   propsStatus: string;
+  overflow?: boolean;
 }
 
 export default function SharePrevieFile({
   user,
   data,
   propsStatus,
+  overflow,
 }: fileTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const [message, setMessage] = React.useState<string>("");
@@ -68,6 +70,7 @@ export default function SharePrevieFile({
   const [shareAccountList, setShareAccountList] = React.useState<
     IUserToAccountTypes[]
   >([]);
+
   const [loading, setLoading] = React.useState(false);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const { setIsAutoClose } = useMenuDropdownState();
@@ -160,7 +163,7 @@ export default function SharePrevieFile({
 
     const isInvalidEmail = isValidEmail(shareAccount);
     if (!isInvalidEmail) {
-      errorMessage("Email is invalid", 2000);
+      errorMessage("Email is invalid", 1000);
       return;
     }
 
@@ -169,7 +172,8 @@ export default function SharePrevieFile({
       await createShare({
         variables: {
           body: {
-            fileId: data?._id,
+            // fileId: data?._id,
+            [data?.folder_type === "folder" ? "folderId" : "fileId"]: data?._id,
             isPublic: accessStatusShare,
             permission: statusShare,
             toAccount: shareAccount,
@@ -179,7 +183,7 @@ export default function SharePrevieFile({
       setIsAutoClose(true);
       setShareAccount("");
       setIsSubmitting(false);
-      successMessage("Shared file successful", 3000);
+      successMessage("Shared file successful", 1000);
     } catch (error: any) {
       setIsSubmitting(false);
       errorMessage("Share someting wrong", 1000);
@@ -188,7 +192,8 @@ export default function SharePrevieFile({
 
   const manageUserFromShare = useManageUserFromShare({
     inputFileOrFolder: data,
-    inputType: data.fileType,
+    inputType:
+      data?.folder_type !== "folder" ? data?.fileType : data?.folder_type,
     user,
   });
 
@@ -208,10 +213,7 @@ export default function SharePrevieFile({
         seletedAccount,
         {
           onSuccess: () => {
-            successMessage(
-              "Changed user permission of share successful!!",
-              3000,
-            );
+            successMessage("Changed user permission of share successful", 1000);
           },
           onFailed: (error: any) => {
             errorMessage(error, 3000);
@@ -233,28 +235,40 @@ export default function SharePrevieFile({
         seletedAccount,
         {
           onSuccess: () => {
-            successMessage("Deleted user out of share successful!!", 3000);
+            successMessage("Deleted user out of share successful!!", 1000);
             setShareAccountList((prevList) =>
               prevList.filter((item) => item._id !== id),
             );
           },
           onFailed: (error: any) => {
-            errorMessage(error, 3000);
+            errorMessage(error, 1000);
           },
         },
       );
     }
   };
 
+  const displayName = () => {
+    if (propsStatus !== "share") {
+      if (data?.folder_type !== "folder") {
+        return cutStringWithEllipsis(data?.filename || "", isMobile ? 35 : 30);
+      } else {
+        return cutStringWithEllipsis(
+          data?.folder_name || "",
+          isMobile ? 35 : 30,
+        );
+      }
+    }
+  };
   return (
     <Box
       sx={{
         overflowY: "scroll",
-        maxHeight: "90vh",
-        paddingBottom: "2rem",
+        maxHeight: overflow ? "100vh" : "90vh",
+        paddingBottom: overflow ? "0" : "2rem",
         [theme.breakpoints.down("sm")]: {
-          paddingBottom: "4rem",
-          maxHeight: "60vh",
+          paddingBottom: overflow ? "1rem" : "4rem",
+          maxHeight: overflow ? "100vh" : "60vh",
         },
       }}
     >
@@ -273,12 +287,7 @@ export default function SharePrevieFile({
           fontSize={isMobile ? "0.8rem" : "1rem"}
           variant="h6"
         >
-          Share &nbsp;
-          {cutStringWithEllipsis(
-            propsStatus !== "share" ? data.filename : data.fileId.filename,
-            isMobile ? 35 : 30,
-          )}
-          "
+          Share &nbsp; "{displayName()}"
         </Typography>
 
         <Box sx={{ mt: 5 }}>
@@ -336,7 +345,7 @@ export default function SharePrevieFile({
             Your information will be shared privately
           </Alert>
         )}
-        <Box sx={{ mt: 3}}>
+        <Box sx={{ mt: 3 }}>
           <Typography
             variant="h6"
             sx={{
@@ -359,7 +368,6 @@ export default function SharePrevieFile({
               value={shareAccount}
               onChange={(event: React.ChangeEvent<HTMLInputElement>) => {
                 const checkIsEmail = event.target.value.endsWith(".com");
-                console.log(checkIsEmail);
                 if (checkIsEmail) {
                   setcheckAlert(true);
                 } else {

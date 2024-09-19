@@ -20,9 +20,8 @@ import MenuDropdown from "components/MenuDropdown";
 import useOuterClick from "hooks/useOuterClick";
 import { useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
-import { cutStringWithEllipsis } from "utils/string.util";
 import { RootState } from "stores/store";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
+import { cutStringWithEllipsis } from "utils/string.util";
 
 const CustomCheckbox: any = styled(Checkbox)({
   "& .MuiSvgIcon-root": {
