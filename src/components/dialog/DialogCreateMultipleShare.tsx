@@ -12,7 +12,6 @@ import {
 import ActionCreateShare from "components/share/ActionCreateShare";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
-import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { MuiChipsInput } from "mui-chips-input";
 import React, { Fragment, useState } from "react";
 import "styles/chipInput.style.css";
@@ -39,7 +38,6 @@ const BoxTitle = styled("div")({});
 const DialogCreateMultipleShare = (props) => {
   const { open, data, onClose, dataSelector } = props;
 
-  const manageGraphqlError = useManageGraphqlError();
   const [createShare] = useMutation(MUTATION_CREATE_SHARE);
   const [createShareFromSharing] = useMutation(
     MUTATION_CREATE_SHARE_FROM_SHARING,

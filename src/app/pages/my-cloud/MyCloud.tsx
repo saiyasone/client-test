@@ -4,9 +4,8 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Button,
   CircularProgress,
-  ListItemText,
   Typography,
-  useMediaQuery,
+  useMediaQuery
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
@@ -49,6 +48,7 @@ import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 // import useScroll from "hooks/useScroll";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useFetchFile from "hooks/file/useFetchFile";
 import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
@@ -56,20 +56,26 @@ import { Base64 } from "js-base64";
 import moment from "moment";
 import {
   Fragment,
-  SetStateAction,
   useCallback,
   useContext,
   useEffect,
   useRef,
-  useState,
+  useState
 } from "react";
 import { CSVLink } from "react-csv";
 import { BiTime } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 import * as MUIFOLDER from "styles/clientPage.style";
 import * as MUI from "styles/my-cloud/myCloud.style";
+import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
   getFileType,
@@ -84,15 +90,6 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
-import { RootState } from "stores/store";
-import { useRefreshState } from "contexts/RefreshProvider";
-import {
-  setMenuToggle,
-  toggleFolderSelected,
-  toggleSelected,
-} from "stores/features/useEventSlice";
-import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
-import { IFolderIdTypes } from "types/filesType";
 
 const ITEM_PER_PAGE_GRID = 20;
 
@@ -629,7 +626,7 @@ export function MyCloud() {
     await manageFile.handleDownloadSingleFile(
       { multipleData: newFileData },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           successMessage("Download successful", 3000);
           setGetValue((prev: any) => {
             return {
