@@ -8,6 +8,10 @@ export const TrashFilesContainer = styled("div")(({ theme }) => ({
     paddingLeft: "30px",
     paddingRight: "30px",
   },
+  [theme.breakpoints.down("sm")]: {
+    paddingLeft: "10px",
+    paddingRight: "10px",
+  },
 }));
 
 export const TrashFilesList = styled("div")({

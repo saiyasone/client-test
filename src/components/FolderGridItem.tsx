@@ -21,6 +21,7 @@ import MenuDropdown from "components/MenuDropdown";
 import useOuterClick from "hooks/useOuterClick";
 import { useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import { RootState } from "stores/store";
 import { cutStringWithEllipsis } from "utils/string.util";
 
 const CustomCheckbox: any = styled(Checkbox)({
@@ -103,14 +104,18 @@ const IconFolderContainer = styled("div")({
   minHeight: "201.58px",
 });
 
-export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
+export default function FolderGridItem({
+  onOuterClick,
+  cardProps,
+  ...props
+}: any) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const itemRef = useRef(null);
   const isFolderItemHover = useHover(itemRef);
   const isCardOuterClicked = useOuterClick(itemRef);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const { isFolderSelected } = useSelector((state: RootState) => state.event);
   // redux store
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
@@ -119,7 +124,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
   const { onDoubleClick: onCardDoubleClick, ...cardDataProps } =
     cardProps || {};
 
-  const handleDropdownOpen = (isOpen) => {
+  const handleDropdownOpen = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
   };
 
@@ -143,6 +148,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
+
           ischecked: cardDataProps?.ischecked?.toString(),
         }}
       >
@@ -151,7 +157,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
             <BsPinAngleFill />
           </Pin>
         )}
-        {props?.menuItem && isOpenMenu && (
+        {(isMobile || (props?.menuItem && isOpenMenu)) && (
           <MenuButtonContainer>
             <MenuDropdown
               customButton={props.customButton}
@@ -166,14 +172,17 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
             <CustomCheckbox
               className="checkbox-selected"
               sx={{
-                display:
-                  !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el: any) =>
-                      el?.id === props?.id &&
-                      el.checkType === props?.selectType,
-                  ) && true
+                display: isMobile
+                  ? isFolderSelected
                     ? "block"
-                    : "none",
+                    : "none" // On mobile, show if folder is selected
+                  : dataSelector?.selectionFileAndFolderData?.find(
+                      (el: any) =>
+                        el?.id === props?.id &&
+                        el.checkType === props?.selectType,
+                    )
+                  ? "block"
+                  : "none",
               }}
               icon={<CheckBoxOutlineBlankRoundedIcon />}
               aria-label={"check-" + props?.id}

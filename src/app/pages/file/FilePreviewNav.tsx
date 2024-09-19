@@ -2,6 +2,7 @@ import CloseIcon from "@mui/icons-material/Close";
 import { Box, Button, Tooltip, Typography, useMediaQuery } from "@mui/material";
 import { styled, useTheme } from "@mui/material/styles";
 import Action from "components/action-table/Action";
+import ActionFileDrop from "components/action-table/ActionFileDrop";
 import ActionFileShare from "components/share/ActionFileShare";
 import {
   shareWithMeFileMenuItems,
@@ -128,7 +129,20 @@ export default function FilePreviewNav({
                   }
                 }}
               />
-              {propStatus !== "share" && propStatus !== "extendshare" ? (
+
+              {propStatus === "filedrop" ? (
+                <ActionFileDrop
+                  color="#ffffff"
+                  params={data}
+                  eventActions={{
+                    handleEvent: (action: string) => {
+                      setIsAutoClose(true);
+                      setDataForEvent(action), handleEvents(action);
+                    },
+                  }}
+                  anchor={[menuDropdownAnchor, setMenuDropdownAnchor]}
+                />
+              ) : propStatus !== "share" && propStatus !== "extendshare" ? (
                 <Action
                   color="#ffffff"
                   params={data}
@@ -165,33 +179,35 @@ export default function FilePreviewNav({
                 gap: 5,
               }}
             >
-              {propStatus !== "share" && propStatus !== "extendshare" && (
-                <Box
-                  sx={{
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 4,
-                  }}
-                >
-                  <MdFavorite
-                    fill={data.favorite ? "#17766B" : "#ffffff"}
-                    size={16}
-                    onClick={() => handleEvents("favourite")}
-                  />
-                  {data.filePassword ? (
-                    <FaLock
-                      fill={theme.palette.primary.main}
-                      onClick={() => handleEvents("password")}
-                    />
-                  ) : (
-                    <FiLock
+              {propStatus !== "share" &&
+                propStatus !== "extendshare" &&
+                propStatus !== "filedrop" && (
+                  <Box
+                    sx={{
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <MdFavorite
+                      fill={data.favorite ? "#17766B" : "#ffffff"}
                       size={16}
-                      onClick={() => handleEvents("password")}
+                      onClick={() => handleEvents("favourite")}
                     />
-                  )}
-                </Box>
-              )}
+                    {data.filePassword ? (
+                      <FaLock
+                        fill={theme.palette.primary.main}
+                        onClick={() => handleEvents("password")}
+                      />
+                    ) : (
+                      <FiLock
+                        size={16}
+                        onClick={() => handleEvents("password")}
+                      />
+                    )}
+                  </Box>
+                )}
 
               <FiEye size={16} onClick={() => handleEvents("detail")} />
               <HiOutlineTrash
@@ -220,34 +236,30 @@ export default function FilePreviewNav({
                 }}
               />
 
-              <FiLink
-                size={16}
-                color={
-                  data?.permission && data?.permission !== "edit"
-                    ? "#6b7280"
-                    : "#F7F9FC"
-                }
-                style={{
-                  cursor:
+              {propStatus !== "filedrop" && (
+                <FiLink
+                  size={16}
+                  color={
                     data?.permission && data?.permission !== "edit"
-                      ? "not-allowed"
-                      : "pointer",
-                  pointerEvents: "auto",
-                }}
-                onClick={() => {
-                  if (data?.permission !== "view") {
-                    handleEvents("get link");
+                      ? "#6b7280"
+                      : "#F7F9FC"
                   }
-                }}
-              />
+                  style={{
+                    cursor:
+                      data?.permission && data?.permission !== "edit"
+                        ? "not-allowed"
+                        : "pointer",
+                    pointerEvents: "auto",
+                  }}
+                  onClick={() => {
+                    if (data?.permission !== "view") {
+                      handleEvents("get link");
+                    }
+                  }}
+                />
+              )}
 
-              <Tooltip
-                title={
-                  data?.permission && data?.permission !== "edit"
-                    ? "You don't have permission"
-                    : ""
-                }
-              >
+              {propStatus === "filedrop" ? (
                 <Button
                   disabled={
                     data?.permission && data?.permission !== "edit"
@@ -274,9 +286,46 @@ export default function FilePreviewNav({
                     }
                   }}
                 >
-                  <FiShare2 size={16} /> &nbsp; Share
+                  <FiShare2 size={16} /> &nbsp; Save to Cloud
                 </Button>
-              </Tooltip>
+              ) : (
+                <Tooltip
+                  title={
+                    data?.permission && data?.permission !== "edit"
+                      ? "You don't have permission"
+                      : ""
+                  }
+                >
+                  <Button
+                    disabled={
+                      data?.permission && data?.permission !== "edit"
+                        ? true
+                        : false
+                    }
+                    variant="contained"
+                    sx={{
+                      fontSize: "14px",
+
+                      bgcolor:
+                        data?.permission === "view"
+                          ? theme.palette.grey[800]
+                          : theme.palette.primary.main,
+                      "&.Mui-disabled": {
+                        bgcolor: "#6b7280",
+                        cursor: "not-allowed",
+                        pointerEvents: "auto",
+                      },
+                    }}
+                    onClick={() => {
+                      if (!data?.permission || data?.permission !== "view") {
+                        handleEvents("share");
+                      }
+                    }}
+                  >
+                    <FiShare2 size={16} /> &nbsp; Share
+                  </Button>
+                </Tooltip>
+              )}
             </Box>
           )}
         </NavBox>

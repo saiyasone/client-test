@@ -13,6 +13,8 @@ import moment from "moment";
 import { getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import { IFavouriteTypes } from "types/favouriteType";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 
 const FavouriteFilesDataGridContainer = styled("div")(() => ({
   height: "100%",
@@ -83,19 +85,43 @@ function FavouriteFileDataGrid(props: any) {
       editable: false,
       sortable: false,
       maxWidth: isMobile ? 40 : 70,
+      flex: 1,
       renderCell: (params: { row: IFavouriteTypes }) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: IFavouriteTypes) => el?.id === _id,
+          );
         return (
-          <Checkbox
-            checked={
-              !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el: IFavouriteTypes) => el?.id === _id,
-              ) && true
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => props?.handleSelection(_id)}
-          />
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: IFavouriteTypes) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },

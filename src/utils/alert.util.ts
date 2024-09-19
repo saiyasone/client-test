@@ -1,6 +1,7 @@
 import Notiflix from "notiflix";
 
 export const  successMessage = (message: string, timeout?: number) => {
+
   Notiflix.Notify.init({ position: "right-top" });
   Notiflix.Notify.success(message, {
     width: "350px",

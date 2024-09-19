@@ -549,7 +549,7 @@ function FavouriteFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile === "on") {
+        if (userPackage?.lockFile !== "on") {
           handleOpenPasswordLink();
         } else {
           errorMessage(
@@ -1279,7 +1279,7 @@ function FavouriteFile() {
                               dispatch(toggleSelected(!isSelected));
                               handleClearMultipleFileData();
                             }}
-                            primary={isSelected ? "Unselect" : "Select"}
+                            primary={isSelected ? "Deselect" : "Select"}
                           />
                         )}
                       </Box>

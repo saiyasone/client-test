@@ -29,7 +29,7 @@ import {
   getFolderName,
   removeFileNameOutOfPath,
 } from "utils/file.util";
-import { ReturnMessage } from "utils/message";
+import { RenameFavouriteMessage, ReturnMessage } from "utils/message";
 
 import LockedFilePreview from "app/pages/file/LockedFilePreview";
 import SharePrevieFile from "app/pages/file/SharePreviewFile";
@@ -256,10 +256,26 @@ function DialogPreviewFileSlide(props: DialogProps) {
       }`;
 
       break;
-
+    case "filedrop":
+      if (
+        parseInt(isCurrentImage.createdBy?._id) !== 0 &&
+        !isNaN(parseInt(isCurrentImage?.createdBy?._id))
+      ) {
+        sourcePath = `${
+          isCurrentImage.createdBy?.newName +
+          "-" +
+          isCurrentImage.createdBy?._id +
+          "/" +
+          isCurrentImage?.newPath
+        }`;
+      } else {
+        sourcePath = `public/${isCurrentImage.newPath}`;
+      }
+      break;
     default:
       return;
   }
+
   const handleZoomIn = () => {
     setZoom((prevZoom) => Math.min(prevZoom + 0.1, 2));
   };
@@ -377,9 +393,22 @@ function DialogPreviewFileSlide(props: DialogProps) {
         {
           onSuccess: async () => {
             isCurrentImage.favorite = newFavoriteStatus;
-            setRefreshAuto({ isAutoClose: true, isStatus: "favourite" });
+            setRefreshAuto({
+              isAutoClose: true,
+              isStatus: propsStatus || "recent",
+            });
+            if (
+              (isCurrentImage?.favorite || isCurrentImage?.fileId?.favorite) !==
+              1
+            ) {
+              successMessage(RenameFavouriteMessage.RemoveFavorite, 1000);
+            } else {
+              successMessage(RenameFavouriteMessage.AddFavorite, 1000);
+            }
           },
-          onFailed: async () => {},
+          onFailed: async () => {
+            errorMessage(RenameFavouriteMessage.FavoriteFailed, 1000);
+          },
         },
       );
     } catch (error: any) {
@@ -398,7 +427,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
         });
       },
       onFailed: (error: string) => {
-        errorMessage(error, 3000);
+        errorMessage(error, 1000);
       },
     });
   };
@@ -438,6 +467,34 @@ function DialogPreviewFileSlide(props: DialogProps) {
     );
   };
 
+  const handleDownloadFileDrop = async () => {
+    const multipleData = [
+      {
+        id: isCurrentImage._id,
+        newPath: isCurrentImage?.newPath,
+        newFilename: isCurrentImage.newFilename || "",
+        isPublic: isCurrentImage?.isPublic,
+        createdBy: {
+          _id: isCurrentImage?.createdBy._id,
+          newName: isCurrentImage?.createdBy?.newName,
+        },
+      },
+    ];
+
+    await manageFile.handleSingleFileDropDownload(
+      { multipleData },
+      {
+        onSuccess: async () => {
+          successMessage("Download successful", 1000);
+        },
+        onFailed: async () => {
+          errorMessage("Download failed! Please try again!", 1000);
+        },
+        onClosure: () => {},
+      },
+    );
+  };
+
   const handleEvents = async (event: string): Promise<void> => {
     switch (event) {
       case "favourite":
@@ -458,10 +515,12 @@ function DialogPreviewFileSlide(props: DialogProps) {
         handleDeleteFile();
         break;
       case "download":
-        if (user?.packageId?.category !== "free") {
+        if (user?.packageId?.category === "free") {
           setDataForEvent(event);
-        } else {
+        } else if (propsStatus !== "filedrop") {
           handleDownloadFile();
+        } else {
+          handleDownloadFileDrop();
         }
         break;
       case "get link":
@@ -551,7 +610,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
               )}
             <ContainerZoon ref={zoomRef}>
               <RemoveIcon
-                onClick={handleZoomIn}
+                onClick={handleZoomOut}
                 sx={{
                   cursor: "pointer",
                   "&:hover": {
@@ -564,7 +623,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
                 }}
               />
               <AddIcon
-                onClick={handleZoomOut}
+                onClick={handleZoomIn}
                 sx={{
                   cursor: "pointer",
                   "&:hover": {
@@ -599,6 +658,8 @@ function DialogPreviewFileSlide(props: DialogProps) {
                     ? "Password protect this file"
                     : dataForEvent === "detail"
                     ? "Details"
+                    : dataForEvent === "rename"
+                    ? "Rename"
                     : "Share"}
                 </Typography>
                 <CloseIconButton
@@ -631,6 +692,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
                   setFilename={setFilename}
                   user={user}
                   setDataForEvent={setDataForEvent}
+                  propsStatus={propsStatus}
                 />
               ) : dataForEvent === "share" ? (
                 <SharePrevieFile

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import "styles/pagination.style.css";
 
 // material ui icon and component
@@ -14,40 +14,46 @@ import menuItems, {
   shortFavouriteMenuItems,
   shortFileShareMenu,
 } from "constants/menuItem.constant";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 import moment from "moment";
 import ResponsivePagination from "react-responsive-pagination";
 import { DATE_PATTERN_FORMAT } from "utils/date.util";
 import { combineOldAndNewFileNames, getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
+import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
 const ExtendFilesDataGridContainer = styled("div")(() => ({
   height: "100%",
   display: "flex",
   flexDirection: "column",
 }));
-
-const FileIconContainer = styled("div")(() => ({
-  width: "24px",
-  height: "24px",
+const FileIconContainer = styled("div")(({ theme }) => ({
+  maxWidth: "24px",
   display: "flex",
   alignItems: "center",
+  [theme.breakpoints.down("sm")]: {
+    maxWidth: "20px",
+    minWidth: "20px",
+  },
 }));
 
-function ExtendFileDataGrid(props) {
+function ExtendFileDataGrid(props:any) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
   const [hover, setHover] = useState("");
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
-  // const [isLoaded, setIsloaded] = useState(null);
-
-  const handlePopperOpen = (event) => {
+  const [styles, setStyles] = React.useState<
+  Record<string, Partial<FileIconProps>>
+>({});
+  const handlePopperOpen = (event:any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data.find((r) => r._id === id);
+    const row = props.data.find((r:IFolderTypes) => r._id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
 
-  const handleOnPreview = (data) => {
+  const handleOnPreview = (data:{row:IFolderTypes}) => {
     if (isTablet || isMobile) {
       props.handleEvent("preview", data.row);
     }
@@ -60,6 +66,12 @@ function ExtendFileDataGrid(props) {
     setHover("");
     setAnchorEvent(null);
   };
+  const handleClick = (params: { row: IFolderTypes }) => {
+    if (!isMobile) {
+      return;
+    }
+    props.handleEvent("folder double click", params.row);
+  };
 
   const columns = [
     {
@@ -67,20 +79,45 @@ function ExtendFileDataGrid(props) {
       headerName: "",
       editable: false,
       sortable: false,
-      width: 60,
-      renderCell: (params) => {
+      maxWidth: isMobile ? 40 : 70,
+      flex: 1,
+      renderCell: (params:{row:IMyCloudTypes}) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+        !!props?.dataSelector?.selectionFileAndFolderData?.find(
+          (el: IMyCloudTypes) => el?.id === _id,
+        );
         return (
-          <Checkbox
-            checked={
-              !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
-              ) && true
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => props?.handleSelection(_id)}
-          />
+         
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: IMyCloudTypes) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },
@@ -88,7 +125,9 @@ function ExtendFileDataGrid(props) {
       field: "name",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      minWidth: 120,
+      flex: 1,
+      renderCell: (params:any) => {
         const { name, newName } = params.row;
         return (
           <div
@@ -101,8 +140,8 @@ function ExtendFileDataGrid(props) {
           >
             <FileIconContainer onClick={() => handleOnPreview(params)}>
               <FileIcon
-                extension={getFileType(name)}
-                {...{ ...defaultStyles[getFileType(name) as string] }}
+                extension={getFileType(name)??""}
+                {...{ ...styles[getFileType(name) as string] }}
               />
             </FileIconContainer>
             <div
@@ -118,13 +157,12 @@ function ExtendFileDataGrid(props) {
           </div>
         );
       },
-      flex: 1,
     },
     {
       field: "size",
       headerName: "Size",
-      renderCell: (params) => {
-        return <Box>{convertBytetoMBandGB(params.row.size)}</Box>;
+      renderCell: (params:{row:IMyCloudTypes}) => {
+        return <Box>{convertBytetoMBandGB(parseInt(params.row.size))}</Box>;
       },
       editable: false,
       flex: 1,
@@ -133,7 +171,7 @@ function ExtendFileDataGrid(props) {
       field: "updatedAt",
       headerName: "Date",
       editable: false,
-      renderCell: (params) =>
+      renderCell: (params:{row:IMyCloudTypes}) =>
         moment(params.row.updatedAt).format(DATE_PATTERN_FORMAT.datetime),
       flex: 1,
     },
@@ -144,7 +182,7 @@ function ExtendFileDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params) => {
+      renderCell:  (params:{row:IMyCloudTypes}) =>{
         return (
           <>
             {props.isFromSharingUrl ? (
@@ -198,8 +236,16 @@ function ExtendFileDataGrid(props) {
               onMouseLeave: handlePopperClose,
             },
           },
-          onRowDoubleClick: (params) => {
+          onRowDoubleClick:(params: { row: IFolderTypes }) =>{
             props.handleEvent("preview", params.row);
+          },
+          onCellClick: (params: { field: string; row: IFolderTypes }) => {
+            if (
+              params.field !== "checkboxAction" &&
+              params.field !== "action"
+            ) {
+              handleClick(params);
+            }
           },
 
           columns,

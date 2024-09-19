@@ -44,7 +44,9 @@ export default function ActionFileDrop(props) {
                 eventActions.handleEvent("favourite", params?.row);
               }}
             >
-              {params?.row?.favorite || params?.row?.fileId?.favorite ? (
+              {params?.row?.favorite ||
+              params?.row?.fileId?.favorite ||
+              params.favorite ? (
                 <MdFavorite size="18px" fill="#17766B" />
               ) : (
                 <MdOutlineFavoriteBorder size="18px" />
@@ -65,7 +67,9 @@ export default function ActionFileDrop(props) {
               return (
                 <MenuDropdownItem
                   isFavorite={
-                    params?.row?.favorite || params.row.fileId?.favorite
+                    params?.row?.favorite ||
+                    params.row.fileId?.favorite ||
+                    params?.favorite
                       ? true
                       : false
                   }
@@ -86,7 +90,7 @@ export default function ActionFileDrop(props) {
           customButton={{
             element: (
               <IconButton>
-                <MoreVertRoundedIcon />
+                <MoreVertRoundedIcon sx={{ color: props.color ?? "" }}/>
               </IconButton>
             ),
           }}
@@ -95,7 +99,9 @@ export default function ActionFileDrop(props) {
             return (
               <MenuDropdownItem
                 isFavorite={
-                  params?.row?.favorite || params.row.fileId?.favorite
+                  params?.row?.favorite ||
+                  params?.row?.fileId?.favorite ||
+                  params?.favorite
                     ? true
                     : false
                 }
