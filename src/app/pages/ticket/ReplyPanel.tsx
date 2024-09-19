@@ -8,25 +8,41 @@ import { setChatMessage } from "stores/features/chatSlice";
 import { getTimeLineChat } from "utils/date.util";
 import { getFileType } from "utils/file.util";
 import * as MUI from "./styles/chat.style";
+import useManageFile from "hooks/file/useManageFile";
+import useAuth from "hooks/useAuth";
 
 function ReplyPanel(props) {
   const { chat, ticketStatus } = props;
+  const { user }: any = useAuth();
+  const manageFile = useManageFile({ user });
 
   const dispatch = useDispatch();
   const messagesEndRef = useRef<any>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollTo(0, 0);
-    // messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   const handleReply = (chat) => {
     dispatch(setChatMessage(chat));
   };
 
-  async function onDownloadFile(chat, file) {
+  async function onDownloadFile(_, file) {
     try {
-      console.log(chat, file);
+      const multipleData: any = [
+        {
+          id: file?._id,
+          checkType: "file",
+          newPath: "",
+          newFilename: "chat-message/" + file.newNameImage,
+          createdBy: { _id: user?._id, newName: user?.newName },
+        },
+      ];
+
+      manageFile.handleMultipleDownloadFileAndFolder(
+        { multipleData, isShare: false },
+        { onSuccess: () => {}, onFailed: () => {} },
+      );
     } catch (err) {
       console.error(err);
     }

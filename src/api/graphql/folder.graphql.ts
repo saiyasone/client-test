@@ -52,6 +52,17 @@ export const QUERY_FOLDER = gql`
   }
 `;
 
+export const QUERY_PATH_FOLDER = gql`
+  query GetFolder($where: FoldersWhereInput) {
+    folders(where: $where) {
+      data {
+        _id
+        newPath
+      }
+    }
+  }
+`;
+
 export const QUERY_FILE_CSV = gql`
   query ExportMultipleShortUrl($id: ID!) {
     exportMultipleShortUrl(ID: $id) {
@@ -101,17 +112,6 @@ export const MUTATION_UPDATE_FOLDER = gql`
   mutation UpdateFolders($data: FoldersInput!, $where: FoldersWhereInputOne!) {
     updateFolders(data: $data, where: $where) {
       _id
-    }
-  }
-`;
-
-export const MUTATION_UPDATE_EXPORT_LINK = gql`
-  mutation UpdateStatusFolderExportLink(
-    $data: FoldersInput!
-    $where: WhereExport!
-  ) {
-    updateStatusFolderExportLink(data: $data, where: $where) {
-      status
     }
   }
 `;

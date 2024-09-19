@@ -64,6 +64,8 @@ import useAuth from "../../../hooks/useAuth";
 import useBreadcrumbData from "../../../hooks/useBreadcrumbData";
 import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
@@ -73,7 +75,7 @@ function ShareWithMe() {
   const [getShareMe, { refetch: refetchShare }] = useLazyQuery(QUERY_SHARE, {
     fetchPolicy: "no-cache",
   });
-
+  const { refreshAuto } = useRefreshState();
   const manageFile = useManageFile({ user });
 
   const [getFolders] = useLazyQuery(QUERY_FOLDER, { fetchPolicy: "no-cache" });
@@ -90,6 +92,7 @@ function ShareWithMe() {
   });
 
   const [listShareMe, setListShareMe] = useState<any>(null);
+  const [fileshare, setFileshare] = useState<any>(null);
   const manageGraphqlError = useManageGraphqlError();
   const { setFolderId }: any = useContext(FolderContext);
 
@@ -118,7 +121,7 @@ function ShareWithMe() {
     ),
     inputType: dataForEvent.data?.folderId?.folder_type,
     user,
-    toAccount: user.email,
+    toAccount: user?.email,
   });
 
   const [folderDrop, setFolderDrop] = useState<any>("");
@@ -164,6 +167,10 @@ function ShareWithMe() {
   const handleCloseFileDrop = () => {
     setIsFiledrop(false);
     resetDataForEvents();
+  };
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
   };
 
   const isCheckPassword = () => {
@@ -457,6 +464,10 @@ function ShareWithMe() {
       onCompleted: async (data) => {
         const queryData = data?.getShare?.data;
         const queryTotal = data?.getShare?.total;
+        const filteredData = data?.getShare?.data?.filter(
+          (item: any) => item.fileId !== null,
+        );
+        setFileshare(filteredData);
         if (queryTotal > 0) {
           setTotal(queryTotal);
           setListShareMe(() => {
@@ -484,6 +495,12 @@ function ShareWithMe() {
   useEffect(() => {
     queryGetShare();
   }, [limitScroll, currentPage, toggle, countPage]);
+
+  useEffect(() => {
+    if (refreshAuto?.isStatus === "share") {
+      queryGetShare();
+    }
+  }, [refreshAuto?.isAutoClose]);
 
   const menuOnClick = async (action) => {
     setIsAutoClose(true);
@@ -1010,20 +1027,26 @@ function ShareWithMe() {
                                   return (
                                     <Fragment key={index}>
                                       <FolderGridItem
+                                        key={index}
                                         file_id={
                                           data?.folderId._id ? true : false
                                         }
                                         folderId={
                                           data?.folderId._id ? true : false
                                         }
+                                        isContainFiles={
+                                          data?.folderId?.total_size > 0
+                                            ? true
+                                            : false
+                                        }
                                         id={data?._id}
                                         folder_name={data?.folderId.folder_name}
+                                        selectType={"folder"}
                                         setIsOpenMenu={setIsOpenMenu}
                                         isOpenMenu={isOpenMenu}
                                         isPinned={
                                           data?.folderId.pin ? true : false
                                         }
-                                        key={index}
                                         onOuterClick={() => {
                                           setMultiChecked(multiChecked);
                                           setChecked({});
@@ -1166,6 +1189,7 @@ function ShareWithMe() {
                                         key={index}
                                         id={data?._id}
                                         path={data?.fileId?.path}
+                                        selectType={"file"}
                                         name={data?.fileId?.filename}
                                         filePassword={
                                           data?.fileId?.filePassword
@@ -1285,18 +1309,6 @@ function ShareWithMe() {
                               })}
                             </FileCardContainer>
                           )}
-
-                          {/* {limitScroll < total && toggle !== "list" && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                mt: 3,
-                              }}
-                            >
-                              <LinearProgress />
-                            </Box>
-                          )} */}
                         </Fragment>
                       )}
                     </Fragment>
@@ -1369,26 +1381,15 @@ function ShareWithMe() {
               name={name}
               setName={setName}
             />
+
             {showPreview && (
-              <DialogPreviewFile
+              <DialogPreviewFileSlide
                 open={showPreview}
-                handleClose={() => {
-                  setShowPreview(false);
-                  resetDataForEvents();
-                }}
-                onClick={() => {
-                  if (userPackage?.downLoadOption === "another") {
-                    handleGetDownloadLink();
-                  } else {
-                    handleDownloadFileAndFolder();
-                  }
-                }}
-                filename={dataForEvent.data.fileId?.filename}
-                newFilename={dataForEvent.data.fileId?.newFilename}
-                fileType={dataForEvent.data.fileId?.fileType}
-                path={dataForEvent.data.fileId?.newPath}
-                user={dataForEvent.data?.ownerId}
-                permission={dataForEvent?.data?.permission}
+                handleClose={handleClosePreview}
+                data={dataForEvent.data}
+                user={user}
+                mainFile={fileshare}
+                propsStatus="share"
               />
             )}
 

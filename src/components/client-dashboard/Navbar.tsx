@@ -66,6 +66,7 @@ import {
 } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import NavbarUserDropdown from "./NavbarUserDropdown";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 const theme = createTheme({
   breakpoints: {
@@ -82,8 +83,9 @@ const theme = createTheme({
 });
 
 const AppSearch = styled("div")({
-  borderRadius: "2px",
+  borderRadius: "0px",
   padding: "5px 0px",
+  border: "none",
   position: "relative",
   background: "#FFF",
   width: "100%",
@@ -93,14 +95,11 @@ const AppSearch = styled("div")({
   },
 });
 const SearchBar = styled("div")({
-  borderRadius: "2px",
-  border: "1px solid #ececec",
   position: "absolute",
   left: 0,
   right: 0,
-  top: "90%",
+  top: "100%",
   background: "#fff",
-  display: "none",
   [theme.breakpoints.up("sm")]: {
     display: "block",
   },
@@ -148,6 +147,7 @@ const Navbar = ({ onDrawerToggle }) => {
   const [dataOfSearch, setDataOfSearch] = useState<any[]>([]);
   const { setFolderId }: any = useContext(FolderContext);
   const [activeData, setActiveData] = useState<any>({});
+  const [seletedData, setSeletedData] = useState<any | null>(null);
   const [fileDetailsDialog, setFileDetailsDialog] = useState(false);
   const breadcrumbData = useBreadcrumbData(
     activeData.path || (activeData.path, activeData.name),
@@ -201,7 +201,11 @@ const Navbar = ({ onDrawerToggle }) => {
 
   const [isPasswordLink, setIsPasswordLink] = useState(false);
 
-  const handleEvent = (paramEventName, data) => {
+  const handleClosePreview = () => {
+    setShowPreview(false);
+  };
+
+  const handleEvent = (paramEventName: any, data: any) => {
     const currentEventName = paramEventName || eventName;
     const currentActiveData = data || activeData;
     setShowEncryptPassword(false);
@@ -249,6 +253,7 @@ const Navbar = ({ onDrawerToggle }) => {
         handleExportCsv(currentActiveData);
         break;
       case "preview":
+        setSeletedData(data);
         handlePreviewFile();
         break;
       case "double click":
@@ -351,7 +356,7 @@ const Navbar = ({ onDrawerToggle }) => {
     });
   };
 
-  const handleOnSearchChange = async (value) => {
+  const handleOnSearchChange = async (value: any) => {
     if (value) {
       await handleSearchFolderAndFile(value);
     } else {
@@ -670,257 +675,243 @@ const Navbar = ({ onDrawerToggle }) => {
                 <MenuIcon />
               </IconButton>
             </Grid>
-            <ThemeProvider theme={theme}>
-              <Grid
-                item
-                sx={{
-                  width: { lg: "50%", md: "50%" },
-                }}
-              >
-                <ClickAwayListener onClickAway={handleOnClickAwaySearch}>
-                  <AppSearch>
-                    <InputSearch
-                      data={{
-                        inputSearch: inputSearch,
-                        setInputHover: setInputHover,
-                        onChange: handleOnSearchChange,
-                        onEnter: handleOnSearchEnter,
-                      }}
-                    />
-                    {inputHover && (
-                      <SearchBar>
-                        {dataOfSearch?.length > 0 && (
-                          <SearchBarLayout>
-                            <Typography
-                              component="div"
-                              sx={{
-                                display: "flex",
-                                flexDirection: "column",
-                                rowGap: 1,
-                              }}
-                            >
-                              {dataOfSearch?.map((data, index) => {
-                                /* cant get size from API */
-                                const isContainsFiles =
-                                  data.checkTypeItem === "folder" && data?.size
-                                    ? Number(data.size) > 0
-                                      ? true
-                                      : false
-                                    : false;
-                                return (
-                                  <Fragment key={index}>
-                                    <Box
+
+            <Grid
+              item
+              sx={{
+                width: { lg: "50%", md: "50%", sm: "80%" },
+              }}
+            >
+              <ClickAwayListener onClickAway={handleOnClickAwaySearch}>
+                <AppSearch>
+                  <InputSearch
+                    data={{
+                      inputSearch: inputSearch,
+                      setInputHover: setInputHover,
+                      onChange: handleOnSearchChange,
+                      onEnter: handleOnSearchEnter,
+                    }}
+                  />
+                  <SearchBar>
+                    {dataOfSearch?.length > 0 && (
+                      <SearchBarLayout>
+                        <Typography
+                          component="div"
+                          sx={{
+                            display: "flex",
+                            flexDirection: "column",
+                            rowGap: 1,
+                          }}
+                        >
+                          {dataOfSearch?.map((data, index) => {
+                            const isContainsFiles =
+                              data.checkTypeItem === "folder" && data?.size
+                                ? Number(data.size) > 0
+                                  ? true
+                                  : false
+                                : false;
+                            return (
+                              <Fragment key={index}>
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    width: "100%",
+                                    flexShrink: 0,
+                                    columnGap: 1,
+                                    height: "50px",
+                                  }}
+                                >
+                                  <NormalButton
+                                    {...(data.checkTypeItem === "folder" && {
+                                      onDoubleClick: () =>
+                                        handleCheckPasswordBeforeEvent(
+                                          "double click",
+                                          data,
+                                        ),
+                                    })}
+                                    {...(data.checkTypeItem === "file" && {
+                                      onDoubleClick: () =>
+                                        handleCheckPasswordBeforeEvent(
+                                          "preview",
+                                          data,
+                                        ),
+                                    })}
+                                    sx={{
+                                      display: "flex",
+                                      alignItems: "center",
+                                      borderRadius: 0,
+                                      width: "100%",
+                                      columnGap: 1,
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                    }}
+                                  >
+                                    <Typography
+                                      component="div"
                                       sx={{
                                         display: "flex",
                                         alignItems: "center",
-                                        width: "100%",
-                                        flexShrink: 0,
-                                        columnGap: 1,
-                                        height: "50px",
+                                        justifyContent: "center",
+                                        width: "50px",
+                                        minWidth: "50px",
+                                        height: "100%",
                                       }}
                                     >
-                                      <NormalButton
-                                        {...(data.checkTypeItem ===
-                                          "folder" && {
-                                          onDoubleClick: () =>
-                                            handleCheckPasswordBeforeEvent(
-                                              "double click",
-                                              data,
-                                            ),
-                                        })}
-                                        {...(data.checkTypeItem === "file" && {
-                                          onDoubleClick: () =>
-                                            handleCheckPasswordBeforeEvent(
-                                              "preview",
-                                              data,
-                                            ),
-                                        })}
+                                      <FileCardItemIcon
+                                        isContainFiles={isContainsFiles}
+                                        name={data.name}
+                                        password={
+                                          data?.password ||
+                                          data?.access_passwordFolder
+                                        }
+                                        fileType={getShortFileTypeFromFileType(
+                                          data.type,
+                                        )}
+                                        imagePath={
+                                          user?.newName +
+                                          "-" +
+                                          user?._id +
+                                          "/" +
+                                          (data.newPath
+                                            ? removeFileNameOutOfPath(
+                                                data.newPath,
+                                              )
+                                            : "") +
+                                          data.newName
+                                        }
+                                        user={user}
+                                      />
+                                    </Typography>
+                                    <Box
+                                      sx={{
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        width: "100%",
+                                        overflow: "hidden",
+                                        whiteSpace: "nowrap",
+                                      }}
+                                    >
+                                      <Box
                                         sx={{
-                                          display: "flex",
-                                          alignItems: "center",
-                                          borderRadius: 0,
-                                          width: "100%",
-                                          columnGap: 1,
-                                          whiteSpace: "nowrap",
                                           overflow: "hidden",
+                                          width: "100%",
+                                          textAlign: "left",
                                         }}
                                       >
                                         <Typography
                                           component="div"
                                           sx={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            width: "50px",
-                                            minWidth: "50px",
-                                            height: "100%",
-                                          }}
-                                        >
-                                          <FileCardItemIcon
-                                            isContainFiles={isContainsFiles}
-                                            name={data.name}
-                                            password={
-                                              data?.password ||
-                                              data?.access_passwordFolder
-                                            }
-                                            fileType={getShortFileTypeFromFileType(
-                                              data.type,
-                                            )}
-                                            imagePath={
-                                              user?.newName +
-                                              "-" +
-                                              user?._id +
-                                              "/" +
-                                              (data.newPath
-                                                ? removeFileNameOutOfPath(
-                                                    data.newPath,
-                                                  )
-                                                : "") +
-                                              data.newName
-                                            }
-                                            user={user}
-                                          />
-                                        </Typography>
-                                        <Box
-                                          sx={{
-                                            display: "flex",
-                                            flexDirection: "column",
-                                            width: "100%",
                                             overflow: "hidden",
+                                            width: "100%",
+                                            textOverflow: "ellipsis",
                                             whiteSpace: "nowrap",
+                                            textAlign: "left",
                                           }}
                                         >
-                                          <Box
-                                            sx={{
-                                              overflow: "hidden",
-                                              width: "100%",
-                                              textAlign: "left",
-                                            }}
-                                          >
-                                            <Typography
-                                              component="div"
-                                              sx={{
-                                                overflow: "hidden",
-                                                width: "100%",
-                                                textOverflow: "ellipsis",
-                                                whiteSpace: "nowrap",
-                                                textAlign: "left",
-                                              }}
-                                            >
-                                              {data.name}
-                                            </Typography>
-                                            <Typography
-                                              component="div"
-                                              sx={{
-                                                fontSize: "0.8rem",
+                                          {data.name}
+                                        </Typography>
+                                        <Typography
+                                          component="div"
+                                          sx={{
+                                            fontSize: "0.8rem",
+                                            color:
+                                              themeSecond.palette.primaryTheme!
+                                                .main,
+                                          }}
+                                        >
+                                          {moment(data?.updatedAt).format(
+                                            "DD-MM-YYYY",
+                                          )}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                  </NormalButton>
+                                  <Box>
+                                    <MenuDropdown
+                                      customButton={{
+                                        element: (
+                                          <NormalButton>
+                                            <MoreVertIcon
+                                              style={{
                                                 color:
                                                   themeSecond.palette
                                                     .primaryTheme!.main,
                                               }}
-                                            >
-                                              {moment(data?.updatedAt).format(
-                                                "DD-MM-YYYY",
-                                              )}
-                                            </Typography>
-                                          </Box>
-                                        </Box>
-                                      </NormalButton>
-                                      <Box>
-                                        <MenuDropdown
-                                          customButton={{
-                                            element: (
-                                              <NormalButton>
-                                                <MoreVertIcon
-                                                  style={{
-                                                    color:
-                                                      themeSecond.palette
-                                                        .primaryTheme!.main,
+                                            />
+                                          </NormalButton>
+                                        ),
+                                      }}
+                                    >
+                                      {data.checkTypeItem === "file" && (
+                                        <div>
+                                          {menuItems.map((menuItem, index) => {
+                                            return (
+                                              <MenuDropdownItem
+                                                key={index}
+                                                isFavorite={
+                                                  data.favorite ? true : false
+                                                }
+                                                isPassword={
+                                                  data?.password ||
+                                                  data?.access_passwordFolder
+                                                }
+                                                title={menuItem.title}
+                                                icon={menuItem.icon}
+                                                onClick={() => {
+                                                  handleCheckPasswordBeforeEvent(
+                                                    menuItem.action,
+                                                    data,
+                                                  );
+                                                }}
+                                              />
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+                                      {data.checkTypeItem === "folder" && (
+                                        <div>
+                                          {favouriteMenuItems?.map(
+                                            (menuItems, index) => {
+                                              return (
+                                                <MenuDropdownItem
+                                                  key={index}
+                                                  className="menu-item"
+                                                  isPinned={
+                                                    data.pin ? true : false
+                                                  }
+                                                  isPassword={
+                                                    data?.password ||
+                                                    data?.access_passwordFolder
+                                                  }
+                                                  title={menuItems.title}
+                                                  icon={menuItems.icon}
+                                                  onClick={() => {
+                                                    handleCheckPasswordBeforeEvent(
+                                                      menuItems.action,
+                                                      data,
+                                                    );
                                                   }}
                                                 />
-                                              </NormalButton>
-                                            ),
-                                          }}
-                                        >
-                                          {data.checkTypeItem === "file" && (
-                                            <div>
-                                              {menuItems.map(
-                                                (menuItem, index) => {
-                                                  return (
-                                                    <MenuDropdownItem
-                                                      key={index}
-                                                      isFavorite={
-                                                        data.favorite
-                                                          ? true
-                                                          : false
-                                                      }
-                                                      isPassword={
-                                                        data?.password ||
-                                                        data?.access_passwordFolder
-                                                      }
-                                                      title={menuItem.title}
-                                                      icon={menuItem.icon}
-                                                      onClick={() => {
-                                                        handleCheckPasswordBeforeEvent(
-                                                          menuItem.action,
-                                                          data,
-                                                        );
-                                                      }}
-                                                    />
-                                                  );
-                                                },
-                                              )}
-                                            </div>
+                                              );
+                                            },
                                           )}
-                                          {data.checkTypeItem === "folder" && (
-                                            <div>
-                                              {favouriteMenuItems?.map(
-                                                (menuItems, index) => {
-                                                  return (
-                                                    <MenuDropdownItem
-                                                      key={index}
-                                                      /* disabled={
-                                                        item.file_id[0]?._id ||
-                                                        item.parentkey[0]?._id
-                                                          ? false
-                                                          : menuItems.disabled
-                                                      } */
-                                                      className="menu-item"
-                                                      isPinned={
-                                                        data.pin ? true : false
-                                                      }
-                                                      isPassword={
-                                                        data?.password ||
-                                                        data?.access_passwordFolder
-                                                      }
-                                                      title={menuItems.title}
-                                                      icon={menuItems.icon}
-                                                      onClick={() => {
-                                                        handleCheckPasswordBeforeEvent(
-                                                          menuItems.action,
-                                                          data,
-                                                        );
-                                                      }}
-                                                    />
-                                                  );
-                                                },
-                                              )}
-                                            </div>
-                                          )}
-                                        </MenuDropdown>
-                                      </Box>
-                                    </Box>
-                                  </Fragment>
-                                );
-                              })}
-                            </Typography>
-                          </SearchBarLayout>
-                        )}
-                      </SearchBar>
+                                        </div>
+                                      )}
+                                    </MenuDropdown>
+                                  </Box>
+                                </Box>
+                              </Fragment>
+                            );
+                          })}
+                        </Typography>
+                      </SearchBarLayout>
                     )}
-                  </AppSearch>
-                </ClickAwayListener>
-              </Grid>
-            </ThemeProvider>
+                  </SearchBar>
+                </AppSearch>
+              </ClickAwayListener>
+            </Grid>
+
             <Grid item xs />
             <Grid
               item
@@ -1011,7 +1002,14 @@ const Navbar = ({ onDrawerToggle }) => {
           userId={user?._id}
         />
       )}
-
+      {/* {!_.isEmpty(seletedData) && showPreview && (
+        <DialogPreviewFileSlide
+          open={showPreview}
+          handleClose={handleClosePreview}
+          data={seletedData}
+          user={user}
+        />
+      )} */}
       {shareDialog && (
         <DialogCreateShare
           onClose={() => {

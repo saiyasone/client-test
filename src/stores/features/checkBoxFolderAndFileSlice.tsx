@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: any = {
   isLoading: false,
@@ -14,7 +14,8 @@ const checkboxFileAndFolderSlice = createSlice({
     setFileAndFolderData: (state, action) => {
       const { data } = action.payload;
       const index = state.selectionFileAndFolderData.findIndex(
-        (item: any) => item?.id === data?.id,
+        (item: any) =>
+          item?.id === data?.id && item.checkType === data?.checkType,
       );
       if (index !== -1) {
         const updateValue = state.selectionFileAndFolderData.filter(
@@ -57,7 +58,7 @@ export const {
   setRemoveDataPassword,
 } = checkboxFileAndFolderSlice.actions;
 
-export const checkboxFileAndFolderSelector = (state) =>
+export const checkboxFileAndFolderSelector = (state: any) =>
   state.checkboxFileAndFolder;
 
 export default checkboxFileAndFolderSlice.reducer;

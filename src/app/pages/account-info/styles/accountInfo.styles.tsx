@@ -242,8 +242,9 @@ export const BoxShowLeftPaymentHistory = styled(Box)({
 export const BoxShowRightPaymentHistory = styled(Box)({
   display: "flex",
   alignItems: "center",
-  justifyContent: "space-between",
+  justifyContent: "end",
   width: "30%",
+  // border: "1px solid red",
   [theme.breakpoints.down("sm")]: {
     width: "100%",
     marginTop: "1rem",

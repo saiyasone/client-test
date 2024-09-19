@@ -28,7 +28,6 @@ import DialogFileDetail from "components/dialog/DialogFileDetail";
 import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
-import ProgressingBar from "components/loading/ProgressingBar";
 import menuItems from "constants/menuItem.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
@@ -53,6 +52,7 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import FileDataGrid from "./FileTypeDataGrid";
 import * as MUI from "./styles/fileType.style";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 
 const ITEM_PER_PAGE = 20;
 
@@ -68,6 +68,7 @@ function FileType() {
   const [isDataFound, setDataFound] = useState<any>(null);
   const [toggle, setToggle] = useState<any>("list");
   const [userPackage, setUserPackage] = useState<any>(null);
+  const [mainFileTypes, setMainFileTypes] = useState<any>(null);
 
   const navigate = useNavigate();
 
@@ -81,9 +82,6 @@ function FileType() {
   });
   const manageFile = useManageFile({ user });
   // const [updateFile] = useMutation(MUTATION_FILES);
-  const [progressing, setProgressing] = useState<any>(0);
-  const [procesing, setProcesing] = useState<any>(true);
-  const [showProgressing, setShowProgressing] = useState<any>(false);
   const [showPreview, setShowPreview] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
     action: null,
@@ -161,6 +159,11 @@ function FileType() {
     setIsMultiplePasswordLink(false);
   };
 
+  const handleClosePreview = () => {
+    resetDataForEvents();
+    setShowPreview(false);
+  };
+  
   const queryFileGrid = async () => {
     if (toggle === "grid") {
       try {
@@ -178,6 +181,8 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
+              console.log(queryData);
+              setMainFileTypes(queryData)
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -234,6 +239,7 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
+              setMainFileTypes(queryData)
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -479,9 +485,6 @@ function FileType() {
   };
 
   const handleDownloadFile = async () => {
-    setShowProgressing(true);
-    setProcesing(true);
-
     const multipleData = [
       {
         id: dataForEvent.data?._id,
@@ -514,9 +517,7 @@ function FileType() {
           customGetFiles();
         },
         onClosure: async () => {
-          setShowProgressing(false);
           setShowPreview(false);
-          setProcesing(false);
           setFileDetailsDialog(false);
         },
       },
@@ -678,6 +679,7 @@ function FileType() {
     }
   }, [dataForEvent.action]);
 
+
   const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
     const result = await getFolders({
       variables: {
@@ -822,7 +824,7 @@ function FileType() {
         />
       )}
 
-      {showPreview && (
+      {/* {showPreview && (
         <DialogPreviewFile
           open={showPreview}
           handleClose={() => {
@@ -845,8 +847,16 @@ function FileType() {
           path={dataForEvent.data.newPath}
           user={user}
         />
-      )}
+      )} */}
 
+      <DialogPreviewFileSlide
+        open={showPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={mainFileTypes}
+        propsStatus="category"
+      />
       <DialogRenameFile
         open={renameDialogOpen}
         onClose={() => {
@@ -921,10 +931,6 @@ function FileType() {
         }}
         onClose={handleCloseMultiplePassword}
       />
-
-      {showProgressing && (
-        <ProgressingBar procesing={procesing} progressing={progressing} />
-      )}
 
       <MUI.FileTypeContainer>
         <MUI.TitleAndSwitch className="title-n-switch" sx={{ my: 2 }}>
@@ -1001,6 +1007,7 @@ function FileType() {
                               data.newFilename
                             }
                             user={user}
+                            selectType={"file"}
                             handleSelect={handleMultipleFiles}
                             favouriteIcon={{
                               isShow: false,

@@ -7,7 +7,6 @@ import {
   MUTATION_CREATE_TICKET,
   MUTATION_CREATE_TICKET_TYPE,
 } from "api/graphql/ticket.graphql";
-import CircularProgressBar from "components/loading/CircularProgressBar";
 import { Formik } from "formik";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { Fragment, useCallback, useState } from "react";
@@ -19,16 +18,17 @@ import * as Yup from "yup";
 import { InputWrapper, Label } from "./styles/createTicket.style";
 import { BrowseImageButton, ButtonUpload } from "./styles/ticket2.style";
 import * as MUI from "./styles/ticketForm.style";
+import useAuth from "hooks/useAuth";
+import axios from "axios";
+import { ENV_KEYS } from "constants/env.constant";
+import { encryptData } from "utils/secure.util";
 
 export default function TicketForm() {
   const manageGraphqlError = useManageGraphqlError();
+  const { user }: any = useAuth();
 
-  const [imgLoading, setImgLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [files, setFiles] = useState<any[]>([]);
-  const [progress, setProgress] = useState(0);
-  // const [] = useState(false);
-  // const
   const [createTypeTicket] = useMutation(MUTATION_CREATE_TICKET_TYPE);
   const [createTicket] = useMutation(MUTATION_CREATE_TICKET);
   const schemaValidation = Yup.object().shape({
@@ -72,7 +72,7 @@ export default function TicketForm() {
         return newName;
       }) || [""];
       // ["a.png", "b.png", "c.png]
-      const fileUploads = [...files] || [];
+      const fileUploads = files || [];
 
       const typeResult = await createTypeTicket({
         variables: {
@@ -97,34 +97,34 @@ export default function TicketForm() {
           },
         });
         if (result?.data?.createTickets?._id) {
-          // const imageAccess = (await result?.data?.createTickets?.image) || [];
+          const imageAccess = (await result?.data?.createTickets?.image) || [];
           if (fileUploads.length) {
-            // setImgLoading(true);
-            // for (let i = 0; i < fileUploads.length; i++) {
-            //   await axios.put(
-            //     `${bunnyUrl}/${user?.newName}-${user?._id}/${imageAccess[i].newNameImage}`,
-            //     fileUploads[i],
-            //     {
-            //       headers: {
-            //         AccessKey: accessKey,
-            //         "Content-Type": "multipart/form-data",
-            //       },
-            //       onUploadProgress: (progressEvent: any) => {
-            //         const percentCompleted = Math.round(
-            //           (progressEvent.loaded * 100) / progressEvent.total,
-            //         );
-            //         if (percentCompleted === 100) {
-            //           setProgress(99);
-            //         } else {
-            //           setProgress(percentCompleted);
-            //         }
-            //       },
-            //     },
-            //   );
-            // }
-            // setImgLoading(false);
+            const uploadPromise = fileUploads.map(async (file, index) => {
+              const headers = {
+                createdBy: user?._id,
+                FILENAME: imageAccess[index].newNameImage,
+                PATH: `${user?.newName}-${user?._id}/chat-message`,
+              };
+
+              const formData = new FormData();
+              formData.append("file", file);
+
+              const encryptedHeader = encryptData(headers);
+              await axios.post(
+                ENV_KEYS.VITE_APP_LOAD_UPLOAD_URL,
+                formData,
+
+                {
+                  headers: {
+                    encryptedHeaders: encryptedHeader,
+                  },
+                },
+              );
+            });
+
+            await Promise.all(uploadPromise);
           }
-          setProgress(0);
+
           setLoading(false);
           setFiles([]);
           successMessage("Ticket is created", 2000);
@@ -133,7 +133,6 @@ export default function TicketForm() {
       }
     } catch (error: any) {
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
-      setImgLoading(false);
       setLoading(false);
 
       errorMessage(
@@ -147,32 +146,6 @@ export default function TicketForm() {
 
   return (
     <Fragment>
-      <CircularProgressBar
-        dialogProps={{
-          PaperProps: {
-            sx: {
-              overflowY: "initial",
-              maxWidth: "sm",
-            },
-          },
-          sx: {
-            columnGap: "20px",
-          },
-        }}
-        dialogContentProps={{
-          sx: {
-            backgroundColor: "white !important",
-            borderRadius: "6px",
-            padding: (theme) => `${theme.spacing(5)}`,
-          },
-        }}
-        isOpen={imgLoading}
-        value={progress}
-      />
-
-      {/* <Button variant="contained" onClick={isCheckFileSize}>
-        Try
-      </Button> */}
       <Formik
         initialValues={{
           message: "",
@@ -197,7 +170,6 @@ export default function TicketForm() {
                 id="labelTitle"
                 name="title"
                 placeholder="Title"
-                // label="title"
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.title && errors.title)}
@@ -218,7 +190,6 @@ export default function TicketForm() {
                 id="labelEmail"
                 name="email"
                 placeholder="Email"
-                // label="email"
                 fullWidth={true}
                 size="small"
                 error={Boolean(touched.email && errors.email)}
@@ -239,7 +210,6 @@ export default function TicketForm() {
                 id="labelMessage"
                 name="message"
                 placeholder="message"
-                // label="message"
                 multiline={true}
                 rows={7}
                 fullWidth={true}

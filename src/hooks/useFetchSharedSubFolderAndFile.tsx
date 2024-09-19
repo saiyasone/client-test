@@ -87,7 +87,7 @@ const useFetchSharedSubFolderAndFile = (parentId, user) => {
                       newName: folderById.newFolder_name,
                       id: data.folderId._id,
                       isContainsFiles:
-                        folderById.folder_?.item !== "0" ? true : false,
+                        data?.folderId?.total_size > 0 ? true : false,
                       pin: folderById.pin ? 1 : 0,
                       checkTypeItem: "folder",
                       permission: data.permission,

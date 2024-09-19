@@ -26,6 +26,7 @@ import {
   QUERY_FOLDER,
 } from "api/graphql/folder.graphql";
 import ShowUpload from "components/ShowUpload";
+import WasabiUpload from "components/WasabiUpload";
 // import UppyUpload from "components/UppyUpload";
 import { ENV_KEYS } from "constants/env.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -47,11 +48,13 @@ const Transition = React.forwardRef(function Transition(
 export default function FloatingButton() {
   const { user }: any = useAuth();
   const [selectFiles, setSelectFiles] = React.useState<any[]>([]);
+  const [openUppy, setOpenUppy] = React.useState(false);
   const [selectedFolderFiles, setSelectedFolderFiles] = React.useState<any[]>(
     [],
   );
   const [folderOpen, setFolderOpen] = React.useState(false);
   const [folder, setFolder] = React.useState("");
+  const [isRandomFolder, setIsRandomFolder] = React.useState<boolean>(false);
   const [resMessage, setResMessage] = React.useState<any>(false);
   const [errorMessage, setErrorMessage] = React.useState("");
   const [getType, setGetType] = React.useState("");
@@ -61,6 +64,8 @@ export default function FloatingButton() {
 
   const handleFolderClose = () => {
     setFolderOpen(false);
+    setIsRandomFolder(false);
+    setFolder("");
   };
 
   //Modal;
@@ -131,14 +136,9 @@ export default function FloatingButton() {
     console.log(error);
   }
 
-  React.useEffect(() => {}, [globalFolderId]);
-
   React.useEffect(() => {
     setResMessage(false);
-    if (
-      // localStorage.getItem("folderId")
-      folderJson
-    ) {
+    if (folderJson) {
       newFolderPath({
         variables: {
           where: {
@@ -183,6 +183,10 @@ export default function FloatingButton() {
         eventUploadTrigger.trigger();
       }
     } catch (error: any) {
+      if (error.message) {
+        setFolder(error.message);
+        setIsRandomFolder(true);
+      }
       setIsLoading(false);
       const strMsg = error.message.split(": ")[1];
       if (strMsg) {
@@ -202,7 +206,6 @@ export default function FloatingButton() {
         setErrorMessage("Please select a new folder!");
       } else {
         setErrorMessage(error);
-        setFolder(strMsg);
       }
     }
   };
@@ -228,8 +231,9 @@ export default function FloatingButton() {
               },
             }}
             onClick={() => {
-              fileUpload("file");
-              setGetType("file");
+              setOpenUppy(true);
+              // fileUpload("file");
+              // setGetType("file");
             }}
           />
           <SpeedDialAction
@@ -265,8 +269,6 @@ export default function FloatingButton() {
           />
         </SpeedDial>
       </Box>
-
-      {/* {open && <UppyUpload open={open} />} */}
 
       {selectFiles && (
         <ShowUpload
@@ -304,6 +306,18 @@ export default function FloatingButton() {
                 setFolder(e.target.value);
               }}
             />
+            {isRandomFolder && folder && (
+              <Typography
+                component="p"
+                sx={{ ml: 1 }}
+                style={{ fontSize: "12px" }}
+              >
+                Folder rename to
+                <strong style={{ fontSize: "12px", marginLeft: "4px" }}>
+                  {folder}
+                </strong>
+              </Typography>
+            )}
             {resMessage ? (
               <Typography
                 component="p"
@@ -347,6 +361,13 @@ export default function FloatingButton() {
           </DialogActions>
         </Box>
       </Dialog>
+
+      <WasabiUpload
+        open={openUppy}
+        onClose={() => {
+          setOpenUppy(false);
+        }}
+      />
     </React.Fragment>
   );
 }

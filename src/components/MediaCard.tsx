@@ -1,5 +1,4 @@
 import { Fragment } from "react";
-
 import {
   Button,
   Card,
@@ -35,59 +34,23 @@ const FileTypeTitle: any = styled(Paper)(({ theme }) => ({
   marginTop: "5px",
 }));
 
-function MediaCard(props) {
-  const { getCount, countLoading } = props;
+interface IFilesCategoryTypes {
+  fileCategory: any;
+  countLoading: boolean;
+}
+function MediaCard({ fileCategory, countLoading }: IFilesCategoryTypes) {
   const navigate = useNavigate();
   const { user }: any = useAuth();
-  const handleClick = (val) => {
+  const handleClick = (val: string) => {
     const status = Base64.encode("active", true);
     const value = Base64.encode(val, true);
     const userId = Base64.encode(user?._id, true);
+
     navigate(`/file/${userId}/${value}/${status}`);
     if (!val) {
       navigate(`/myfile/file/${userId}/${value}/${status}`);
     }
   };
-  let application = 0;
-  let image = 0;
-  let video = 0;
-  let audio = 0;
-  let text: any = 0;
-  let other = 0;
-  for (let i = 0; i < getCount?.getFileCategoryDetails?.data?.length; i++) {
-    if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "application"
-    ) {
-      application = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "image"
-    ) {
-      image = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "video"
-    ) {
-      video = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "audio"
-    ) {
-      audio = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-      "text"
-    ) {
-      text = getCount?.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      getCount?.getFileCategoryDetails?.data[i]?.fileType?.split("/")?.[0] ===
-        "" ||
-      null
-    ) {
-      other = getCount?.getFileCategoryDetails?.data[i]?.size;
-    }
-  }
 
   return (
     <Box>
@@ -112,32 +75,44 @@ function MediaCard(props) {
                         {card.type === "audio"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(audio)
+                            : convertBytetoMBandGB(
+                                fileCategory.audioFileData.totalSize,
+                              )
                           : ""}
                         {card.type === "video"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(video)
+                            : convertBytetoMBandGB(
+                                fileCategory.videoFileData.totalSize,
+                              )
                           : ""}
                         {card.type === "image"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(image)
+                            : convertBytetoMBandGB(
+                                fileCategory.imageFileData.totalSize,
+                              )
                           : ""}
                         {card.type === "application"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(application)
+                            : convertBytetoMBandGB(
+                                fileCategory.documentFileData.totalSize,
+                              )
                           : ""}
                         {card.type === "other"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(other)
+                            : convertBytetoMBandGB(
+                                fileCategory.otherFileData.totalSize,
+                              )
                           : ""}
                         {card.type === "text"
                           ? countLoading
                             ? "Loading.."
-                            : convertBytetoMBandGB(parseInt(text))
+                            : convertBytetoMBandGB(
+                                fileCategory.textFileData.totalSize,
+                              )
                           : ""}
                       </Typography>
                     </Box>

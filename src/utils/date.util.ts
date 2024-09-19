@@ -229,3 +229,12 @@ export function DateTimeFormate(dateTime: string): string | undefined {
 }
 
 export default moment;
+
+
+export const calculateExpirationDate = (days) => {
+  const today = new Date();
+  const expirationDate = new Date(today);
+  expirationDate.setDate(today.getDate() + days);
+  expirationDate.setHours(12, 0, 0, 0);
+  return expirationDate.toISOString();
+};

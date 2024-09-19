@@ -2,7 +2,6 @@ import axios from "axios";
 import { ENV_KEYS } from "constants/env.constant";
 import _ from "lodash";
 import { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { encryptData } from "utils/secure.util";
 const { CancelToken } = axios;
 
@@ -19,23 +18,25 @@ const useResizeImage = ({
   imagePath,
   user,
   fileType,
-  width = 200,
-  height = 200,
-  isPublic = false,
-}: Props) => {
+  width,
+  height,
+  isPublic,
+}: // width = 200,
+// height = 200,
+// isPublic = false,
+Props) => {
   const [imageSrc, setImageSrc] = useState<any>("");
   const [imageFound, setImageFound] = useState<any>(null);
-  const location = useLocation();
 
   const source = CancelToken.source();
   const cancelToken = source.token;
 
   useEffect(() => {
     if (fileType === "image") {
-      const fetchResizeImage = async (imagePath, userId) => {
+      const fetchResizeImage = async (imagePath: string, userId: string) => {
         try {
           const enData = encryptData({
-            path: imagePath, 
+            path: imagePath,
             createdBy: isPublic ? "0" : userId,
             width: `${width}`,
             height: `${height}`,
@@ -77,7 +78,7 @@ const useResizeImage = ({
         // source.cancel("Operation canceled due to route change.");
       };
     }
-  }, [imagePath, user, fileType, location]);
+  }, [imagePath, user, fileType]);
 
   return { imageSrc, imageFound };
 };

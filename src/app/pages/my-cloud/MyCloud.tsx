@@ -9,11 +9,7 @@ import {
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
-import {
-  MUTATION_ACTION_FILE,
-  QUERY_FILE,
-  QUERY_FILE_CATEGORY,
-} from "api/graphql/file.graphql";
+import { MUTATION_ACTION_FILE, QUERY_FILE } from "api/graphql/file.graphql";
 import { MUTATION_CREATE_FILE_DROP_URL_PRIVATE } from "api/graphql/fileDrop.graphql";
 import {
   MUTATION_UPDATE_FOLDER,
@@ -33,7 +29,6 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import ProgressingBar from "components/loading/ProgressingBar";
@@ -52,10 +47,21 @@ import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 // import useScroll from "hooks/useScroll";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import useFetchFile from "hooks/file/useFetchFile";
+import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { Base64 } from "js-base64";
 import moment from "moment";
-import { Fragment, useContext, useEffect, useRef, useState } from "react";
+import {
+  Fragment,
+  SetStateAction,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { CSVLink } from "react-csv";
 import { BiTime } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
@@ -77,8 +83,14 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
+import { RootState } from "stores/store";
+import { useRefreshState } from "contexts/RefreshProvider";
+import { setMenuToggle } from "stores/features/useEventSlice";
+import { IMyCloudTypes } from "types/mycloudFileType";
+import DialogGetLink from "components/dialog/DialogGetLink";
+import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
 
-// const ITEM_PER_PAGE_GRID = 20;
+const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
   const { user }: any = useAuth();
@@ -91,12 +103,6 @@ export function MyCloud() {
   });
   const manageFolder = useManageFolder({ user });
   const manageFile = useManageFile({ user });
-  const [getCategoryAll, { loading: countLoading }] = useLazyQuery(
-    QUERY_FILE_CATEGORY,
-    {
-      fetchPolicy: "no-cache",
-    },
-  );
 
   const [createFileDropLink] = useMutation(
     MUTATION_CREATE_FILE_DROP_URL_PRIVATE,
@@ -105,13 +111,13 @@ export function MyCloud() {
   const [fileAction] = useMutation(MUTATION_ACTION_FILE);
   const [deleteFolder] = useMutation(MUTATION_UPDATE_FOLDER);
   const [folder, setFolder] = useState<any>(null);
-  const [getCategory, setGetCategory] = useState(null);
   const [mainFile, setMainFile] = useState<any>(null);
   const [progressing, setProgressing] = useState(0);
   const [procesing, setProcesing] = useState(true);
   const [showProgressing, setShowProgressing] = useState(false);
-  const [showPreview, setShowPreview] = useState(false);
   const [openPreview, setOpenPreview] = useState(false);
+  const [openGetLink, setOpenGetLink] = useState(false);
+  const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isPasswordLink, setIsPasswordLink] = useState(false);
   const [isMultiplePasswordLink, setIsMultiplePasswordLink] = useState(false);
@@ -122,10 +128,10 @@ export function MyCloud() {
   const [multiChecked, setMultiChecked] = useState<any[]>([]);
   const navigate = useNavigate();
   const [name, setName] = useState("");
-  const [newName, setNewName] = useState("");
   const isMobile = useMediaQuery("(max-width:600px)");
   const [userPackage, setUserPackage] = useState<any>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
+  const { refreshAuto } = useRefreshState();
 
   // slice in redux
   const dispatch = useDispatch();
@@ -146,7 +152,7 @@ export function MyCloud() {
 
   const handleGetDownloadLink = async () => {
     setDataDownloadURL(dataForEvent.data);
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
         action: "",
@@ -158,7 +164,6 @@ export function MyCloud() {
     resetDataForEvent();
     setRenameDialogOpen(false);
   };
-
   useEffect(() => {
     if (!renameDialogOpen) {
       setName("");
@@ -172,14 +177,12 @@ export function MyCloud() {
 
   const open = Boolean(null);
   const [fileDetailsDialog, setFileDetailsDialog] = useState(false);
-  const [fileType, setFileType] = useState("");
   const [path, setPath] = useState("");
   const [openShare, setOpenShare] = useState(Boolean(false));
   const [toggle, setToggle] = useState<any>(null);
   const [_optionsValue, setOptionsValue] = useState(false);
   const [getValue, setGetValue] = useState<any>(null);
   const [viewMore, setViewMore] = useState(20);
-  const [fileViewMore, setFileViewMore] = useState(20);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { setIsAutoClose, isAutoClose } = useMenuDropdownState();
   const [total, setTotal] = useState(0);
@@ -188,14 +191,20 @@ export function MyCloud() {
   const location = useLocation();
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
-  // const { limitScroll, addMoreLimit } = useScroll({
-  //   total,
-  //   limitData: ITEM_PER_PAGE_GRID,
-  // });
+  const {
+    isOpenMenu: isMenu,
+    isSelected,
+    isOnClicked,
+    isToggleMenu,
+  } = useSelector((state: RootState) => state.event);
+
+  const { limitScroll, addMoreLimit } = useScroll({
+    total,
+    limitData: ITEM_PER_PAGE_GRID,
+  });
   const { setFolderId, handleTriggerFolder }: any = useContext(FolderContext);
   const [dataGetUrl, setDataGetUrl] = useState(null);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
-  // const totalDownloadHandle = useDownloadFile(afterDowload);
   const handleGetFolderURL = useGetUrl(dataGetUrl || getValue);
   const [openFileDrop, setOpenFileDrop] = useState(false);
   const [showEncryptPassword, setShowEncryptPassword] = useState(false);
@@ -216,6 +225,10 @@ export function MyCloud() {
     folderId: "",
     folderName: " ",
   });
+  const dataFiles = useFetchFile({
+    user,
+  });
+
   const csvRef = useRef<any>();
   const useDataExportCSV = useExportCSV({
     folderId: csvFolder.folderId,
@@ -258,7 +271,7 @@ export function MyCloud() {
     }
   }, []);
 
-  const handleToggle = (value) => {
+  const handleToggle = (value: string) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
   };
@@ -296,12 +309,13 @@ export function MyCloud() {
 
   const handleSubmitDecryptedPassword = async () => {
     if (eventClick === "get-link") {
-      setDataGetUrl(dataForEvent.data);
+      // setDataGetUrl(dataForEvent.data);
+      setOpenGetLink(true);
       handleCloseDecryptedPassword();
     }
 
     if (eventClick === "share") {
-      setDataForEvent((prev) => {
+      setDataForEvent((prev: any) => {
         return {
           ...prev,
           action: "",
@@ -381,11 +395,16 @@ export function MyCloud() {
       handleDataPreview();
       handleCloseDecryptedPassword();
     }
+
+    if(eventClick ==='one-time-link'){
+      setOpenOneTimeLink(true);
+      handleCloseDecryptedPassword();
+    }
   };
 
   const handleCloseDecryptedPassword = () => {
     setEventClick("");
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
         action: "",
@@ -408,7 +427,16 @@ export function MyCloud() {
     countFilePage = k;
   }
 
-  const handleClickFolder = (_e, value) => {
+  const handleClickFolder = (
+    _e: any,
+    value: {
+      folder_type: string;
+      folder_name: SetStateAction<string>;
+      filename: SetStateAction<string>;
+      _id: SetStateAction<{}>;
+      path: SetStateAction<string>;
+    },
+  ) => {
     if (value.folder_type === "folder") {
       setName(value?.folder_name);
     } else {
@@ -439,7 +467,7 @@ export function MyCloud() {
   };
 
   // open folder
-  const handleOpenFolder = (value) => {
+  const handleOpenFolder = (value: { _id: any; url: any }) => {
     setFolderId(value?._id);
     handleClose();
     const url = value?.url;
@@ -450,7 +478,7 @@ export function MyCloud() {
 
   const handleClosePreview = () => {
     resetDataForEvent();
-    setShowPreview(false);
+    setOpenPreview(false);
   };
 
   // query file grid
@@ -466,7 +494,7 @@ export function MyCloud() {
               source: "default",
             },
             orderBy: "updatedAt_DESC",
-            limit: fileViewMore,
+            limit: limitScroll,
           },
           onCompleted: (data) => {
             if (data) {
@@ -514,26 +542,11 @@ export function MyCloud() {
 
   useEffect(() => {
     queryFile();
-  }, [currentFilePage, countFilePage, toggle]);
+  }, [currentFilePage, countFilePage, toggle, isAutoClose]);
 
   useEffect(() => {
     queryFileGrid();
-  }, [fileViewMore, toggle]);
-
-  //query all files count and separate base on file type
-  const queryCategory = async () => {
-    await getCategoryAll({
-      onCompleted: (data) => {
-        if (data) {
-          setGetCategory(data);
-        }
-      },
-    });
-  };
-
-  useEffect(() => {
-    queryCategory();
-  }, []);
+  }, [limitScroll, isAutoClose, toggle]);
 
   //query all folder
   const queryFolder = async () => {
@@ -599,7 +612,6 @@ export function MyCloud() {
       } else {
         queryFileGrid();
       }
-      queryCategory();
     }
   }, [eventUploadTrigger?.triggerData]);
 
@@ -608,16 +620,23 @@ export function MyCloud() {
     queryFolder();
   }, [checkUploadSuccessAll]);
 
+  useEffect(() => {
+    if (refreshAuto?.isStatus === "mycloud") {
+      queryFile();
+      queryFileGrid();
+    }
+  }, [refreshAuto?.isAutoClose]);
+
   const handleViewMoreFolder = () => {
     setViewMore((prevState) => prevState + 20);
   };
 
   const handleViewMoreFile = () => {
-    // addMoreLimit();
-    setFileViewMore((prev) => prev + 10);
+    addMoreLimit();
+    // setFileViewMore((prev) => prev + 20);
   };
 
-  const handleDownloadFile = async (inputData) => {
+  const handleDownloadFile = async (inputData: any) => {
     const data = inputData || getValue;
 
     const newFileData = [
@@ -638,7 +657,7 @@ export function MyCloud() {
       {
         onSuccess: () => {
           successMessage("Download successful", 3000);
-          setGetValue((prev) => {
+          setGetValue((prev: any) => {
             return {
               ...prev,
               totalDownload: parseInt(getValue?.totalDownload + 1),
@@ -650,7 +669,7 @@ export function MyCloud() {
             queryFileGrid();
           }
         },
-        onFailed: (error) => {
+        onFailed: (error: any) => {
           errorMessage(error, 3000);
         },
 
@@ -674,7 +693,7 @@ export function MyCloud() {
     }
   };
 
-  const handleDownloadFolder = async (data) => {
+  const handleDownloadFolder = async (data: any) => {
     const multipleData = [
       {
         id: data?._id,
@@ -691,7 +710,7 @@ export function MyCloud() {
     await manageFile.handleDownloadSingleFile(
       { multipleData },
       {
-        onFailed: async (error) => {
+        onFailed: async (error: any) => {
           errorMessage(error, 3000);
         },
         onSuccess: async () => {
@@ -708,7 +727,7 @@ export function MyCloud() {
     );
   };
 
-  const handleDeleteFile = async (data) => {
+  const handleDeleteFile = async (data: { _id: string }) => {
     await manageFile.handleDeleteFile(data._id, {
       onSuccess: () => {
         setIsAutoClose(true);
@@ -720,13 +739,13 @@ export function MyCloud() {
           queryFileGrid();
         }
       },
-      onFailed: (error) => {
+      onFailed: (error: any) => {
         errorMessage(error, 3000);
       },
     });
   };
 
-  const handleDeleteFolder = async (folderData) => {
+  const handleDeleteFolder = async (folderData: any) => {
     try {
       if (multiSelectId.length > 0) {
         for (let i = 0; i < multiSelectId.length; i++) {
@@ -768,12 +787,12 @@ export function MyCloud() {
       }
       successMessage("Delete folder successful!", 3000);
     } catch (err) {
-      errorMessage("Something wrong. Please try again!");
+      errorMessage("Something wrong. Please try again!", 1000);
     }
   };
 
   // File action for count in recent file
-  const handleActionFile = async (val, data?) => {
+  const handleActionFile = async (val: string, data: IMyCloudTypes) => {
     try {
       await fileAction({
         variables: {
@@ -789,9 +808,9 @@ export function MyCloud() {
     }
   };
 
-  const handleMultipleFolderData = (selectData) => {
+  const handleMultipleFolderData = (selectData: any) => {
     const optionValue = folder?.folders?.data?.find(
-      (folder) => folder._id === selectData,
+      (folder: { _id: string }) => folder._id === selectData,
     );
 
     dispatch(
@@ -815,8 +834,8 @@ export function MyCloud() {
     );
   };
 
-  const handleMultipleFileData = (selectData) => {
-    const optionValue = mainFile?.find((file) => file._id === selectData);
+  const handleMultipleFileData = (selectData: IMyCloudTypes) => {
+    const optionValue = mainFile?.find((file: any) => file._id === selectData);
 
     dispatch(
       checkboxAction.setFileAndFolderData({
@@ -845,7 +864,9 @@ export function MyCloud() {
     "",
   );
 
-  const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
+  const handleFileDetailDialogBreadcrumbFolderNavigate = async (
+    link: string,
+  ) => {
     const result = await getFolder({
       variables: {
         where: {
@@ -862,7 +883,7 @@ export function MyCloud() {
   };
 
   // open file drop
-  const handleOpenFileDropDialog = (id) => {
+  const handleOpenFileDropDialog = (id: number) => {
     setCurrentFolderId(id);
     setOpenFileDrop(true);
     resetDataForEvent();
@@ -874,10 +895,10 @@ export function MyCloud() {
   };
 
   const handleCreateFileDrop = async (
-    link,
-    date,
-    values,
-    activePrivateFileDrop,
+    link: string,
+    date: Date,
+    values: any,
+    activePrivateFileDrop: any,
   ) => {
     try {
       if (activePrivateFileDrop) {
@@ -931,18 +952,15 @@ export function MyCloud() {
   };
 
   const handleDataPreview = () => {
-    setShowPreview(true);
-    setOpenPreview(true);
+    setOpenPreview(!openPreview);
     setName(dataForEvent.data?.filename);
-    setNewName(dataForEvent.data?.newFilename);
-    setFileType(dataForEvent.data?.fileType);
     setPath(dataForEvent.data?.newPath);
   };
 
-  const handleDeletedUserFromShareOnSave = async (sharedData) => {
+  const handleDeletedUserFromShareOnSave = async (sharedData: any) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IMyCloudTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -950,16 +968,16 @@ export function MyCloud() {
         }));
         successMessage("Deleted user out of share successful!!", 3000);
       },
-      onFailed: (error) => {
+      onFailed: (error: any) => {
         errorMessage(error, 3000);
       },
     });
   };
 
-  const handleChangedUserPermissionFromShareSave = async (sharedData) => {
+  const handleChangedUserPermissionFromShareSave = async (sharedData: any) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IMyCloudTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -967,19 +985,47 @@ export function MyCloud() {
         }));
         successMessage("Changed user permission of share successful!!", 3000);
       },
-      onFailed: (error) => {
+      onFailed: (error: any) => {
         errorMessage(error, 3000);
       },
     });
   };
 
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataGetUrl(null);
+    // setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  }
+
+  const handleGenerateGetLink = (values) => {
+    //not complete => waiting API
+    //Need to check in other functions for getLink event fire
+    setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    console.log({values});
+
+    setOpenGetLink(false);
+  }
+
   useEffect(() => {
     if (dataForEvent.data && dataForEvent.action) {
       menuOnClick(dataForEvent.action);
     }
-  }, [dataForEvent.action]);
+  }, [openGetLink,dataForEvent.action]);
 
-  const menuOnClick = async (action) => {
+  const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
     setGetValue(dataForEvent.data);
 
@@ -989,6 +1035,7 @@ export function MyCloud() {
     }, 500);
 
     const checkPassword = isCheckPassword();
+
     switch (action) {
       case "rename": {
         setEventClick("rename");
@@ -1003,10 +1050,7 @@ export function MyCloud() {
       }
       case "download": {
         setEventClick("download");
-        if (
-          // getValue?.folder_type === "folder" ||
-          dataForEvent.data?.folder_type === "folder"
-        ) {
+        if (dataForEvent.data?.folder_type === "folder") {
           setEventClick("download");
           if (multiSelectId.length > 0) {
             await handleDownloadFolders();
@@ -1062,13 +1106,14 @@ export function MyCloud() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          setDataGetUrl(dataForEvent.data);
-          setDataForEvent((prev) => {
-            return {
-              ...prev,
-              action: "",
-            };
-          });
+          // setDataGetUrl(dataForEvent.data);
+          // setDataForEvent((prev: any) => {
+          //   return {
+          //     ...prev,
+          //     action: "",
+          //   };
+          // });
+        setOpenGetLink(true);
         }
         break;
       }
@@ -1112,7 +1157,6 @@ export function MyCloud() {
         break;
       }
       case "password": {
-        console.log({dataEvent:dataForEvent.data, userPackage});
         if (dataForEvent.data?.folder_type) {
           if (userPackage?.lockFolder === "on") {
             handleOpenPassword();
@@ -1124,7 +1168,7 @@ export function MyCloud() {
             );
           }
         } else {
-          if (userPackage?.lockFile === "on") {
+          if (userPackage?.lockFile !== "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
@@ -1147,13 +1191,13 @@ export function MyCloud() {
         break;
       }
       case "preview": {
-        setEventClick("preview");
-
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
+          setEventClick("preview");
           handleDataPreview();
         }
+
         break;
       }
       case "export-csv": {
@@ -1170,11 +1214,21 @@ export function MyCloud() {
         }
         break;
       }
+      case "one-time-link":{
+        setEventClick("one-time-link");
+
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenOneTimeLink(true);
+        }
+        break;
+      }
     }
   };
 
   // favourite function
-  const handleFavourite = async (data) => {
+  const handleFavourite = async (data: IMyCloudTypes) => {
     await manageFile.handleFavoriteFile(data._id, data.favorite ? 0 : 1, {
       onSuccess: async () => {
         setIsAutoClose(true);
@@ -1194,7 +1248,7 @@ export function MyCloud() {
           resetDataForEvent();
           successMessage("One File added to Favourite", 3000);
         }
-        setGetValue((state) => ({
+        setGetValue((state: any) => ({
           ...state,
           favorite: getValue?.favorite ? 0 : 1,
         }));
@@ -1212,7 +1266,7 @@ export function MyCloud() {
   };
 
   // pin folder
-  const handleAddPin = async (data) => {
+  const handleAddPin = async (data: any) => {
     await manageFolder.handleAddPinFolder(data._id, data.pin ? 0 : 1, {
       onSuccess: async () => {
         if (data.pin) {
@@ -1220,7 +1274,7 @@ export function MyCloud() {
         } else {
           successMessage("One File added to Pin", 3000);
         }
-        setGetValue((state) => ({
+        setGetValue((state: { data: IMyCloudTypes }) => ({
           data: {
             ...state.data,
             pin: data.pin ? 0 : 1,
@@ -1246,7 +1300,7 @@ export function MyCloud() {
     });
   };
 
-  const handleRenameFolderOrFile = async (newRename) => {
+  const handleRenameFolderOrFile = async (newRename: string) => {
     if (getValue?.folder_type === "folder") {
       await manageFolder.handleRenameFolder(
         {
@@ -1275,11 +1329,10 @@ export function MyCloud() {
         },
       );
     } else {
-      const actionStatus = "edit";
       await manageFile.handleRenameFile({ id: getValue?._id }, newRename, {
-        onSuccess: () => {
+        onSuccess: async () => {
           handleCloseRenameDialog();
-          handleActionFile(actionStatus);
+          await handleActionFile("edit", getValue);
           successMessage("Update File successful", 3000);
           if (toggle === "list") {
             queryFile();
@@ -1305,9 +1358,56 @@ export function MyCloud() {
     dispatch(checkboxAction.setRemoveFileAndFolderData());
   };
 
+  const handleOneTimeLinkClose = () => {
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    })
+    setOpenOneTimeLink(false);
+  }
+
+  const handleOneTimeLinkSubmit = (values: any) => {
+    setOpenOneTimeLink(false);
+    setDataGetUrl(null);
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    });
+
+    console.log({submit1TimeLink: values});
+
+    ///Next
+
+  }
+
   useEffect(() => {
     handleClearMultipleFileAndFolder();
   }, [dispatch, location]);
+
+  const handleClick = useCallback(
+    async (data: IMyCloudTypes) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: IMyCloudTypes) => {
+    setDataForEvent({
+      action: "preview",
+      data,
+    });
+  };
 
   return (
     <Fragment>
@@ -1359,13 +1459,13 @@ export function MyCloud() {
               <Box sx={{ mb: 2 }}>
                 {isMobile ? (
                   <FileCardSlider
-                    getCount={getCategory}
-                    countLoading={countLoading}
+                    fileCategory={dataFiles.data}
+                    countLoading={dataFiles.dataLoading}
                   />
                 ) : (
                   <MediaCard
-                    getCount={getCategory}
-                    countLoading={countLoading}
+                    fileCategory={dataFiles.data}
+                    countLoading={dataFiles.dataLoading}
                   />
                 )}
                 <MUI.DivFolders>
@@ -1418,7 +1518,7 @@ export function MyCloud() {
                           data={folder?.folders?.data}
                           total={folder?.folders.total}
                           dataSelector={dataSelector}
-                          handleEvent={async (action, data) => {
+                          handleEvent={async (action: string, data: any) => {
                             setGetValue(data);
                             setDataForEvent({
                               action,
@@ -1431,9 +1531,9 @@ export function MyCloud() {
                     </Box>
                   ) : (
                     <Fragment>
-                      <Box>
-                        <MUIFOLDER.FolderGrid>
-                          {folder?.folders?.data?.map((item, index) => {
+                      <MUIFOLDER.FolderGrid>
+                        {folder?.folders?.data?.map(
+                          (item: any, index: number) => {
                             return (
                               <Fragment key={index}>
                                 <FolderGridItem
@@ -1445,6 +1545,7 @@ export function MyCloud() {
                                   }
                                   id={item?._id}
                                   folder_name={item?.folder_name}
+                                  selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
                                   isOpenMenu={isOpenMenu}
                                   isPinned={item.pin ? true : false}
@@ -1456,7 +1557,7 @@ export function MyCloud() {
                                     handleMultipleFolderData
                                   }
                                   cardProps={{
-                                    onClick: (e) => {
+                                    onClick: (e: any) => {
                                       handleMultipleFolderData(item?._id);
                                       handleClickFolder(e, item);
                                     },
@@ -1473,7 +1574,9 @@ export function MyCloud() {
                                       ischecked: true,
                                     }),
                                     ...(dataSelector?.selectionFileAndFolderData?.find(
-                                      (el) => el?.id === item?._id,
+                                      (el: any) =>
+                                        el?.id === item?._id &&
+                                        el?.checkType === "folder",
                                     ) && {
                                       ishas: "true",
                                     }),
@@ -1483,11 +1586,10 @@ export function MyCloud() {
                                       return (
                                         <MenuDropdownItem
                                           key={index}
-                                          disabled={
-                                            item.file_id[0]?._id ||
-                                            item.parentkey[0]?._id
-                                              ? false
-                                              : menuItems.disabled
+                                          disabled={(item.file_id[0]?._id ||
+                                                item.parentkey[0]?._id)
+                                                  ? false
+                                                  : menuItems.disabled
                                           }
                                           className="menu-item"
                                           isPinned={item.pin ? true : false}
@@ -1513,50 +1615,50 @@ export function MyCloud() {
                                 />
                               </Fragment>
                             );
-                          })}
-                        </MUIFOLDER.FolderGrid>
+                          },
+                        )}
+                      </MUIFOLDER.FolderGrid>
 
-                        <Box
-                          sx={{
-                            mt: 4,
-                            display: "flex",
-                            justifyContent: "center",
-                            alignItems: "center",
-                          }}
-                        >
-                          {totalPages > folder?.folders?.data?.length && (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                position: "relative",
-                              }}
+                      <Box
+                        sx={{
+                          mt: 4,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        {totalPages > folder?.folders?.data?.length && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              position: "relative",
+                            }}
+                          >
+                            <Button
+                              endIcon={<ExpandMoreIcon />}
+                              sx={{ mt: 2 }}
+                              disabled={loading === true}
+                              size="small"
+                              variant="outlined"
+                              onClick={handleViewMoreFolder}
                             >
-                              <Button
-                                endIcon={<ExpandMoreIcon />}
-                                sx={{ mt: 2 }}
-                                disabled={loading === true}
-                                size="small"
-                                variant="outlined"
-                                onClick={handleViewMoreFolder}
-                              >
-                                Load more
-                              </Button>
-                              {loading && (
-                                <CircularProgress
-                                  size={24}
-                                  sx={{
-                                    color: green[500],
-                                    position: "absolute",
-                                    top: "50%",
-                                    left: "50%",
-                                    marginTop: "-12px",
-                                    marginLeft: "-12px",
-                                  }}
-                                />
-                              )}
-                            </Box>
-                          )}
-                        </Box>
+                              Load more
+                            </Button>
+                            {loading && (
+                              <CircularProgress
+                                size={24}
+                                sx={{
+                                  color: green[500],
+                                  position: "absolute",
+                                  top: "50%",
+                                  left: "50%",
+                                  marginTop: "-12px",
+                                  marginLeft: "-12px",
+                                }}
+                              />
+                            )}
+                          </Box>
+                        )}
                       </Box>
                     </Fragment>
                   )}
@@ -1573,6 +1675,7 @@ export function MyCloud() {
                     >
                       Files
                     </Typography>
+
                     <Typography
                       variant="h5"
                       sx={{
@@ -1596,7 +1699,7 @@ export function MyCloud() {
                           }}
                           data={mainFile}
                           total={total}
-                          handleEvent={(action, data) => {
+                          handleEvent={(action: string, data: any) => {
                             setDataForEvent({
                               data,
                               action,
@@ -1612,76 +1715,78 @@ export function MyCloud() {
                     <Box sx={{ mt: 4 }}>
                       {mainFile?.length > 0 && (
                         <FileCardContainer>
-                          {mainFile?.map((item, index) => {
-                            return (
-                              <Fragment key={index}>
-                                <FileCardItem
-                                  imagePath={
-                                    user?.newName +
-                                    "-" +
-                                    user?._id +
-                                    (item?.path
-                                      ? removeFileNameOutOfPath(item?.path)
-                                      : "") +
-                                    "/" +
-                                    item?.newFilename
-                                  }
-                                  user={user}
-                                  path={item?.path}
-                                  isCheckbox={true}
-                                  filePassword={item?.filePassword}
-                                  id={item?._id}
-                                  favouriteIcon={{
-                                    isShow: false,
-                                    handleFavouriteOnClick: async () =>
-                                      await handleFavourite(item),
-                                    isFavourite:
-                                      item?.favorite === 1 ? true : false,
-                                  }}
-                                  fileType={getFolderName(item?.fileType)}
-                                  handleSelect={handleMultipleFileData}
-                                  name={item?.filename}
-                                  newName={item?.newFilename}
-                                  cardProps={{
-                                    onDoubleClick: () => {
-                                      setGetValue(item);
-                                      setDataForEvent({
-                                        data: item,
-                                        action: "preview",
-                                      });
-                                    },
-                                  }}
-                                  menuItems={menuItems.map(
-                                    (menuItem, index) => {
-                                      return (
-                                        <MenuDropdownItem
-                                          key={index}
-                                          isFavorite={
-                                            item.favorite ? true : false
-                                          }
-                                          isPassword={
-                                            item.filePassword ||
-                                            item.access_password
-                                              ? true
-                                              : false
-                                          }
-                                          title={menuItem.title}
-                                          icon={menuItem.icon}
-                                          onClick={() => {
-                                            setDataForEvent({
-                                              data: item,
-                                              action: menuItem.action,
-                                            });
-                                            setGetValue(item);
-                                          }}
-                                        />
-                                      );
-                                    },
-                                  )}
-                                />
-                              </Fragment>
-                            );
-                          })}
+                          {mainFile?.map(
+                            (item: IMyCloudTypes, index: number) => {
+                              return (
+                                <Fragment key={index}>
+                                  <FileCardItem
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      (item?.path
+                                        ? removeFileNameOutOfPath(item?.path)
+                                        : "") +
+                                      "/" +
+                                      item?.newFilename
+                                    }
+                                    user={user}
+                                    selectType={"file"}
+                                    path={item?.path}
+                                    isCheckbox={true}
+                                    filePassword={item?.filePassword}
+                                    id={item?._id}
+                                    favouriteIcon={{
+                                      isShow: false,
+                                      handleFavouriteOnClick: async () =>
+                                        await handleFavourite(item),
+                                      isFavourite:
+                                        item?.favorite === 1 ? true : false,
+                                    }}
+                                    fileType={getFolderName(item?.fileType)}
+                                    handleSelect={handleMultipleFileData}
+                                    name={item?.filename}
+                                    newName={item?.newFilename}
+                                    cardProps={{
+                                      onClick: isMobile
+                                        ? async () => await handleClick(item)
+                                        : undefined,
+                                      onDoubleClick: !isMobile
+                                        ? () => handleDoubleClick(item)
+                                        : undefined,
+                                    }}
+                                    menuItems={menuItems.map(
+                                      (menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            key={index}
+                                            isFavorite={
+                                              item.favorite ? true : false
+                                            }
+                                            isPassword={
+                                              item.filePassword ||
+                                              item.access_password
+                                                ? true
+                                                : false
+                                            }
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                            onClick={() => {
+                                              setDataForEvent({
+                                                data: item,
+                                                action: menuItem.action,
+                                              });
+                                              setGetValue(item);
+                                            }}
+                                          />
+                                        );
+                                      },
+                                    )}
+                                  />
+                                </Fragment>
+                              );
+                            },
+                          )}
                         </FileCardContainer>
                       )}
                       {fileLoading && (
@@ -1702,7 +1807,8 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    fileViewMore < total &&
+                    // fileViewMore < total &&
+                    limitScroll < total &&
                     toggle === "grid" && (
                       <Box
                         sx={{
@@ -1732,27 +1838,6 @@ export function MyCloud() {
                     )}
                 </>
               </MUI.DivRecentFile>
-              {showPreview && (
-                <DialogPreviewFile
-                  open={openPreview}
-                  handleClose={handleClosePreview}
-                  onClick={() => {
-                    if (
-                      userPackage?.downLoadOption === "another" ||
-                      userPackage?.category === "free"
-                    ) {
-                      handleGetDownloadLink();
-                    } else {
-                      handleDownloadFile(dataForEvent.data);
-                    }
-                  }}
-                  filename={name}
-                  newFilename={newName}
-                  fileType={fileType}
-                  path={path}
-                  user={user}
-                />
-              )}
 
               {/* create share popup */}
               {openShare && (
@@ -1965,6 +2050,36 @@ export function MyCloud() {
         onConfirm={handleSubmitDecryptedPassword}
         onClose={handleCloseDecryptedPassword}
       />
+
+      <DialogPreviewFileSlide
+        open={openPreview}
+        handleClose={handleClosePreview}
+        data={dataForEvent.data}
+        user={user}
+        mainFile={mainFile}
+        propsStatus="mycloud"
+      />
+      {
+        openGetLink && dataForEvent.data &&
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      }
+      
+
+      {
+        openOneTimeLink && dataForEvent?.data && 
+        <DialogOneTimeLink
+          isOpen={setOpenOneTimeLink}
+          onClose={handleOneTimeLinkClose}
+          onCreate={handleOneTimeLinkSubmit}
+          data={dataForEvent?.data}
+        />
+
+      }
     </Fragment>
   );
 }

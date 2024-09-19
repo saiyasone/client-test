@@ -1,10 +1,10 @@
 import React, { Fragment, useState } from "react";
-import { FileIcon, defaultStyles } from "react-file-icon";
+import { FileIcon, FileIconProps, defaultStyles } from "react-file-icon";
 import ResponsivePagination from "react-responsive-pagination";
 import "styles/pagination.style.css";
 
 // material ui icon and component
-import { Box, Checkbox } from "@mui/material";
+import { Box, Checkbox, useMediaQuery } from "@mui/material";
 
 // component
 
@@ -17,6 +17,7 @@ import FileDataGrid from "components/file/FileDataGrid";
 import moment from "moment";
 import { combineOldAndNewFileNames, getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
+import { IMyCloudTypes } from "types/mycloudFileType";
 
 const CloudFilesDataGridContainer = styled("div")(() => ({
   height: "100%",
@@ -24,16 +25,20 @@ const CloudFilesDataGridContainer = styled("div")(() => ({
   flexDirection: "column",
 }));
 
-function CloudFileDataGrid(props) {
+function CloudFileDataGrid(props: any) {
   const [hover, setHover] = useState("");
   const [isPage, setIsPage] = useState(false);
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
   const [isLoaded, setIsloaded] = useState<any>(null);
+  const isMobile = useMediaQuery("(max-width:600px)");
+  const [styles, setStyles] = React.useState<
+    Record<string, Partial<FileIconProps>>
+  >({});
 
-  const handlePopperOpen = (event) => {
+  const handlePopperOpen = (event: any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data.find((r) => r._id === id);
+    const row = props.data.find((r: IMyCloudTypes) => r._id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
@@ -66,15 +71,16 @@ function CloudFileDataGrid(props) {
       headerName: "",
       editable: false,
       sortable: false,
-      width: 50,
-      renderCell: (params) => {
+      maxWidth: isMobile ? 40 : 70,
+      flex: 1,
+      renderCell: (params: { row: IMyCloudTypes }) => {
         const { _id } = params?.row || {};
 
         return (
           <Checkbox
             checked={
               !!props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
+                (el: IMyCloudTypes) => el?.id === _id,
               ) && true
             }
             aria-label={"checkbox" + _id}
@@ -87,7 +93,9 @@ function CloudFileDataGrid(props) {
       field: "filename",
       headerName: "Name",
       editable: false,
-      renderCell: (params) => {
+      minWidth: 120,
+      flex: 1,
+      renderCell: (params: { row: IMyCloudTypes }) => {
         return (
           <div
             style={{
@@ -104,9 +112,9 @@ function CloudFileDataGrid(props) {
             >
               <FileIcon
                 color="white"
-                extension={getFileType(params.row.filename)}
+                extension={getFileType(params.row.filename) ?? ""}
                 {...{
-                  ...defaultStyles[getFileType(params.row.filename) as string],
+                  ...styles[getFileType(params.row.filename) as string],
                 }}
               />
             </Box>
@@ -125,7 +133,6 @@ function CloudFileDataGrid(props) {
           </div>
         );
       },
-      flex: 1,
     },
     {
       field: "size",

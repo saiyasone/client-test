@@ -70,7 +70,7 @@ function ResetPassword(props) {
           setIsLoading(true);
           await resetPassword?.(values);
           setIsLoading(false);
-        } catch (error) {
+        } catch (error: any) {
           setIsLoading(false);
           const message = error.message || "Something went wrong";
 
@@ -104,7 +104,11 @@ function ResetPassword(props) {
             value={values.newPassword}
             error={Boolean(touched.newPassword && errors.newPassword)}
             fullWidth
-            helperText={touched.newPassword && errors.newPassword}
+            helperText={
+              touched.newPassword && errors.newPassword
+                ? String(errors.newPassword)
+                : undefined
+            }
             onBlur={handleBlur}
             onChange={handleChange}
             my={3}
@@ -137,7 +141,11 @@ function ResetPassword(props) {
             value={values.confirmPassword}
             error={Boolean(touched.confirmPassword && errors.confirmPassword)}
             fullWidth
-            helperText={touched.confirmPassword && errors.confirmPassword}
+            helperText={
+              touched.confirmPassword && errors.confirmPassword
+                ? String(errors.confirmPassword)
+                : undefined
+            }
             onBlur={handleBlur}
             onChange={handleChange}
             my={3}

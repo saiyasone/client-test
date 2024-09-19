@@ -73,7 +73,8 @@ const useStyles = makeStyles({
     fontStyle: "normal",
     fontWeight: 800,
     fontSize: "20px",
-    lineHeight: "24px",
+    lineHeight: "2px",
+    marginBottom: '15px',
     textDecoration:'underline',
     textDecorationColor:'rgb(255,255,255,0.6)',
     textDecorationThickness:'1px',
@@ -83,14 +84,14 @@ const useStyles = makeStyles({
     }
   },
   iconContainer: {
-    paddingTop: "20px",
-    paddingBottom: "15px",
+    paddingTop: "15px",
+    paddingBottom: "0px",
     textAlign: "center",
     "& button": {
       flex: "1 1 auto",
       border: "none",
       textAlign: "center",
-      margin: "5px",
+      margin: "3px",
     },
   },
   closeImg: {
@@ -302,7 +303,7 @@ function ShareSocial(props: IndexPropsType) {
           {title}
         </h1>
       )}
-      <div className={classes.iconContainer} style={style?.iconContainer}>
+      <div className={classes.iconContainer}>
           {Array.isArray(socialTypes) &&
             socialTypes.map((type, idx) => (
               <React.Fragment key={"social_item_" + idx}>

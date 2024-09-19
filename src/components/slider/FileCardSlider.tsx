@@ -3,60 +3,22 @@ import "swiper/css";
 import { Swiper, SwiperSlide } from "swiper/react";
 import CardHeadMobile from "./CardHeadMobile";
 import cardNumber from "./cardNumber";
+import { useEffect, useRef } from "react";
 
-function FileCardSlider({ ...props }) {
-  let application = 0;
-  let image = 0;
-  let video = 0;
-  let audio = 0;
-  let text = 0;
-  let other = 0;
+interface IFilesCategoryTypes {
+  fileCategory: any;
+  countLoading: boolean;
+}
+function FileCardSlider({ fileCategory, countLoading }: IFilesCategoryTypes) {
+  const objV1 = {
+    application: fileCategory.documentFileData.totalSize,
+    image: fileCategory.imageFileData.totalSize,
+    video: fileCategory.videoFileData.totalSize,
+    audio: fileCategory.audioFileData.totalSize,
+    text: fileCategory.textFileData.totalSize,
+    other: fileCategory.otherFileData.totalSize,
+  };
 
-  for (
-    let i = 0;
-    i < props?.getCount?.getFileCategoryDetails?.data?.length;
-    i++
-  ) {
-    if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "application"
-    ) {
-      application = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "image"
-    ) {
-      image = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "video"
-    ) {
-      video = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "audio"
-    ) {
-      audio = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "text"
-    ) {
-      text = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    } else if (
-      props.getCount.getFileCategoryDetails?.data[i]?.fileType?.split(
-        "/",
-      )?.[0] === "" ||
-      null
-    ) {
-      other = props.getCount.getFileCategoryDetails?.data[i]?.size;
-    }
-  }
-  const obj = { application, image, video, audio, text, other };
   return (
     <div>
       <Box>
@@ -64,10 +26,11 @@ function FileCardSlider({ ...props }) {
           {cardNumber.map((card, index) => (
             <SwiperSlide key={index}>
               <CardHeadMobile
-                data={obj}
+                data={objV1}
                 icon={card.icon}
                 title={card.title}
                 type={card.type}
+                isLoading={countLoading}
               />
             </SwiperSlide>
           ))}

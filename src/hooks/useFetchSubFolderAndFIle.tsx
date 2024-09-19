@@ -71,6 +71,7 @@ const useFetchSubFolderAndFile = ({
                   };
                 }) || [],
               );
+              console.log(data?.folders?.total)
               setFolderTotal(data?.folders?.total);
               setFolderDataFound(true);
             } else {

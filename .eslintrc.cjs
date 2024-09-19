@@ -20,5 +20,7 @@ module.exports = {
       "error",
       { varsIgnorePattern: "^_", argsIgnorePattern: "^_" },
     ],
+    /* below code hide console*/
+    "no-console": process.env.NODE_ENV === "production" ? "error" : "off",
   },
 };

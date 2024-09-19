@@ -10,7 +10,6 @@ import {
 import he from "he";
 import { CSSProperties, Fragment, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import useAuth from "../../../hooks/useAuth";
 import * as MUI from "./styles/chat.style";
 import { ReplyContainer, TicketContainer } from "./styles/createTicket.style";
 import { HeaderLayout } from "./styles/ticket2.style";
@@ -41,7 +40,6 @@ function ReplyTicket() {
   const [isOpen, setIsOpen] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const { paramId } = useParams();
-  const { user }: any = useAuth();
 
   const dispatch = useDispatch();
   const [updateCloseTicket] = useMutation(MUTATION_UPDATE_TICKET_TYPE);
@@ -60,6 +58,11 @@ function ReplyTicket() {
   const chatSelector = useSelector(chatMessageSelector);
 
   const handleReloading = () => manageChat.customChatMessage();
+
+  function handleEmit(message?: string) {
+    const socket = socketIO();
+    socket.emit("newMessage", { customerId: paramId, message });
+  }
 
   function handleOpen() {
     if (manageReply.dataStatus === "close") return;
@@ -160,9 +163,10 @@ function ReplyTicket() {
     function getMessageServer() {
       const socket = socketIO();
       try {
-        socket.emit("joinRoom", parseInt(user?._id));
+        socket.emit("joinRoom", paramId);
         socket.on("newMessage", (data) => {
           if (!data) return;
+
           handleReloading();
         });
       } catch (error) {
@@ -174,7 +178,7 @@ function ReplyTicket() {
       };
     }
     getMessageServer();
-  }, []);
+  }, [paramId]);
 
   return (
     <Fragment>
@@ -219,7 +223,6 @@ function ReplyTicket() {
               <MUI.ChatHeaderWrapper>
                 <MUI.ChatHeaderLeft>
                   <Box className="admin-logo">
-                    {/* <img src={iconPerson} alt="icon-person" /> */}
                     <Typography variant="h4">V</Typography>
                   </Box>
 
@@ -278,6 +281,7 @@ function ReplyTicket() {
                         dataReply={userCreate}
                         isAdmin={false}
                         handleReloading={handleReloading}
+                        handleEmit={handleEmit}
                       />
                     </MUI.ChatMessageReplyForm>
                   )}

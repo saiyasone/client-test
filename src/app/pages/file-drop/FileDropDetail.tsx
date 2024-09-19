@@ -482,7 +482,7 @@ function FileDropDetail() {
       }
     } catch (err) {
       resetDataForEvent();
-      errorMessage("Sorry! Something went wrong. Please try again!");
+      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
     }
   };
 
@@ -664,12 +664,6 @@ function FileDropDetail() {
                               data?.newPath || "";
                           const publicPath = "public/" + data.newFilename;
 
-                          // console.log(
-                          //   data?.createdBy?._id === "0"
-                          //     ? publicPath
-                          //     : privatePath,
-                          // );
-
                           return (
                             <FileCardItem
                               cardProps={{
@@ -691,6 +685,7 @@ function FileDropDetail() {
                               }
                               user={user}
                               isCheckbox={true}
+                              selectType={"file"}
                               fileType={getShortFileTypeFromFileType(
                                 data.fileType,
                               )}

@@ -24,6 +24,7 @@ export const QUERY_SHARE = gql`
           _id
           email
           newName
+          profile
           firstName
           lastName
         }
@@ -70,16 +71,16 @@ export const QUERY_SHARE = gql`
         createdAt
         fromAccount {
           _id
-          username
           email
           newName
         }
         toAccount {
           _id
           email
-          username
+          newName
           firstName
           lastName
+          profile
         }
         accessKey
         isPublic
@@ -173,9 +174,6 @@ export const QUERY_FILE_SHARE_PUBLIC = gql`
     filePublic(ID: $id) {
       data {
         _id
-        type_id {
-          _id
-        }
         folder_id {
           _id
         }
@@ -235,8 +233,11 @@ export const MUTATION_UPDATE_SHARE = gql`
 
 export const MUTATION_CREATE_SHARE_FROM_SHARING = gql`
   mutation HandleOnlyShare($body: OnlyShareInput) {
-    handleOnlyShare(body: $body) {
+    createShare(body: $body) {
       _id
     }
+    # handleOnlyShare(body: $body) {
+    #   _id
+    # }
   }
 `;
