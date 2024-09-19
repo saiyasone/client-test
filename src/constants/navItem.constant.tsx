@@ -157,30 +157,30 @@ const navItems: any = [
   //   title: "",
   //   pages: Uppy,
   // },
-  {
-    title: "SHORT",
-    pages: null,
-  },
-  {
-    title: "",
-    pages: feedForyou,
-  },
-  {
-    title: "",
-    pages: feedExplore,
-  },
-  {
-    title: "",
-    pages: feedFollowing,
-  },
-  {
-    title: "",
-    pages: feedFriend,
-  },
-  {
-    title: "",
-    pages: feedProfile,
-  },
+  // {
+  //   title: "SHORT",
+  //   pages: null,
+  // },
+  // {
+  //   title: "",
+  //   pages: feedForyou,
+  // },
+  // {
+  //   title: "",
+  //   pages: feedExplore,
+  // },
+  // {
+  //   title: "",
+  //   pages: feedFollowing,
+  // },
+  // {
+  //   title: "",
+  //   pages: feedFriend,
+  // },
+  // {
+  //   title: "",
+  //   pages: feedProfile,
+  // },
 ];
 
 export default navItems;
