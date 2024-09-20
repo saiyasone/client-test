@@ -499,6 +499,10 @@ function ExtendFolder() {
     const url = value?.url;
 
     const base64URL = Base64.encodeURI(url);
+    setDataForEvent((prev) => ({
+      ...prev,
+      action: "",
+    }));
     navigate(`/folder/${base64URL}`);
   };
   useEffect(() => {

@@ -831,55 +831,55 @@ function ShareWithMe() {
 
   const handleDeleteShare = async () => {
     try {
-      await deleteShareFileAndFolder({
-        variables: {
-          id: dataForEvent.data?._id,
-          email: dataForEvent.data?.toAccount?.email,
-        },
+      // await deleteShareFileAndFolder({
+      //   variables: {
+      //     id: dataForEvent.data?._id,
+      //     email: dataForEvent.data?.toAccount?.email,
+      //   },
 
-        onCompleted: async () => {
-          if (dataForEvent.data?.folderId?._id) {
-            successMessage("Delete folder successful !", 2000);
-          } else {
-            successMessage("Delete file successful !", 2000);
-          }
-          queryGetShare();
-        },
-      });
-      // if (dataForEvent.data?.folderId?._id) {
-      //   // folder
-      //   await updateFolder({
-      //     variables: {
-      //       where: {
-      //         _id: parseInt(dataForEvent.data.folderId._id),
-      //       },
-      //       data: {
-      //         status: "deleted",
-      //       },
-      //     },
-      //     onCompleted: () => {
-      //       queryGetShare();
+      //   onCompleted: async () => {
+      //     if (dataForEvent.data?.folderId?._id) {
       //       successMessage("Delete folder successful !", 2000);
-      //     },
-      //   });
-      // } else {
-      //   // file
-      //   await updateFile({
-      //     variables: {
-      //       where: {
-      //         _id: parseInt(dataForEvent.data.fileId._id),
-      //       },
-      //       data: {
-      //         status: "deleted",
-      //       },
-      //     },
-
-      //     onCompleted: () => {
-      //       queryGetShare();
+      //     } else {
       //       successMessage("Delete file successful !", 2000);
-      //     },
-      //   });
-      // }
+      //     }
+      //     queryGetShare();
+      //   },
+      // });
+      if (dataForEvent.data?.folderId?._id) {
+        // folder
+        await updateFolder({
+          variables: {
+            where: {
+              _id: parseInt(dataForEvent.data.folderId._id),
+            },
+            data: {
+              status: "deleted",
+            },
+          },
+          onCompleted: () => {
+            queryGetShare();
+            successMessage("Delete folder successful !", 2000);
+          },
+        });
+      } else {
+        // file
+        await updateFile({
+          variables: {
+            where: {
+              _id: parseInt(dataForEvent.data.fileId._id),
+            },
+            data: {
+              status: "deleted",
+            },
+          },
+
+          onCompleted: () => {
+            queryGetShare();
+            successMessage("Delete file successful !", 2000);
+          },
+        });
+      }
     } catch (error: any) {
       errorMessage(error.message, 3000);
     }

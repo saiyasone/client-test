@@ -1609,22 +1609,6 @@ export default function ShowUpload(props: Props) {
                 const speedV1 = fileStates[index]?.uploadSpeed || 0;
                 const cancelStatusV1 = fileStates[index]?.cancel || false;
 
-                // const progress = fileProgress[index] || 0;
-                // const upload = uploads.find(
-                //   (upload) => upload?.file?.name === val.name,
-                // );
-
-                // const isFilePresignedSuccess = upload
-                //   ? presignSuccesFiles[upload.uploadId]?.finished || false
-                //   : false;
-                // const progressTab = upload
-                //   ? progressBar[upload.uploadId]?.total || 0
-                //   : 0;
-                // const timeTab = upload ? fileTimes[upload.uploadId]?.total : 0;
-                // const speedTab = upload
-                //   ? fileSpeeds[upload.uploadId]?.total
-                //   : 0;
-
                 return (
                   <MUI.ShowFileUploadBox key={index}>
                     <MUI.ShowFileDetailBox>
