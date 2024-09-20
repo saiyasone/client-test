@@ -1,6 +1,16 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice } from "@reduxjs/toolkit";
+import { ISelectMultipleType } from "types/selectMultipleType";
 
-const initialState: any = {
+type Module = {
+  checkboxFileAndFolder: CheckboxState;
+};
+type CheckboxState = {
+  isLoading: boolean;
+  getLinkLoading: boolean;
+  selectionFileAndFolderData: ISelectMultipleType[];
+  selectionDataPasswords: any[];
+};
+const initialState: CheckboxState = {
   isLoading: false,
   getLinkLoading: false,
   selectionFileAndFolderData: [],
@@ -58,7 +68,7 @@ export const {
   setRemoveDataPassword,
 } = checkboxFileAndFolderSlice.actions;
 
-export const checkboxFileAndFolderSelector = (state: any) =>
+export const checkboxFileAndFolderSelector = (state: Module) =>
   state.checkboxFileAndFolder;
 
 export default checkboxFileAndFolderSlice.reducer;

@@ -370,7 +370,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
       },
     );
   };
-  
+
   const handleGetLinkShareAnother = () => {
     dispatch(checkboxAction.setIsLoading(true));
     manageFileAction.handleMultipleShareGetLinks(
@@ -648,11 +648,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         let hasFile = false;
         let hasFolder = false;
         dataSelector.selectionFileAndFolderData?.forEach((item) => {
-          if (item.checkType === "folder" && item.checkType === "file") {
-            setMultipleTab("multiple");
-          } else if (item.checkType === "folder") {
+          if (item.checkType === "folder") {
             hasFolder = true;
-          } else if (item.checkType === "file") {
+          }
+          if (item.checkType === "file") {
             hasFile = true;
           }
         });

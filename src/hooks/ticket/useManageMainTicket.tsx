@@ -38,6 +38,7 @@ const useManageMainTicket = ({ filter }) => {
               createdAtBetween: [createdAt.startDate, createdAt.endDate],
             }),
         },
+        request: "client",
       },
     });
   };

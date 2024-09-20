@@ -6,8 +6,15 @@ export const QUERY_CHAT_MESSAGE = gql`
     $limit: Int
     $orderBy: OrderByFolderAndFileInput
     $skip: Int
+    $request: Request
   ) {
-    tickets(where: $where, limit: $limit, orderBy: $orderBy, skip: $skip) {
+    tickets(
+      where: $where
+      limit: $limit
+      orderBy: $orderBy
+      skip: $skip
+      request: $request
+    ) {
       total
       data {
         _id

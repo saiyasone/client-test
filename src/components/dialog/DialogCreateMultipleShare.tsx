@@ -7,7 +7,7 @@ import { createTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
 import {
   MUTATION_CREATE_SHARE,
-  MUTATION_CREATE_SHARE_FROM_SHARING,
+  // MUTATION_CREATE_SHARE_FROM_SHARING,
 } from "api/graphql/share.graphql";
 import ActionCreateShare from "components/share/ActionCreateShare";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
@@ -35,13 +35,21 @@ const TextInputdShare = styled("div")(({ theme }) => ({
 }));
 const BoxTitle = styled("div")({});
 
-const DialogCreateMultipleShare = (props) => {
+type Props = {
+  open?: boolean;
+  data?: string;
+  mainShare?: boolean;
+  dataSelector?: any[];
+
+  onClose?: () => void;
+};
+const DialogCreateMultipleShare = (props: Props) => {
   const { open, data, onClose, dataSelector } = props;
 
   const [createShare] = useMutation(MUTATION_CREATE_SHARE);
-  const [createShareFromSharing] = useMutation(
-    MUTATION_CREATE_SHARE_FROM_SHARING,
-  );
+  // const [createShareFromSharing] = useMutation(
+  //   MUTATION_CREATE_SHARE_FROM_SHARING,
+  // );
   const [statusShare, setStatusShare] = React.useState("view");
   const [isGlobals, _setIsGlobals] = React.useState("private");
   const isMobile = useMediaQuery("(max-width:768px)");
@@ -66,16 +74,16 @@ const DialogCreateMultipleShare = (props) => {
 
   const handleShareStatus = async () => {
     try {
-      if (dataSelector?.length > 0) {
+      if (dataSelector!.length > 0) {
         if (chipData.length > 0) {
           setIsLoading(true);
-          const sharePromise = dataSelector?.map(async (item) => {
+          const sharePromise = dataSelector!.map(async (item) => {
             if (item.checkType === "folder") {
               for (let i = 0; i < chipData.length; i++) {
                 await createShare({
                   variables: {
                     body: {
-                      folderId: item?.id,
+                      folderId: props?.mainShare ? item.dataId : item?.id,
                       toAccount: chipData[i],
                       isPublic: isGlobals,
                       permission: statusShare,
@@ -112,7 +120,7 @@ const DialogCreateMultipleShare = (props) => {
                 await createShare({
                   variables: {
                     body: {
-                      fileId: item?.id,
+                      fileId: props?.mainShare ? item.dataId : item?.id,
                       toAccount: chipData[i],
                       isPublic: isGlobals,
                       permission: statusShare,
@@ -153,9 +161,9 @@ const DialogCreateMultipleShare = (props) => {
           await Promise.all(sharePromise);
           successMessage("Share file successful", 3000);
           await handleClearChipData();
-          await onClose();
+          await onClose?.();
         } else {
-          onClose();
+          onClose?.();
         }
       } else {
         onClose?.();
@@ -179,7 +187,7 @@ const DialogCreateMultipleShare = (props) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} keepMounted fullWidth={true}>
+    <Dialog open={open!} onClose={onClose} keepMounted fullWidth={true}>
       <Box
         sx={{
           [theme.breakpoints.up("sm")]: {
@@ -243,7 +251,7 @@ const DialogCreateMultipleShare = (props) => {
                 type="button"
                 variant="contained"
                 color="greyTheme"
-                onClick={() => onClose()}
+                onClick={onClose}
               >
                 Done
               </Button>
