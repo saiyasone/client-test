@@ -103,12 +103,12 @@ const DialogOneTimeLink = (props) => {
     const handleGenerate = async() => {
         if(!expireDays)
         {
-            errorMessage('Please, select expire date111', 3000);
+            errorMessage('Please, select expire date', 3000);
             return false;
         }
 
         if(!expiredAt){
-            errorMessage('Please, select expire date1', 3000);
+            errorMessage('Please, select expire date', 3000);
             return false;
         }
 
