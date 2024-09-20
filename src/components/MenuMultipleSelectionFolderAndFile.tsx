@@ -91,6 +91,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
     onPressLockData,
     onPressSuccess,
     onPressDeleteShare,
+    onOneTimeLinks,
     country,
     device,
   } = props;
@@ -223,7 +224,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
         handleDeleteFileDrop();
         break;
       case "one-time-link":
-        handleOneTimeLinkMultiFiles();
+        onOneTimeLinks();
         break;
     }
   };
@@ -582,10 +583,6 @@ function MenuMultipleSelectionFolderAndFile(props) {
     }
   };
 
-  const handleOneTimeLinkMultiFiles = async() => {
-    onPressSuccess(true);
-  }
-
   // Function to handle Escape key press
   const handleEscKey = (event: KeyboardEvent): void => {
     if (event.key === "Escape") {
@@ -843,6 +840,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                             item.action === "folder-download" ||
                                             item.action === "password" ||
                                             item.action === "delete" ||
+                                            item.action === "one-time-link" ||
                                             item.action === "share") &&
                                           dataSelector?.selectionFileAndFolderData?.some(
                                             (selector) =>

@@ -119,7 +119,7 @@ const DialogOneTimeLink = (props) => {
             folders.map((folder)=>(
                 data.push({
                     type: 'folder',
-                    folderId: folder?._id,
+                    folderId: folder?._id || folder?.id,
                     expiredAt,
                     password: password
                 })
@@ -143,7 +143,7 @@ const DialogOneTimeLink = (props) => {
             errorMessage('Please, can not get source to create Url.', 3000);
             return false;
         }
-        
+
         return await createOneTimeLink({
             variables: {
                 input: {
@@ -254,7 +254,7 @@ const DialogOneTimeLink = (props) => {
         setExpiredAt('');
         setExpireDays(7);
         setStep(1);
-        onCreate({generatedLink});
+        onCreate();
     }
 
     async function copyTextToClipboard(link: string) {
@@ -281,7 +281,7 @@ const DialogOneTimeLink = (props) => {
 
         if(Array.isArray(data)){
             data.forEach((value)=>{
-                if(data && value?.folder_type === 'folder'){
+                if(value && (value?.folder_type || value?.checkType) === 'folder'){
                     setFolders((prevFolders) => [...prevFolders, value]);
                 }
                 else{
@@ -291,7 +291,7 @@ const DialogOneTimeLink = (props) => {
         }
         else
         {
-            if(data && data?.folder_type === 'folder'){
+            if(data && (data?.folder_type || data?.checkType) === 'folder'){
                 setFolders((prevFolders) => [...prevFolders, data]);
             }
             else{
@@ -363,16 +363,16 @@ const DialogOneTimeLink = (props) => {
                                             >
                                             <IconFolderContainer>
                                             {
-                                                item?.total_size > 0 ? (
+                                                (item?.total_size || item?.totalSize) > 0 ? (
                                                     <FolderNotEmptyIcon />
                                                 ) : (
                                                     <FolderEmptyIcon />
                                                 )
                                             }
                                             </IconFolderContainer>
-                                            {item?.folder_name || item?._id}
+                                            {item?.folder_name || item?.name || item?.newFilename || item?._id}
                                             </div>
-                                            <Typography>{convertBytetoMBandGB(item?.total_size)}</Typography>
+                                            <Typography>{convertBytetoMBandGB(item?.total_size || item?.totalSize)}</Typography>
                                         </Box>
 
                                     {
@@ -406,9 +406,9 @@ const DialogOneTimeLink = (props) => {
                                                     userId={user?._id}
                                                 />
                                             </Box>
-                                            {item?.filename?.length <= 15 ? item?.filename : item?.filename?.substring(0, 9)+'...'+item?.filename?.substring(item?.filename?.length-6, item?.filename?.length)}
+                                            {item?.name || item?.newFilename?.length <= 15 ? item?.newFilename : item?.newFilename?.substring(0, 9)+'...'+item?.newFilename?.substring(item?.newFilename?.length-6, item?.newFilename?.length)}
                                             </div>
-                                            <Typography>{convertBytetoMBandGB(item?.size)}</Typography>
+                                            <Typography>{convertBytetoMBandGB(item?.size || item?.totalSize)}</Typography>
                                         </Box>
                                         {
                                             files?.length > 1 && ((index + 1) < files?.length) &&
@@ -593,9 +593,6 @@ const DialogOneTimeLink = (props) => {
                                                 "workspace",
                                                 ]}
                                                 url={generatedLink}
-                                                onSocialButtonClicked={(buttonName: string) => {
-                                                console.log(`${buttonName} clicked`);
-                                                }}
                                                 title="Social Media"
                                             />
                                             </Typography>

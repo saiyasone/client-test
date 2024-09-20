@@ -321,6 +321,7 @@ export function MyCloud() {
           action: "",
         };
       });
+
       setShowEncryptPassword(false);
       setOpenShare(true);
     }
@@ -1014,8 +1015,6 @@ export function MyCloud() {
       };
     });
 
-    console.log({values});
-
     setOpenGetLink(false);
   }
 
@@ -1216,7 +1215,6 @@ export function MyCloud() {
       }
       case "one-time-link":{
         setEventClick("one-time-link");
-
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
@@ -1226,6 +1224,44 @@ export function MyCloud() {
       }
     }
   };
+
+  const handleOneTimeLinkMultiFiles = () =>{
+    resetDataForEvent();
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0)
+    {
+      setEventClick("one-time-link");
+
+      for (let i = dataSelector.selectionFileAndFolderData.length - 1; i >= 0; i--) {
+        const item = dataSelector.selectionFileAndFolderData[i];
+        if (item?.checkType === "folder" && item?.totalSize <= 0) {
+          dataSelector.selectionFileAndFolderData.splice(i, 1);
+        }
+      }
+      
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+
+        return {
+          ...prev,
+          data: data
+        }
+      })
+      
+      setOpenOneTimeLink(true);
+    }
+  }
 
   // favourite function
   const handleFavourite = async (data: IMyCloudTypes) => {
@@ -1368,7 +1404,7 @@ export function MyCloud() {
     setOpenOneTimeLink(false);
   }
 
-  const handleOneTimeLinkSubmit = (values: any) => {
+  const handleOneTimeLinkSubmit = () => {
     setOpenOneTimeLink(false);
     setDataGetUrl(null);
     setDataForEvent((prev: any)=>{
@@ -1377,11 +1413,6 @@ export function MyCloud() {
         action: ""
       }
     });
-
-    console.log({submit1TimeLink: values});
-
-    ///Next
-
   }
 
   useEffect(() => {
@@ -1425,6 +1456,7 @@ export function MyCloud() {
               onPressShare={() => {
                 setShareMultipleDialog(true);
               }}
+              onOneTimeLinks={handleOneTimeLinkMultiFiles}
               onPressLockData={handleOpenMultiplePassword}
               onPressSuccess={() => {
                 queryFolder();
@@ -2071,12 +2103,12 @@ export function MyCloud() {
       
 
       {
-        openOneTimeLink && dataForEvent?.data && 
+        openOneTimeLink && dataForEvent?.data &&
         <DialogOneTimeLink
           isOpen={setOpenOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
-          data={dataForEvent?.data}
+          data={dataForEvent?.data }
         />
 
       }
