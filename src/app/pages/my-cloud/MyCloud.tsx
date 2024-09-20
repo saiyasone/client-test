@@ -1007,7 +1007,7 @@ export function MyCloud() {
   const handleGenerateGetLink = (values) => {
     //not complete => waiting API
     //Need to check in other functions for getLink event fire
-    setDataGetUrl(dataForEvent.data);
+    setDataGetUrl(null);
     setDataForEvent((prev: any) => {
       return {
         ...prev,
@@ -1225,19 +1225,40 @@ export function MyCloud() {
     }
   };
 
+  const handleGetLinkMultipe = () => {
+    resetDataForEvent();
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0){
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+  
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+  
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+  
+        return {
+          ...prev,
+          data: data
+        }
+      });
+
+      setOpenGetLink(true);
+    }
+  }
+
   const handleOneTimeLinkMultiFiles = () =>{
     resetDataForEvent();
     
     if(dataSelector.selectionFileAndFolderData?.length > 0)
     {
       setEventClick("one-time-link");
-
-      for (let i = dataSelector.selectionFileAndFolderData.length - 1; i >= 0; i--) {
-        const item = dataSelector.selectionFileAndFolderData[i];
-        if (item?.checkType === "folder" && item?.totalSize <= 0) {
-          dataSelector.selectionFileAndFolderData.splice(i, 1);
-        }
-      }
       
       setDataForEvent((prev)=>{
         const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
@@ -1457,6 +1478,7 @@ export function MyCloud() {
                 setShareMultipleDialog(true);
               }}
               onOneTimeLinks={handleOneTimeLinkMultiFiles}
+              onManageLink={handleGetLinkMultipe}
               onPressLockData={handleOpenMultiplePassword}
               onPressSuccess={() => {
                 queryFolder();

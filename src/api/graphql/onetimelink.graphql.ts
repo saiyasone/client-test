@@ -8,6 +8,7 @@ export const CREATE_ONE_TIME_LINK = gql`mutation CreateOneTimeLink($input: Creat
       status
       createdBy
       password
+      expiredAt
     }
   }`;
 

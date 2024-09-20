@@ -92,6 +92,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
     onPressSuccess,
     onPressDeleteShare,
     onOneTimeLinks,
+    onManageLink,
     country,
     device,
   } = props;
@@ -201,6 +202,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "get link":
+        // handleGetLink();
         handleGetLink();
         break;
 
@@ -306,28 +308,30 @@ function MenuMultipleSelectionFolderAndFile(props) {
   };
 
   const handleGetLink = () => {
-    dispatch(checkboxAction.setIsGetLinkLoading(true));
-    manageFileAction.handleMultipleGetLinks(
-      {
-        dataMultiple: dataSelector?.selectionFileAndFolderData,
-      },
-      {
-        onSuccess: async (result) => {
-          dispatch(checkboxAction.setIsGetLinkLoading(false));
-          await copyTextToClipboard(result.shortLink);
-          successMessage("Link is copied", 3000);
-          handleClearFile();
-        },
-        onFailed: (error) => {
-          dispatch(checkboxAction.setIsGetLinkLoading(false));
-          const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
-          errorMessage(
-            manageGraphqlError.handleErrorMessage(cutErr) as string,
-            3000,
-          );
-        },
-      },
-    );
+    onManageLink();
+    // alert('gggg')
+    // dispatch(checkboxAction.setIsGetLinkLoading(true));
+    // manageFileAction.handleMultipleGetLinks(
+    //   {
+    //     dataMultiple: dataSelector?.selectionFileAndFolderData,
+    //   },
+    //   {
+    //     onSuccess: async (result) => {
+    //       dispatch(checkboxAction.setIsGetLinkLoading(false));
+    //       await copyTextToClipboard(result.shortLink);
+    //       successMessage("Link is copied", 3000);
+    //       handleClearFile();
+    //     },
+    //     onFailed: (error) => {
+    //       dispatch(checkboxAction.setIsGetLinkLoading(false));
+    //       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+    //       errorMessage(
+    //         manageGraphqlError.handleErrorMessage(cutErr) as string,
+    //         3000,
+    //       );
+    //     },
+    //   },
+    // );
   };
 
   const handleGetLinkAnother = () => {
