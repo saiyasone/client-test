@@ -69,8 +69,8 @@ const DialogOneTimeLink = (props) => {
     const [isShared, setIsShared] = useState(false);
 
     const [createOneTimeLink] = useMutation(CREATE_ONE_TIME_LINK);
-    const [getOneTimeLink] = useLazyQuery(GET_ONE_TIME_LINK,{fetchPolicy:'no-cache'});
-    const [burnOneTimeLink] = useLazyQuery(BURN_ONE_TIME_LINK,{fetchPolicy:'no-cache'});
+    const [getOneTimeLink] = useLazyQuery(GET_ONE_TIME_LINK);
+    const [burnOneTimeLink] = useLazyQuery(BURN_ONE_TIME_LINK);
 
     const resetAll = () => {
         setExpireDays(7);
@@ -131,7 +131,7 @@ const DialogOneTimeLink = (props) => {
             files.map((file)=>(
                 data.push({
                     type: 'file',
-                    fileId: file?._id,
+                    fileId: file?._id || file?.id,
                     expiredAt,
                     password: password
                 })
