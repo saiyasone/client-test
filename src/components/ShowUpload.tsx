@@ -969,7 +969,7 @@ export default function ShowUpload(props: Props) {
 
                       setFolderProgressMap((prev) => ({
                         ...prev,
-                        [folderKey]: totalProgress,
+                        [folderKey]: totalProgress >= 100 ? 100 : totalProgress,
                       }));
                     },
                     cancelToken: source.token,
