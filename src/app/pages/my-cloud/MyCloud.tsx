@@ -1051,7 +1051,7 @@ export function MyCloud() {
           setDataForEvent((prev: any) => {
             return {
               ...prev,
-              action: "",
+              action: action,
             };
           });
         }
