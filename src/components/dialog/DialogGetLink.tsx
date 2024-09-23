@@ -19,7 +19,7 @@ import FolderEmptyIcon from "assets/images/empty/folder-empty.svg?react";
 import FolderNotEmptyIcon from "assets/images/empty/folder-not-empty.svg?react";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import ImageComponent from "components/getImage";
-import { removeFileNameOutOfPath } from "utils/file.util";
+import { cutFileName, removeFileNameOutOfPath } from "utils/file.util";
 import { errorMessage, successMessage } from "utils/alert.util";
 import moment from "moment";
 import QRCode from "react-qr-code";
@@ -109,12 +109,12 @@ const DialogOneTimeLink = (props) => {
 
   const handleGenerate = async () => {
     if (!expireDays) {
-      errorMessage("Please, select expire date111", 3000);
+      errorMessage("Please, select expire date", 3000);
       return false;
     }
 
     if (!expiredAt) {
-      errorMessage("Please, select expire date1", 3000);
+      errorMessage("Please, select expire date", 3000);
       return false;
     }
 
@@ -135,7 +135,7 @@ const DialogOneTimeLink = (props) => {
       files.map((file) =>
         data.push({
           type: "file",
-          fileId: file?._id,
+          fileId: file?._id || file?.id,
           expiredAt,
           password: password,
         }),
@@ -380,14 +380,9 @@ const DialogOneTimeLink = (props) => {
                                     // userId={user?._id}
                                   />
                                 </Box>
-                                {item?.name || item?.newFilename?.length <= 15
-                                  ? item?.newFilename
-                                  : item?.newFilename?.substring(0, 9) +
-                                    "..." +
-                                    item?.newFilename?.substring(
-                                      item?.newFilename?.length - 6,
-                                      item?.newFilename?.length,
-                                    )}
+                                {item.name
+                                  ? cutFileName(item.name, 20)
+                                  : cutFileName(item?.filename || "", 20)}
                               </div>
                               <Typography>
                                 {convertBytetoMBandGB(
