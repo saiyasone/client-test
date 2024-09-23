@@ -86,7 +86,6 @@ function ExtendShare() {
   const parentFolderUrl: any = Base64.decode(params.id);
   const { refreshAuto } = useRefreshState();
 
-
   const handleToggle = (value) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
@@ -117,8 +116,6 @@ function ExtendShare() {
     userAuth,
   );
 
-  console.log(parentFolder?._id);
-  
   useEffect(() => {
     if (fetchSubFoldersAndFiles.data) {
       setFileshare(fetchSubFoldersAndFiles?.data?.files?.data);
@@ -827,7 +824,6 @@ function ExtendShare() {
     const selectOptions = fetchSubFoldersAndFiles.data?.folders?.data?.find(
       (el) => el?._id === data,
     );
-    console.log(selectOptions);
 
     if (selectOptions) {
       dispatch(

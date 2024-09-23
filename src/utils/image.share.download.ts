@@ -26,7 +26,7 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
 
       const file = new File([blob], `${fileName}.jpg`, { type: 'image/jpeg' });
   
-      if (navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
+      if (!navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
        
         await navigator.share({
           title: fileName,
@@ -77,22 +77,29 @@ export const handleDownloadQRCode = (event: React.MouseEvent<HTMLButtonElement>,
   canvas.width = canvasWidth;
   canvas.height = canvasHeight;
 
-  if(!ctx){
+  if (!ctx) {
     return;
   }
 
   function drawRoundedRect(ctx, x, y, width, height, radius) {
-      ctx.beginPath();
-      ctx.moveTo(x + radius, y);
-      ctx.arcTo(x + width, y, x + width, y + height, radius);
-      ctx.arcTo(x + width, y + height, x, y + height, radius);
-      ctx.arcTo(x, y + height, x, y, radius);
-      ctx.arcTo(x, y, x + width, y, radius);
-      ctx.closePath();
+    ctx.beginPath();
+    ctx.moveTo(x + radius, y);
+    ctx.arcTo(x + width, y, x + width, y + height, radius);
+    ctx.arcTo(x + width, y + height, x, y + height, radius);
+    ctx.arcTo(x, y + height, x, y, radius);
+    ctx.arcTo(x, y, x + width, y, radius);
+    ctx.closePath();
   }
 
   ctx.fillStyle = "white";
-  drawRoundedRect(ctx, borderWidth * scaleFactor, borderWidth * scaleFactor, canvas.width - borderWidth * scaleFactor * 2, canvas.height - borderWidth * scaleFactor * 2, borderRadius * scaleFactor);
+  drawRoundedRect(
+    ctx,
+    borderWidth * scaleFactor,
+    borderWidth * scaleFactor,
+    canvas.width - borderWidth * scaleFactor * 2,
+    canvas.height - borderWidth * scaleFactor * 2,
+    borderRadius * scaleFactor,
+  );
   ctx.fill();
 
   // Draw border
@@ -106,27 +113,31 @@ export const handleDownloadQRCode = (event: React.MouseEvent<HTMLButtonElement>,
   const url = URL.createObjectURL(svgBlob);
 
   img.onload = function () {
-      ctx.drawImage(img, padding * scaleFactor, padding * scaleFactor, svgWidth * scaleFactor, svgHeight * scaleFactor);
+    ctx.drawImage(
+      img,
+      padding * scaleFactor,
+      padding * scaleFactor,
+      svgWidth * scaleFactor,
+      svgHeight * scaleFactor,
+    );
 
-      const imgURL = canvas.toDataURL("image/jpeg");
+    const imgURL = canvas.toDataURL("image/jpeg");
 
-      // Trigger download
-      const link = document.createElement("a");
-      link.href = imgURL;
-      link.download = `${fileName}.jpg`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    // Trigger download
+    const link = document.createElement("a");
+    link.href = imgURL;
+    link.download = `${fileName}.jpg`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-      // Clean up
-      URL.revokeObjectURL(url);
+    // Clean up
+    URL.revokeObjectURL(url);
   };
 
   img.onerror = function () {
-      console.error("Failed to load image.");
+    console.error("Failed to load image.");
   };
 
   img.src = url;
 };
-
-

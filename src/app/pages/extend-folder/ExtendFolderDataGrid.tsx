@@ -91,7 +91,7 @@ function ExtendFolderDataGrid(props) {
       editable: false,
       sortable: false,
       maxWidth: isMobile ? 40 : 70,
-      renderCell: (params:{row:IFolderTypes}) => {
+      renderCell: (params: { row: IFolderTypes }) => {
         const { _id } = params?.row || {};
         const isChecked =
           !!props?.dataSelector?.selectionFileAndFolderData?.find(
@@ -146,7 +146,7 @@ function ExtendFolderDataGrid(props) {
       headerName: "Name",
       editable: false,
       minWidth: 120,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const { name, isContainsFiles, _id } = params.row || {};
         return (
           <div
@@ -191,7 +191,7 @@ function ExtendFolderDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const { isContainsFiles } = params.row || {};
 
         return (
@@ -202,7 +202,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action:string, data:any) =>
+                  handleEvent: (action: string, data: any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={shareWithMeFolderMenuItems}
@@ -217,7 +217,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action:string, data:any) =>
+                  handleEvent: (action: string, data: any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={favouriteMenuItems}

@@ -35,7 +35,6 @@ import { UAParser } from "ua-parser-js";
 import { errorMessage } from "utils/alert.util";
 import { getFileNameExtension } from "utils/file.util";
 import { encryptData } from "utils/secure.util";
-import useUnloadHandler from "hooks/useUnloadHandler";
 
 type Props = {
   open: boolean;
@@ -46,9 +45,9 @@ function WasabiUpload(props: Props) {
   const [canClose, setCanClose] = useState(false);
 
   const [fileId, setFileId] = useState({});
-  const [uploadedFileIds, setUploadedFileIds] = useState<{
-    [key: number]: string;
-  }>({});
+  // const [uploadedFileIds, setUploadedFileIds] = useState<{
+  //   [key: number]: string;
+  // }>({});
   const [selectFiles, setSelectFiles] = useState<any>([]);
 
   const [subPath, setSubPath] = useState("");
@@ -125,7 +124,7 @@ function WasabiUpload(props: Props) {
     setCanClose(true);
     try {
       const uploadPromise = dataFiles.map(async (file, index) => {
-        const filePath = newFilePath + "/" + getFileNameExtension(file.name);
+        const filePath = newFilePath + "/" + file.newFilename;
         const uploading = await uploadFileAction({
           variables: {
             data: {
@@ -146,10 +145,10 @@ function WasabiUpload(props: Props) {
         const fileId = await uploading.data?.createFiles?._id;
 
         if (fileId) {
-          setUploadedFileIds((prev) => ({
-            ...prev,
-            [index]: fileId,
-          }));
+          // setUploadedFileIds((prev) => ({
+          //   ...prev,
+          //   [index]: fileId,
+          // }));
           fileIdRef.current = {
             ...fileIdRef.current,
             [index]: fileId,
@@ -277,6 +276,7 @@ function WasabiUpload(props: Props) {
           await Promise.all(updatePromise);
           await eventUploadTrigger?.trigger();
           await handleDoneUpload();
+          props?.onClose?.()
         });
 
         uppy.use(Webcam, {});

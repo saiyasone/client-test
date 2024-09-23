@@ -36,6 +36,7 @@ import Trash from "./pages/trash/Trash";
 import UppyUpload from "components/UppyUpload";
 import ConfirmPayment from "./pages/confirm-payment/Confirmpayment";
 import ResetPassword from "./pages/reset-password/ResetPassword";
+import PaymentDetail from "./pages/account-info/paymentDetail";
 import { RefreshProvider } from "contexts/RefreshProvider";
 import ForyouView from "./feed/foryou/foryou";
 
@@ -183,33 +184,37 @@ const routes: RouteObject[] = [
         path: "file/:user/:fileType/:status",
         element: <File />,
       },
+      {
+        path: "account-setting/payment-detail/:paymentId",
+        element: <PaymentDetail />,
+      },
       ///Feed
       {
-        path: "feed-for-you",
-        element: <ForyouView />,
-      },
-      {
-        path: "feed-explore",
-        element: <>Expore Page</>,
-      },
-      {
-        path: "feed-following",
-        element: <>Following page</>,
-      },
-      {
-        path: "feed-friend",
-        element: <>Feed friend page</>,
-      },
-      {
-        path: "feed-profile",
-        element: <>Feed Profile</>,
-      }
+       path: "feed-for-you",
+       element: <ForyouView />,
+     },
+     {
+       path: "feed-explore",
+       element: <>Expore Page</>,
+     },
+     {
+       path: "feed-following",
+       element: <>Following page</>,
+     },
+     {
+       path: "feed-friend",
+       element: <>Feed friend page</>,
+     },
+     {
+       path: "feed-profile",
+       element: <>Feed Profile</>,
+     },
     ],
   },
-  {
-    path: "uppy",
-    element: <UppyUpload />,
-  },
+  // {
+  //   path: "uppy",
+  //   element: <UppyUpload />,
+  // },
   {
     path: "confirm",
     element: <ConfirmPayment />,

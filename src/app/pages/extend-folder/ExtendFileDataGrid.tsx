@@ -37,23 +37,23 @@ const FileIconContainer = styled("div")(({ theme }) => ({
   },
 }));
 
-function ExtendFileDataGrid(props:any) {
+function ExtendFileDataGrid(props: any) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
   const [hover, setHover] = useState("");
   const [anchorEvent, setAnchorEvent] = React.useState(null);
   const [menuDropdownAnchor, setMenuDropdownAnchor] = React.useState(null);
   const [styles, setStyles] = React.useState<
-  Record<string, Partial<FileIconProps>>
->({});
-  const handlePopperOpen = (event:any) => {
+    Record<string, Partial<FileIconProps>>
+  >({});
+  const handlePopperOpen = (event: any) => {
     const id = event.currentTarget.dataset.id;
-    const row = props.data.find((r:IFolderTypes) => r._id === id);
+    const row = props.data.find((r: IFolderTypes) => r._id === id);
     setHover(row);
     setAnchorEvent(event.currentTarget);
   };
 
-  const handleOnPreview = (data:{row:IFolderTypes}) => {
+  const handleOnPreview = (data: { row: IFolderTypes }) => {
     if (isTablet || isMobile) {
       props.handleEvent("preview", data.row);
     }
@@ -81,14 +81,13 @@ function ExtendFileDataGrid(props:any) {
       sortable: false,
       maxWidth: isMobile ? 40 : 70,
       flex: 1,
-      renderCell: (params:{row:IMyCloudTypes}) => {
+      renderCell: (params: { row: IMyCloudTypes }) => {
         const { _id } = params?.row || {};
         const isChecked =
-        !!props?.dataSelector?.selectionFileAndFolderData?.find(
-          (el: IMyCloudTypes) => el?.id === _id,
-        );
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: IMyCloudTypes) => el?.id === _id,
+          );
         return (
-         
           <div>
             {isMobile ? (
               <Box>
@@ -127,7 +126,7 @@ function ExtendFileDataGrid(props:any) {
       editable: false,
       minWidth: 120,
       flex: 1,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const { name, newName } = params.row;
         return (
           <div
@@ -140,7 +139,7 @@ function ExtendFileDataGrid(props:any) {
           >
             <FileIconContainer onClick={() => handleOnPreview(params)}>
               <FileIcon
-                extension={getFileType(name)??""}
+                extension={getFileType(name) ?? ""}
                 {...{ ...styles[getFileType(name) as string] }}
               />
             </FileIconContainer>
@@ -161,7 +160,7 @@ function ExtendFileDataGrid(props:any) {
     {
       field: "size",
       headerName: "Size",
-      renderCell: (params:{row:IMyCloudTypes}) => {
+      renderCell: (params: { row: IMyCloudTypes }) => {
         return <Box>{convertBytetoMBandGB(parseInt(params.row.size))}</Box>;
       },
       editable: false,
@@ -171,7 +170,7 @@ function ExtendFileDataGrid(props:any) {
       field: "updatedAt",
       headerName: "Date",
       editable: false,
-      renderCell: (params:{row:IMyCloudTypes}) =>
+      renderCell: (params: { row: IMyCloudTypes }) =>
         moment(params.row.updatedAt).format(DATE_PATTERN_FORMAT.datetime),
       flex: 1,
     },
@@ -182,7 +181,7 @@ function ExtendFileDataGrid(props:any) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell:  (params:{row:IMyCloudTypes}) =>{
+      renderCell: (params: { row: IMyCloudTypes }) => {
         return (
           <>
             {props.isFromSharingUrl ? (
@@ -236,7 +235,7 @@ function ExtendFileDataGrid(props:any) {
               onMouseLeave: handlePopperClose,
             },
           },
-          onRowDoubleClick:(params: { row: IFolderTypes }) =>{
+          onRowDoubleClick: (params: { row: IFolderTypes }) => {
             props.handleEvent("preview", params.row);
           },
           onCellClick: (params: { field: string; row: IFolderTypes }) => {

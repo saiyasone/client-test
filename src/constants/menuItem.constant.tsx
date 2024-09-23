@@ -11,6 +11,7 @@ import {
   FiShare2,
 } from "react-icons/fi";
 import { HiOutlineTrash } from "react-icons/hi";
+import AddLinkIcon from "@mui/icons-material/AddLink";
 import {
   MdCloudDownload,
   MdOutlineDone,
@@ -23,7 +24,7 @@ import CloudDownloadOutlinedIcon from "@mui/icons-material/CloudDownloadOutlined
 const menuItems = [
   { icon: <FiEye />, title: "Details", action: "detail" },
   { icon: <FiShare2 />, title: "Share", action: "share", disabled: true },
-  { icon: <FiLink />, title: "Get Link", action: "get link", disabled: true },
+  { icon: <FiLink />, title: "Get link", action: "get link", disabled: true },
   { icon: <FiLock />, title: "Password", action: "password", disabled: true },
   { icon: <FiEdit />, title: "Rename", action: "rename" },
   {
@@ -38,6 +39,7 @@ const menuItems = [
     action: "download",
     disabled: true,
   },
+  { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true },
   { icon: <HiOutlineTrash />, title: "Move to trash", action: "delete" },
 ];
 
@@ -133,6 +135,7 @@ export const favouriteMenuItems = [
     disabled: true,
   },
   { icon: <FiFile />, title: "File Drop", action: "filedrop" },
+  { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true},
   { icon: <HiOutlineTrash />, title: "Remove to Trash", action: "delete" },
 ];
 
@@ -228,6 +231,7 @@ export const multipleSelectionFileItems = [
     title: "Delete",
     action: "delete",
   },
+  { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true},
 ];
 
 export const multipleSelectionFolderItems = [
@@ -262,6 +266,7 @@ export const multipleSelectionFolderItems = [
     title: "Delete",
     action: "delete",
   },
+  { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true },
 ];
 
 export const multipleSelectionFolderAndFileItems = [
@@ -291,6 +296,7 @@ export const multipleSelectionFolderAndFileItems = [
     title: "Delete",
     action: "delete",
   },
+  { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true },
 ];
 
 export const multipleTrashFolderAndFileItems = [

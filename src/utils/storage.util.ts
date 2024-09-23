@@ -1,4 +1,8 @@
 export const convertBytetoMBandGB = (size: number) => {
+  if(!size){
+    return '0 KB';
+  }
+
   const sizeInKB = size / 1024;
   const sizeInMB = size / (1024 * 1024);
   const sizeInGB = size / (1024 * 1024 * 1024);

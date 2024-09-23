@@ -108,6 +108,7 @@ type DialogProps = {
   mainFile?: IFileTypes[];
   propsStatus: string;
 };
+
 function DialogPreviewFileSlide(props: DialogProps) {
   const { open, handleClose, data, user, mainFile, propsStatus } = props;
   const theme = useTheme();
@@ -501,7 +502,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
         handleFavorite();
         break;
       case "password":
-        if (user.packageId.lockFile !== "on") {
+        if (user.packageId.lockFile === "on") {
           setDataForEvent(event);
         } else {
           setDataForEvent("");

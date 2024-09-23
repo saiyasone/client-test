@@ -273,7 +273,7 @@ const ClientDashboardLayout = () => {
             onClose={handleClose}
             onSelectMore={handleSelectMore}
             parentComponent="clientDashboard"
-            hasNewFile={hasFile}
+            // hasNewFile={hasFile}
           />
         </MainContent>
 

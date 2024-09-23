@@ -202,7 +202,7 @@ export default function FolderGridItem({
               </BoxImage>
             ) : (
               <IconFolderContainer>
-                {props?.isContainFiles || props?.file_id ? (
+                {props?.isContainFiles ? (
                   <FolderNotEmptyIcon />
                 ) : (
                   <FolderEmptyIcon />

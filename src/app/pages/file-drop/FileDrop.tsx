@@ -67,6 +67,7 @@ import { NavLink } from "react-router-dom";
 import DialogPreviewQRcode from "components/dialog/DialogPreviewQRCode";
 import QrIcon from "@mui/icons-material/QrCode";
 import { ShareSocial } from "components/social-media";
+import { DateTimeFormate } from "utils/date.util";
 
 const DatePickerV1Container = styled(Box)({
   width: "100%",
@@ -418,20 +419,21 @@ function FileDrop() {
         );
       },
     },
-    {
-      field: "createdAt",
-      headerName: "Created date",
-      flex: 1,
-      renderCell: (params) => {
-        return (
-          <div>
-            <span>
-              {moment(params?.row?.createdAt).format("DD-MM-YYYY h:mm:ss")}
-            </span>
-          </div>
-        );
-      },
-    },
+    // {
+    //   field: "createdAt",
+    //   headerName: "Created date",
+    //   flex: 1,
+    //   renderCell: (params) => {
+    //     return (
+    //       <div>
+    //         <span>
+    //           {/* {moment(params?.row?.createdAt).format("DD-MM-YYYY h:mm:ss")} */}
+    //           {DateTimeFormate(params?.row?.createdAt)}
+    //         </span>
+    //       </div>
+    //     );
+    //   },
+    // },
     {
       field: "expiredAt",
       headerName: "Expired date",
@@ -440,7 +442,8 @@ function FileDrop() {
         return (
           <div>
             <span>
-              {moment(params?.row?.expiredAt).format("DD-MM-YYYY h:mm:ss")}
+              {/* {moment(params?.row?.expiredAt).format("DD-MM-YYYY h:mm:ss")} */}
+              {DateTimeFormate(params?.row?.expiredAt)}
             </span>
           </div>
         );
@@ -883,62 +886,83 @@ function FileDrop() {
                       <DownloadSharpIcon sx={{ mr: 3 }} />
                       Download
                     </Button>
-                    <Box sx={{ ml: 5, width: "130px", position:'relative' }}>
+                    <Box sx={{ ml: 5, width: "130px", position: "relative" }}>
                       <Button
-                        sx={{position:'relative'}}
+                        sx={{ position: "relative" }}
                         variant="contained"
-                        onClick={async(e) => {
-                          if(isShared){
+                        onClick={async (e) => {
+                          if (isShared) {
                             setIsShared(false);
-                          }
-                          else{
+                          } else {
+                            // const result = await handleShareQR(e, qrCodeRef, headerData);
+                            // // console.log({result});
+                            // if(!result){
+                            //   setIsShared(!isShared)
+                            // }
                             const result = await handleShareQR(e, qrCodeRef, headerData);
-                            // console.log({result});
-                            if(!result){
-                              setIsShared(!isShared)
-                            }
+                            console.log({result});
+                            setIsShared(!isShared);
                           }
                         }}
                         // onClick={()=>setIsShared(!isShared)}
                       >
                         Share
                         <ReplyAllSharpIcon
-                          sx={{ ml: 3, transform: "rotate(180deg) scale(1,-1)" }}
+                          sx={{
+                            ml: 3,
+                            transform: "rotate(180deg) scale(1,-1)",
+                          }}
                         />
                       </Button>
-                      
-                      {
-                        isShared && value &&
-                        <Typography component={'div'} 
-                        sx={{
-                          position: 'absolute',
-                          left: '50%',
-                          top: 50,
-                          zIndex: 9999,
-                          transform: {
-                            xs: 'translateX(-60%)',
-                            md: 'none',
-                          },
-                          '@media (max-width: 600px)': {
-                            maxWidth: '90vw',
-                          },
-                        }}
 
-                          onClick={(e)=>{
+                      {isShared && value && (
+                        <Typography
+                          component={"div"}
+                          sx={{
+                            position: "absolute",
+                            left: "50%",
+                            top: 50,
+                            zIndex: 9999,
+                            transform: {
+                              xs: "translateX(-60%)",
+                              md: "none",
+                            },
+                            "@media (max-width: 600px)": {
+                              maxWidth: "90vw",
+                            },
+                          }}
+                          onClick={(e) => {
                             e.stopPropagation();
                             setIsShared(!isShared);
                           }}
                         >
                           <ShareSocial
-                            socialTypes={['copy','facebook', 'twitter', 'line', 'linkedin', 'whatsapp', 'viber', 'telegram', 'reddit', 'instapaper', 'livejournal', 'mailru', 'ok', 'hatena','email', 'workspace']}
+                            socialTypes={[
+                              "copy",
+                              "facebook",
+                              "twitter",
+                              "line",
+                              "linkedin",
+                              "whatsapp",
+                              "viber",
+                              "telegram",
+                              "reddit",
+                              "instapaper",
+                              "livejournal",
+                              "mailru",
+                              "ok",
+                              "hatena",
+                              "email",
+                              "workspace",
+                            ]}
                             url={value}
                             onSocialButtonClicked={(buttonName: string) => {
-                              console.log(`${buttonName} clicked`)
+                              console.log(`${buttonName} clicked`);
                             }}
                             title="Social Media"
                           />
                         </Typography>
-                      }
+                      )}
                     </Box>
                   </Box>
                 </Box>
