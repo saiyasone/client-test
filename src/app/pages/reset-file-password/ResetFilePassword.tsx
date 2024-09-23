@@ -58,7 +58,10 @@ function ResetFilePassword() {
         fileURL || "",
         ENV_KEYS.VITE_APP_SECRET_KEY_RESET_PASSWORD,
       );
-      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      const decryptedString = bytes.toString(CryptoJS.enc.Utf8);
+      const decryptedData = JSON?.parse(bytes?.toString(CryptoJS.enc.Utf8));
+      console.log(decryptedString);
+      
       setDataForEvent({
         data: decryptedData,
       });

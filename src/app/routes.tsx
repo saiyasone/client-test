@@ -37,6 +37,8 @@ import UppyUpload from "components/UppyUpload";
 import ConfirmPayment from "./pages/confirm-payment/Confirmpayment";
 import ResetPassword from "./pages/reset-password/ResetPassword";
 import { RefreshProvider } from "contexts/RefreshProvider";
+import ForYou from "./pages/feed/foryou/foryou";
+import ClientFeedLayout from "components/feed/ClientFeedLayout";
 
 const routes: RouteObject[] = [
   {
@@ -77,6 +79,30 @@ const routes: RouteObject[] = [
   {
     path: "file/reset-password",
     element: <ResetFilePassword />,
+  },
+  {
+    path: "",
+    element: (
+      <FolderProvider>
+        <EventUploadTriggerProvider>
+          <AuthProvider>
+            <ClientAuthGuard>
+              <PackageCheckerProvider>
+                <MenuDropdownProvider>
+                  <RefreshProvider>
+                    <ClientFeedLayout />
+                  </RefreshProvider>
+                </MenuDropdownProvider>
+              </PackageCheckerProvider>
+            </ClientAuthGuard>
+          </AuthProvider>
+        </EventUploadTriggerProvider>
+      </FolderProvider>
+    ),
+    children: [
+      { path: "feed/foryou", element: <ForYou /> },
+      { path: "feed/explore" },
+    ],
   },
   {
     path: "",

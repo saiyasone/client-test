@@ -23,6 +23,7 @@ import { isUserPackage } from "utils/checkPackageUser";
 import { cutStringWithEllipsis } from "utils/string.util";
 import ShareExtend from "./ShareExtend";
 import { useDeleteFolder } from "hooks/folder/useDeleteFolder";
+import useManageFolder from "hooks/folder/useManageFolder";
 
 const IconFolderContainer = styled("div")({
   minWidth: "60px",
@@ -32,8 +33,12 @@ const IconFolderContainer = styled("div")({
 
 interface IFolderOfSearchProps {
   data?: ISearchFolderTypes;
+  open?: boolean;
 }
-export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
+export default function SearchExtendFolder({
+  data,
+  open,
+}: IFolderOfSearchProps) {
   const theme = useTheme();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -48,8 +53,17 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
   const { setIsAutoClose } = useMenuDropdownState();
   const handleGetFolderURL = useGetUrl(activeData);
   const manageFile = useManageFile({ user });
+  const manageFolder = useManageFolder({ user });
+  const [deleteId, setDeleteId] = React.useState<any[]>([]);
+
   const handleDownloadUrl = useGetUrlExtendFolderDownload(activeData);
   const { deleteSubFolderAndFile, loading, error, success } = useDeleteFolder();
+
+  React.useEffect(() => {
+    if (!open) {
+      setDeleteId([]);
+    }
+  }, [open]);
 
   React.useEffect(() => {
     if (eventName === "get link") {
@@ -82,6 +96,7 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
     switch (newAction) {
       case "share":
       case "rename":
+      case "filedrop":
         setOpenEvent(true);
         break;
       case "preview":
@@ -95,6 +110,9 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
         break;
       case "delete":
         handleDelete(data);
+        break;
+      case "pin":
+        handleAddPin(data);
         break;
       default:
         return null;
@@ -114,13 +132,31 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
     }
   };
 
+  const handleAddPin = async (values: ISearchFolderTypes) => {
+    await manageFolder.handleAddPinFolder(values?._id, values?.pin ? 0 : 1, {
+      onSuccess: async () => {
+        if (values.pin) {
+          successMessage("One File removed from Pin", 2000);
+        } else {
+          successMessage("One File added to Pin", 2000);
+        }
+        values.pin = values.pin ? 0 : 1;
+      },
+      onFailed: (error: any) => {},
+      onClosure: () => {},
+    });
+  };
+
   const handleDelete = async (data: ISearchFolderTypes) => {
     try {
       const deleted = await deleteSubFolderAndFile(data, user);
-      console.log(deleted);
-      console.log(error);
-      console.log(success);
+      if (deleted?.data?.updateFolders?._id || success) {
+        successMessage("Delete folder success", 1000);
+        setRefreshAuto({ isStatus: "extendsearch", isAutoClose: true });
+        setDeleteId([...deleteId, deleted?.data?.updateFolders?._id]);
+      }
     } catch (error) {
+      errorMessage("Delete folder success", 1000);
       console.log(error);
     }
   };
@@ -153,6 +189,8 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
     );
   };
 
+  const shouldShow = !deleteId.includes(data?._id);
+
   return (
     <>
       <div>
@@ -164,82 +202,88 @@ export default function SearchExtendFolder({ data }: IFolderOfSearchProps) {
             event={eventName}
           />
         )}
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
+        {shouldShow && (
           <Box
-            sx={{ display: "flex", alignItems: "center", gap: 2 }}
-            onClick={() => {
-              if (data) {
-                handleOpenFolder(data);
-              }
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            <IconFolderContainer>
-              {data?.file_id[0]?._id || data?.parentkey[0]?._id ? (
-                <FolderNotEmptyIcon />
-              ) : (
-                <FolderEmptyIcon />
-              )}
-            </IconFolderContainer>
-            <Typography
-              variant="h6"
-              component="p"
-              sx={{
-                fontSize: "0.8rem",
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 2 }}
+              onClick={() => {
+                if (data) {
+                  handleOpenFolder(data);
+                }
               }}
             >
-              {cutStringWithEllipsis(data?.folder_name, 25)}
-            </Typography>
-            <ListItemText
-              sx={{ fontSize: "0.5rem" }}
-              primary={moment(data?.updatedAt).format("MM-DD-YYYY")}
-            />
-          </Box>
-          <Box>
-            <MenuDropdown
-              customButton={{
-                shadows: "0px 0px 5px rgba(0, 0, 0, 0.2)",
-                element: (
-                  <NormalButton>
-                    <MoreVertIcon
-                      style={{
-                        color: theme.palette.primaryTheme!.main,
+              <IconFolderContainer>
+                {data?.file_id[0]?._id || data?.parentkey[0]?._id ? (
+                  <FolderNotEmptyIcon />
+                ) : (
+                  <FolderEmptyIcon />
+                )}
+              </IconFolderContainer>
+              <Typography
+                variant="h6"
+                component="p"
+                sx={{
+                  fontSize: "0.8rem",
+                }}
+              >
+                {cutStringWithEllipsis(data?.folder_name, 25)}
+              </Typography>
+              <ListItemText
+                sx={{ fontSize: "0.5rem" }}
+                primary={moment(data?.updatedAt).format("MM-DD-YYYY")}
+              />
+            </Box>
+
+            <Box>
+              <MenuDropdown
+                customButton={{
+                  shadows: "0px 0px 5px rgba(0, 0, 0, 0.2)",
+                  element: (
+                    <NormalButton>
+                      <MoreVertIcon
+                        style={{
+                          color: theme.palette.primaryTheme!.main,
+                        }}
+                      />
+                    </NormalButton>
+                  ),
+                }}
+              >
+                {favouriteMenuItems?.map((menuItems, index) => {
+                  return (
+                    <MenuDropdownItem
+                      key={index}
+                      className="menu-item"
+                      disabled={
+                        data?.file_id[0]?._id || data?.parentkey[0]?._id
+                          ? false
+                          : menuItems.disabled
+                      }
+                      isPinned={data?.pin ? true : false}
+                      isPassword={data?.access_password}
+                      title={menuItems.title}
+                      icon={menuItems.icon}
+                      onClick={() => {
+                        if (data) {
+                          handleCheckPasswordBeforeEvent(
+                            menuItems.action,
+                            data,
+                          );
+                        }
                       }}
                     />
-                  </NormalButton>
-                ),
-              }}
-            >
-              {favouriteMenuItems?.map((menuItems, index) => {
-                return (
-                  <MenuDropdownItem
-                    key={index}
-                    className="menu-item"
-                    disabled={
-                      data?.file_id[0]?._id || data?.parentkey[0]?._id
-                        ? false
-                        : menuItems.disabled
-                    }
-                    isPinned={data?.pin ? true : false}
-                    isPassword={data?.access_password}
-                    title={menuItems.title}
-                    icon={menuItems.icon}
-                    onClick={() => {
-                      if (data) {
-                        handleCheckPasswordBeforeEvent(menuItems.action, data);
-                      }
-                    }}
-                  />
-                );
-              })}
-            </MenuDropdown>
+                  );
+                })}
+              </MenuDropdown>
+            </Box>
           </Box>
-        </Box>
+        )}
       </div>
     </>
   );

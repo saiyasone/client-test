@@ -5,13 +5,14 @@ import useAuth from "hooks/useAuth";
 import React from "react";
 import { IUserTypes } from "types/userType";
 import SharePrevieFile from "../file/SharePreviewFile";
+import FiledropExtend from "./FiledropExtend";
 
 const HeadSearch = styled("div")(() => ({
   display: "grid",
   gridTemplateColumns: "1fr auto",
   alignItems: "center",
   justifyContent: "space-between",
-  margin: "1rem 0.8rem",
+  margin: "5rem 0.8rem 0.8rem 0.8rem",
 }));
 
 interface ISharehProps {
@@ -35,12 +36,19 @@ export default function ShareExtend({
   const [dataForEvent, setDataForEvent] = React.useState<string>("");
   const [filename, setFilename] = React.useState<string>();
 
-
   const getActionTile = (type: string, event: string | null | undefined) => {
     if (type === "folder" && type !== null && type !== undefined) {
-      return event !== "rename" ? "Share folder" : "Rename folder";
+      return event == "rename"
+        ? "Rename folder"
+        : event === "share"
+        ? "Share folder"
+        : "Create file drop";
     } else {
-      return event !== "rename" ? "Share file" : "Rename file";
+      return event == "rename"
+        ? "Rename file"
+        : event == "share"
+        ? "Share file"
+        : "Create file drop";
     }
   };
   const actionText = getActionTile(data?.folder_type, event);
@@ -74,24 +82,24 @@ export default function ShareExtend({
                 onClick={handleClose}
               />
             </HeadSearch>
-            {data && event !== "rename" ? (
+            {data && event == "share" ? (
               <SharePrevieFile
                 overflow={true}
                 user={user}
                 data={data}
                 propsStatus="extendFolder"
               />
+            ) : data && event == "rename" ? (
+              <FileRename
+                data={data}
+                filename={filename}
+                setFilename={setFilename}
+                user={user}
+                setDataForEvent={setDataForEvent}
+                propsStatus="extendFolder"
+              />
             ) : (
-              data && (
-                <FileRename
-                  data={data}
-                  filename={filename}
-                  setFilename={setFilename}
-                  user={user}
-                  setDataForEvent={setDataForEvent}
-                  propsStatus="extendFolder"
-                />
-              )
+              <FiledropExtend data={data}/>
             )}
           </Dialog>
         )}

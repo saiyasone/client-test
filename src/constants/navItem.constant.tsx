@@ -5,6 +5,10 @@ import { FiFile } from "react-icons/fi";
 import { HiOutlineShare } from "react-icons/hi";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { TbDashboard } from "react-icons/tb";
+import FeedHome from "assets/images/feed-icon/home.svg?react";
+import { MdOutlineExplore } from "react-icons/md";
+import { TbUserPlus } from "react-icons/tb";
+import { FiUsers } from "react-icons/fi";
 
 const dashboard = [
   {
@@ -31,15 +35,6 @@ const myCloud = [
     ],
   },
 ];
-
-// const myFolders = [
-//   {
-//     href: "/my-folder",
-//     icon: FaRegFolderOpen,
-//     title: "My folders",
-//   },
-// ];
-
 const shareWithMe = [
   {
     href: "/share-with-me",
@@ -78,6 +73,34 @@ const trash = [
   },
 ];
 
+const Feed = [
+  {
+    href: "/feed/foryou",
+    icon: FeedHome,
+    title: "For you",
+  },
+  {
+    href: "/feed/explore",
+    icon: MdOutlineExplore,
+    title: "Explore",
+  },
+  {
+    href: "/feed/following",
+    icon: TbUserPlus,
+    title: "Following",
+  },
+  {
+    href: "/feed/friends",
+    icon: FiUsers,
+    title: "Friends",
+  },
+  {
+    href: "/feed/profile",
+    icon: FiUsers,
+    title: "Channel",
+  },
+];
+
 const navItems: any = [
   {
     title: "",
@@ -107,6 +130,7 @@ const navItems: any = [
     title: "",
     pages: trash,
   },
+  { title: "SHORT", pages: Feed },
   // {
   //   title: "",
   //   pages: Uppy,
