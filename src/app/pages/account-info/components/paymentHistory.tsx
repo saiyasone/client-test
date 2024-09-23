@@ -1,15 +1,15 @@
 // components
 import SelectV1 from "components/SelectV1";
 import * as MUI from "../styles/accountInfo.styles";
+import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
+import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 
 // material ui
 import { DataGrid } from "@mui/x-data-grid";
 import PaginationStyled from "components/PaginationStyled";
-import AddIcon from "@mui/icons-material/Add";
 import {
   Avatar,
   Box,
-  Button,
   Chip,
   FormControl,
   IconButton,
@@ -17,8 +17,6 @@ import {
   Typography,
   useMediaQuery,
 } from "@mui/material";
-import EmailOutlinedIcon from "@mui/icons-material/EmailOutlined";
-import MoreVertOutlinedIcon from "@mui/icons-material/MoreVertOutlined";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
 
 // hooks
@@ -260,26 +258,6 @@ function PaymentHistory() {
               }}
             />
           </Box>
-          <Button
-            startIcon={<AddIcon />}
-            sx={{
-              background: "#17766B",
-              color: "#ffffff",
-              fontSize: isMobile ? "0.8rem" : "",
-              "&:hover": {
-                color: "#17766B",
-              },
-              padding: isTablet
-                ? "0.4rem 0.2rem"
-                : isMobile
-                ? "0.4rem 0.6rem"
-                : "0.4rem 2rem",
-              width: isMobile ? "45%" : "auto",
-            }}
-            size="small"
-          >
-            Create Invoice
-          </Button>
         </MUI.BoxShowLeftPaymentHistory>
         <MUI.BoxShowRightPaymentHistory>
           <FormControl
@@ -294,7 +272,6 @@ function PaymentHistory() {
               selectStyle={{
                 height: "35px",
                 minHeight: "35px",
-                marginTop: "0.3rem",
               }}
               selectProps={{
                 disableClear: true,
@@ -332,12 +309,6 @@ function PaymentHistory() {
           getRowId={(row) => row._id}
           rows={managePayment.data || []}
           columns={columns}
-          initialState={{
-            pagination: {
-              page: 0,
-              pageSize: 5,
-            },
-          }}
           checkboxSelection
           disableSelectionOnClick
           disableColumnFilter
@@ -345,7 +316,6 @@ function PaymentHistory() {
           hideFooter
           onSelectionModelChange={(ids) => {
             managePayment.setSelectedRow(ids);
-            // setMultiId(ids);
           }}
         />
         {managePayment?.data?.length > filterPayment.state.pageSize && (

@@ -276,6 +276,7 @@ function WasabiUpload(props: Props) {
           await Promise.all(updatePromise);
           await eventUploadTrigger?.trigger();
           await handleDoneUpload();
+          props?.onClose?.()
         });
 
         uppy.use(Webcam, {});

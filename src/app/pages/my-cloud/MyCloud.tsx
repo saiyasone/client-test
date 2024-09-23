@@ -90,7 +90,8 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
-
+import DialogGetLink from "components/dialog/DialogGetLink";
+import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
 const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
@@ -117,6 +118,8 @@ export function MyCloud() {
   const [procesing, setProcesing] = useState(true);
   const [showProgressing, setShowProgressing] = useState(false);
   const [openPreview, setOpenPreview] = useState(false);
+  const [openGetLink, setOpenGetLink] = useState(false);
+  const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isPasswordLink, setIsPasswordLink] = useState(false);
   const [isMultiplePasswordLink, setIsMultiplePasswordLink] = useState(false);
@@ -308,7 +311,8 @@ export function MyCloud() {
 
   const handleSubmitDecryptedPassword = async () => {
     if (eventClick === "get-link") {
-      setDataGetUrl(dataForEvent.data);
+      // setDataGetUrl(dataForEvent.data);
+      setOpenGetLink(true);
       handleCloseDecryptedPassword();
     }
 
@@ -319,6 +323,7 @@ export function MyCloud() {
           action: "",
         };
       });
+
       setShowEncryptPassword(false);
       setOpenShare(true);
     }
@@ -391,6 +396,11 @@ export function MyCloud() {
 
     if (eventClick === "preview") {
       handleDataPreview();
+      handleCloseDecryptedPassword();
+    }
+
+    if (eventClick === "one-time-link") {
+      setOpenOneTimeLink(true);
       handleCloseDecryptedPassword();
     }
   };
@@ -812,9 +822,11 @@ export function MyCloud() {
         data: {
           id: optionValue?._id,
           name: optionValue?.filename,
+          fileType: optionValue?.fileType,
           newPath: optionValue?.newPath || "",
           newFilename: optionValue?.newFilename || "",
           totalDownload: optionValue?.totalDownload || 0,
+          totalSize: optionValue?.size || 0,
           checkType: "file",
           dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
@@ -961,11 +973,37 @@ export function MyCloud() {
     });
   };
 
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataGetUrl(null);
+    // setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  };
+
+  const handleGenerateGetLink = () => {
+    //not complete => waiting API
+    //Need to check in other functions for getLink event fire
+    setDataGetUrl(null);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  };
+
   useEffect(() => {
     if (dataForEvent.data && dataForEvent.action) {
       menuOnClick(dataForEvent.action);
     }
-  }, [dataForEvent.action]);
+  }, [openGetLink, dataForEvent.action]);
 
   const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
@@ -977,6 +1015,7 @@ export function MyCloud() {
     }, 500);
 
     const checkPassword = isCheckPassword();
+
     switch (action) {
       case "rename": {
         setEventClick("rename");
@@ -1047,13 +1086,14 @@ export function MyCloud() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          setDataGetUrl(dataForEvent.data);
-          setDataForEvent((prev: any) => {
-            return {
-              ...prev,
-              action: action,
-            };
-          });
+          // setDataGetUrl(dataForEvent.data);
+          // setDataForEvent((prev: any) => {
+          //   return {
+          //     ...prev,
+          //     action: action,
+          //   };
+          // });
+          setOpenGetLink(true);
         }
         break;
       }
@@ -1154,6 +1194,75 @@ export function MyCloud() {
         }
         break;
       }
+      case "one-time-link": {
+        setEventClick("one-time-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenOneTimeLink(true);
+        }
+        break;
+      }
+    }
+  };
+
+  const handleGetLinkMultipe = () => {
+    resetDataForEvent();
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
+        return {
+          ...prev,
+          data: data,
+        };
+      });
+
+      setOpenGetLink(true);
+    }
+  };
+
+  const handleOneTimeLinkMultiFiles = () => {
+    resetDataForEvent();
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setEventClick("one-time-link");
+
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
+        return {
+          ...prev,
+          data: data,
+        };
+      });
+
+      setOpenOneTimeLink(true);
     }
   };
 
@@ -1288,6 +1397,27 @@ export function MyCloud() {
     dispatch(checkboxAction.setRemoveFileAndFolderData());
   };
 
+  const handleOneTimeLinkClose = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+    setOpenOneTimeLink(false);
+  };
+
+  const handleOneTimeLinkSubmit = () => {
+    setOpenOneTimeLink(false);
+    setDataGetUrl(null);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  };
+
   useEffect(() => {
     handleClearMultipleFileAndFolder();
   }, [dispatch, location]);
@@ -1365,6 +1495,8 @@ export function MyCloud() {
               onPressShare={() => {
                 setShareMultipleDialog(true);
               }}
+              onOneTimeLinks={handleOneTimeLinkMultiFiles}
+              onManageLink={handleGetLinkMultipe}
               onPressLockData={handleOpenMultiplePassword}
               onPressSuccess={() => {
                 queryFolder();
@@ -2023,6 +2155,23 @@ export function MyCloud() {
         mainFile={mainFile}
         propsStatus="mycloud"
       />
+      {openGetLink && dataForEvent.data && (
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      )}
+
+      {openOneTimeLink && dataForEvent?.data && (
+        <DialogOneTimeLink
+          isOpen={setOpenOneTimeLink}
+          onClose={handleOneTimeLinkClose}
+          onCreate={handleOneTimeLinkSubmit}
+          data={dataForEvent?.data}
+        />
+      )}
     </Fragment>
   );
 }

@@ -200,10 +200,6 @@ function FavouriteFile() {
 
   // popup
   const [name, setName] = useState<any>("");
-  // const [isOpenMenu, setIsOpenMenu] = useState<any>(false);
-
-  //dialog
-
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<any>(false);
 
   const [renameDialogOpen, setRenameDialogOpen] = useState<any>(false);

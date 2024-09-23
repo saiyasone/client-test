@@ -100,6 +100,9 @@ export const QUERY_PAYMENT = gql`
           _id
           firstName
           lastName
+          email
+          phone
+          address
         }
       }
       total
