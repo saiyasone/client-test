@@ -1,5 +1,11 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Box, ListItemText, Typography, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Button,
+  ListItemText,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
 import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
@@ -56,6 +62,8 @@ import { convertBytetoMBandGB } from "utils/storage.util";
 import FileDataGrid from "./FileTypeDataGrid";
 import * as MUI from "./styles/fileType.style";
 import { useRefreshState } from "contexts/RefreshProvider";
+import { ExpandMore } from "@mui/icons-material";
+import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 
 const ITEM_PER_PAGE = 20;
 
@@ -77,7 +85,7 @@ function FileType() {
     (state: RootState) => state.event,
   );
   const navigate = useNavigate();
-
+  const detectResizeWindow = useDetectResizeWindow();
   const handleToggle = (value: string) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
@@ -145,10 +153,15 @@ function FileType() {
     "",
   );
 
-  const { limitScroll } = useScroll({
+  const { limitScroll, addMoreLimit } = useScroll({
     total: total,
     limitData: ITEM_PER_PAGE,
   });
+
+  const handleViewMoreFile = () => {
+    addMoreLimit();
+    // setFileViewMore((prev) => prev + 20);
+  };
 
   const handleOpenPasswordLink = () => {
     setIsPasswordLink(true);
@@ -1101,6 +1114,36 @@ function FileType() {
                       handleSelect={handleMultipleFiles}
                     />
                   )}
+
+                  {!detectResizeWindow.canBeScrolled &&
+                    limitScroll < total &&
+                    toggle === "grid" && (
+                      <Box
+                        sx={{
+                          my: 3,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            position: "relative",
+                          }}
+                        >
+                          <Button
+                            endIcon={<ExpandMore />}
+                            sx={{ mt: 2 }}
+                            size="small"
+                            variant="outlined"
+                            onClick={handleViewMoreFile}
+                          >
+                            Load more
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
                 </Fragment>
               </MUI.FileTypeItem>
             </Fragment>

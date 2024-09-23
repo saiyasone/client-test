@@ -5,7 +5,7 @@ import {
   Button,
   CircularProgress,
   Typography,
-  useMediaQuery
+  useMediaQuery,
 } from "@mui/material";
 import Box from "@mui/material/Box";
 import { green } from "@mui/material/colors";
@@ -60,7 +60,7 @@ import {
   useContext,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import { CSVLink } from "react-csv";
 import { BiTime } from "react-icons/bi";
@@ -604,7 +604,6 @@ export function MyCloud() {
 
   const handleViewMoreFile = () => {
     addMoreLimit();
-    // setFileViewMore((prev) => prev + 20);
   };
 
   const handleDownloadFile = async (inputData: any) => {
@@ -805,7 +804,7 @@ export function MyCloud() {
     );
   };
 
-  const handleMultipleFileData = (selectData: IMyCloudTypes) => {
+  const handleMultipleFileData = (selectData: string) => {
     const optionValue = mainFile?.find((file: any) => file._id === selectData);
 
     dispatch(
@@ -1497,13 +1496,13 @@ export function MyCloud() {
                               <Fragment key={index}>
                                 <FolderGridItem
                                   open={open}
-                                  file_id={
+                                  id={item?._id}
+                                  password={item?.access_password}
+                                  isContainFiles={
                                     parseInt(item?.total_size) > 0
                                       ? true
                                       : false
                                   }
-                                  id={item?._id}
-                                  password={item?.access_password}
                                   folder_name={item?.folder_name}
                                   selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
@@ -1541,8 +1540,7 @@ export function MyCloud() {
                                         <MenuDropdownItem
                                           key={index}
                                           disabled={
-                                            item.file_id[0]?._id ||
-                                            item.parentkey[0]?._id
+                                            parseInt(item.total_size) > 0
                                               ? false
                                               : menuItems.disabled
                                           }
@@ -1837,7 +1835,6 @@ export function MyCloud() {
                 }}
                 open={shareMultipleDialog}
                 data={dataForEvent.data}
-                refetch={fileLoading}
                 dataSelector={dataSelector?.selectionFileAndFolderData}
               />
 

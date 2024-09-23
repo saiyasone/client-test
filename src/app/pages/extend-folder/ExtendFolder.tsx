@@ -1332,132 +1332,132 @@ function ExtendFolder() {
               <Fragment>
                 {fetchSubFoldersAndFiles.folders.total > 0 && (
                   <MUI.ExtendItem>
-                    <Fragment>
-                      {toggle === "grid" && (
-                        <Fragment>
-                          <Box
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h4" fontWeight="bold">
+                        Folders
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {isMobile && toggle !== "list" && (
+                          <Typography
                             sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
+                              p: 2,
+                              fontSize: "1rem",
+                            }}
+                            onClick={() => {
+                              dispatch(toggleFolderSelected(!isFolderSelected));
+                              handleClearMultipleFileData();
                             }}
                           >
-                            <Typography variant="h4" fontWeight="bold">
-                              Folders
-                            </Typography>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              {isMobile && toggle !== "list" && (
-                                <Typography
-                                  sx={{
-                                    p: 2,
-                                    fontSize: "1rem",
-                                  }}
-                                  onClick={() => {
-                                    dispatch(
-                                      toggleFolderSelected(!isFolderSelected),
-                                    );
-                                    handleClearMultipleFileData();
-                                  }}
-                                >
-                                  {isFolderSelected ? "Deselect" : "Select"}
-                                </Typography>
-                              )}
+                            {isFolderSelected ? "Deselect" : "Select"}
+                          </Typography>
+                        )}
 
-                              <Typography
-                                variant="h5"
-                                sx={{
-                                  fontSize: "1rem",
-                                  color: "initial !important",
-                                  fontWeight: "normal !important",
-                                }}
-                                mr={3}
-                              >
-                                {fetchSubFoldersAndFiles.folderTotal || 0} Items
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <FileCardContainer>
-                            {fetchSubFoldersAndFiles.folders.data.map(
-                              (data: any, index: number) => {
-                                return (
-                                  <FolderGridItem
-                                    key={index}
-                                    open={open}
-                                    file_id={
-                                      parseInt(data?.total_size) > 0
-                                        ? true
-                                        : false
-                                    }
-                                    id={data?._id}
-                                    folder_name={data?.folder_name}
-                                    selectType={"folder"}
-                                    setIsOpenMenu={setIsOpenMenu}
-                                    isOpenMenu={isOpenMenu}
-                                    isCheckbox={true}
-                                    isPinned={data.pin ? true : false}
-                                    onOuterClick={() => {
-                                      setMultiChecked(multiChecked);
-                                      setChecked({});
-                                    }}
-                                    cardProps={{
-                                      onClick: () =>
-                                        isMobile
-                                          ? handleFolderClick(data)
-                                          : handleMultipleFolderData(data._id),
-                                      onDoubleClick: () =>
-                                        handleFolderDoubleClick(data),
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontSize: "1rem",
+                            color: "initial !important",
+                            fontWeight: "normal !important",
+                          }}
+                          mr={3}
+                        >
+                          {fetchSubFoldersAndFiles.folderTotal || 0} Items
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Fragment>
+                      {toggle === "grid" && (
+                        <FileCardContainer>
+                          {fetchSubFoldersAndFiles.folders.data.map(
+                            (data: any, index: number) => {
+                              return (
+                                <FolderGridItem
+                                  key={index}
+                                  open={open}
+                                  file_id={
+                                    parseInt(data?.total_size) > 0
+                                      ? true
+                                      : false
+                                  }
+                                  id={data?._id}
+                                  isContainFiles={
+                                    parseInt(data?.total_size) > 0
+                                      ? true
+                                      : false
+                                  }
+                                  folder_name={data?.folder_name}
+                                  selectType={"folder"}
+                                  setIsOpenMenu={setIsOpenMenu}
+                                  isOpenMenu={isOpenMenu}
+                                  isCheckbox={true}
+                                  isPinned={data.pin ? true : false}
+                                  onOuterClick={() => {
+                                    setMultiChecked(multiChecked);
+                                    setChecked({});
+                                  }}
+                                  cardProps={{
+                                    onClick: () =>
+                                      isMobile
+                                        ? handleFolderClick(data)
+                                        : handleMultipleFolderData(data._id),
+                                    onDoubleClick: () =>
+                                      handleFolderDoubleClick(data),
 
-                                      ...(dataSelector?.selectionFileAndFolderData?.find(
-                                        (el: any) =>
-                                          el?.id === data?._id &&
-                                          el?.checkType === "folder",
-                                      ) && {
-                                        ishas: "true",
-                                      }),
-                                    }}
-                                    menuItem={favouriteMenuItems?.map(
-                                      (menuItems, index) => {
-                                        return (
-                                          <MenuDropdownItem
-                                            key={index}
-                                            disabled={
-                                              data.file_id[0]?._id ||
-                                              data.parentkey[0]?._id
-                                                ? false
-                                                : menuItems.disabled
-                                            }
-                                            className="menu-item"
-                                            isPinned={data.pin ? true : false}
-                                            isPassword={
-                                              data.filePassword ||
-                                              data.access_password
-                                                ? true
-                                                : false
-                                            }
-                                            title={menuItems.title}
-                                            icon={menuItems.icon}
-                                            onClick={() => {
-                                              setDataForEvent({
-                                                data: data,
-                                                action: menuItems.action,
-                                              });
-                                            }}
-                                          />
-                                        );
-                                      },
-                                    )}
-                                  />
-                                );
-                              },
-                            )}
-                          </FileCardContainer>
-                        </Fragment>
+                                    ...(dataSelector?.selectionFileAndFolderData?.find(
+                                      (el: any) =>
+                                        el?.id === data?._id &&
+                                        el?.checkType === "folder",
+                                    ) && {
+                                      ishas: "true",
+                                    }),
+                                  }}
+                                  menuItem={favouriteMenuItems?.map(
+                                    (menuItems, index) => {
+                                      return (
+                                        <MenuDropdownItem
+                                          key={index}
+                                          disabled={
+                                            data?.total_size > 0
+                                              ? false
+                                              : menuItems.disabled
+                                          }
+                                          className="menu-item"
+                                          isPinned={data.pin ? true : false}
+                                          isPassword={
+                                            data.filePassword ||
+                                            data.access_password
+                                              ? true
+                                              : false
+                                          }
+                                          title={menuItems.title}
+                                          icon={menuItems.icon}
+                                          onClick={() => {
+                                            setDataForEvent({
+                                              data: data,
+                                              action: menuItems.action,
+                                            });
+                                          }}
+                                        />
+                                      );
+                                    },
+                                  )}
+                                />
+                              );
+                            },
+                          )}
+                        </FileCardContainer>
                       )}
                       {toggle !== "grid" && (
                         <ExtendFolderDataGrid
