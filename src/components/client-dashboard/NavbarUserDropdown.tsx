@@ -48,6 +48,8 @@ function NavbarUserDropdown() {
   };
 
   const [userAccount, setUserAccount] = useState<any>({});
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath = `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`;
   const resizeImage = useResizeImage({
     imagePath: `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
     fileType: "image",

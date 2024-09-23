@@ -229,10 +229,14 @@ function WasabiUpload(props: Props) {
   useEffect(() => {
     const initializeUppy = () => {
       try {
+        console.log(userAuth?.packageId);
+        const category = userAuth?.packageId?.category;
+        const limitUpload =
+          category === "premium" ? 1000 : category === "pro" ? 500 : 300;
         const uppy = new Uppy({
           id: "upload-file-id",
           restrictions: {
-            maxNumberOfFiles: userAuth?.packageId?.numberOfFileUpload || 10,
+            maxNumberOfFiles: limitUpload,
           },
           autoProceed: false,
           allowMultipleUploadBatches: true,
@@ -276,7 +280,7 @@ function WasabiUpload(props: Props) {
           await Promise.all(updatePromise);
           await eventUploadTrigger?.trigger();
           await handleDoneUpload();
-          props?.onClose?.()
+          props?.onClose?.();
         });
 
         uppy.use(Webcam, {});
