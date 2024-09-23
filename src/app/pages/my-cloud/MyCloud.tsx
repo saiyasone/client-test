@@ -2127,7 +2127,7 @@ export function MyCloud() {
       {
         openOneTimeLink && dataForEvent?.data &&
         <DialogOneTimeLink
-          isOpen={setOpenOneTimeLink}
+          isOpen={openOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
           data={dataForEvent?.data }

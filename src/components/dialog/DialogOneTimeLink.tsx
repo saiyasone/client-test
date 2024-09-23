@@ -12,12 +12,12 @@ import { errorMessage, successMessage } from 'utils/alert.util';
 import moment from 'moment';
 import QRCode from 'react-qr-code';
 import { handleDownloadQRCode, handleShareQR } from 'utils/image.share.download';
-import { ShareSocial } from 'components/social-media';
 import { IoMdClose } from 'react-icons/io';
-import { BURN_ONE_TIME_LINK, CREATE_ONE_TIME_LINK, GET_ONE_TIME_LINK } from 'api/graphql/onetimelink.graphql';
+import { BURN_ONE_TIME_LINK, CREATE_ONE_TIME_LINK, GET_MANAGE_LINKS } from 'api/graphql/onetimelink.graphql';
 import { useLazyQuery, useMutation } from '@apollo/client';
 import { calculateExpirationDate } from 'utils/date.util';
 import DialogBackendVerifyPassword from './DialogBackendVerifyPassword';
+import DialogShare from './DialogShare.SocialMedia';
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -69,7 +69,7 @@ const DialogOneTimeLink = (props) => {
     const [isShared, setIsShared] = useState(false);
 
     const [createOneTimeLink] = useMutation(CREATE_ONE_TIME_LINK);
-    const [getOneTimeLink] = useLazyQuery(GET_ONE_TIME_LINK);
+    const [getManageLinks] = useLazyQuery(GET_MANAGE_LINKS);
     const [burnOneTimeLink] = useLazyQuery(BURN_ONE_TIME_LINK);
 
     const resetAll = () => {
@@ -178,16 +178,18 @@ const DialogOneTimeLink = (props) => {
             return false;
         }
 
-        return await getOneTimeLink({
+
+        return await getManageLinks({
             variables:{
                 where: {
-                  _id: burnLinkId
+                  _id: burnLinkId,
+                  status: "active"
                 }
             },
             onCompleted: (response) => {
-                if(response && response?.getOneTimeLink?.data)
+                if(response && response?.getManageLinks?.data)
                 {
-                    const result = response?.getOneTimeLink?.data;
+                    const result = response?.getManageLinks?.data;
                     if(result?.password)
                     {
                         setOpenConfirmPWD(true);
@@ -199,6 +201,7 @@ const DialogOneTimeLink = (props) => {
                 }
             },
             onError: (error) => {
+                console.log(error);
                 errorMessage(error?.message || "Can not burn this secret Url.", 3000);
                 setOpenConfirmPWD(false);
                 return false;
@@ -573,28 +576,7 @@ const DialogOneTimeLink = (props) => {
                                                 setIsShared(!isShared);
                                             }}
                                             >
-                                            <ShareSocial
-                                                socialTypes={[
-                                                "copy",
-                                                "facebook",
-                                                "twitter",
-                                                "line",
-                                                "linkedin",
-                                                "whatsapp",
-                                                "viber",
-                                                "telegram",
-                                                "reddit",
-                                                "instapaper",
-                                                "livejournal",
-                                                "mailru",
-                                                "ok",
-                                                "hatena",
-                                                "email",
-                                                "workspace",
-                                                ]}
-                                                url={generatedLink}
-                                                title="Social Media"
-                                            />
+                                                <DialogShare onClose={()=>setIsShared(!isShared)} isOpen={isShared} url={generatedLink}/>
                                             </Typography>
                                         )
                                     }

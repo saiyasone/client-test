@@ -12,11 +12,11 @@ import { errorMessage, successMessage } from 'utils/alert.util';
 import moment from 'moment';
 import QRCode from 'react-qr-code';
 import { handleDownloadQRCode, handleShareQR } from 'utils/image.share.download';
-import { ShareSocial } from 'components/social-media';
 import { IoMdClose } from 'react-icons/io';
 import { useMutation } from '@apollo/client';
 import { calculateExpirationDate } from 'utils/date.util';
 import { CREATE_MANAGE_LINK } from 'api/graphql/getlink.graphsql';
+import DialogShare from './DialogShare.SocialMedia';
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -123,7 +123,7 @@ const DialogOneTimeLink = (props) => {
             files.map((file)=>(
                 data.push({
                     type: 'file',
-                    fileId: file?._id,
+                    fileId: file?._id || file?.id,
                     expiredAt,
                     password: password
                 })
@@ -481,28 +481,7 @@ const DialogOneTimeLink = (props) => {
                                                 setIsShared(!isShared);
                                             }}
                                             >
-                                            <ShareSocial
-                                                socialTypes={[
-                                                "copy",
-                                                "facebook",
-                                                "twitter",
-                                                "line",
-                                                "linkedin",
-                                                "whatsapp",
-                                                "viber",
-                                                "telegram",
-                                                "reddit",
-                                                "instapaper",
-                                                "livejournal",
-                                                "mailru",
-                                                "ok",
-                                                "hatena",
-                                                "email",
-                                                "workspace",
-                                                ]}
-                                                url={generatedLink}
-                                                title="Social Media"
-                                            />
+                                                <DialogShare onClose={()=>setIsShared(!isShared)} isOpen={isShared} url={generatedLink}/>
                                             </Typography>
                                         )
                                     }
