@@ -1066,7 +1066,6 @@ function FavouriteFile() {
         }}
         open={shareMultipleDialog}
         data={dataForEvent.data}
-        refetch={loadingFolders || filesRefetch}
         dataSelector={dataSelector?.selectionFileAndFolderData}
       />
 

@@ -1203,7 +1203,7 @@ function ShareWithMe() {
                                           ) && {
                                             ischecked: true,
                                           }),
-                                          ...(dataSelector?.selectionFileAndFolder?.find(
+                                          ...(dataSelector?.selectionFileAndFolderData?.find(
                                             (el) =>
                                               el?.id === data?.folderId?._id,
                                           ) && {
