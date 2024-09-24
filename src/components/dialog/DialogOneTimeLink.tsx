@@ -474,13 +474,14 @@ const DialogOneTimeLink = (props) => {
                                       user?.newName +
                                       "-" +
                                       user?._id +
-                                      (item?.path
-                                        ? removeFileNameOutOfPath(item?.path)
+                                      "/" +
+                                      (item?.newPath
+                                        ? removeFileNameOutOfPath(item?.newPath)
                                         : "") +
                                       "/" +
                                       item?.newFilename
                                     }
-                                    fileType={item.type}
+                                    fileType={item?.fileType}
                                   />
                                 </Box>
                                 {item?.name || item?.filename?.length <= 15
