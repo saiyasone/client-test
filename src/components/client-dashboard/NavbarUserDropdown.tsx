@@ -123,15 +123,11 @@ function NavbarUserDropdown() {
             >
               {resizeImage.imageFound === null && <Loader />}
               {resizeImage.imageFound === true && (
-                <>
-                  {resizeImage.imageSrc && (
-                    <Avatar
-                      src={resizeImage.imageSrc}
-                      alt={"user profile"}
-                      className="file-card-image"
-                    />
-                  )}
-                </>
+                <Avatar
+                  src={newUrl + sourcePath}
+                  alt={"user profile"}
+                  className="file-card-image"
+                />
               )}
               {resizeImage.imageFound === false && (
                 <Avatar alt={"user profile"} className="file-card-image">
@@ -152,15 +148,11 @@ function NavbarUserDropdown() {
           <MUI.BoxShowCurrentUser>
             {resizeImage.imageFound === null && <Loader />}
             {resizeImage.imageFound === true && (
-              <>
-                {resizeImage.imageSrc && (
-                  <Avatar
-                    src={resizeImage.imageSrc}
-                    alt={"user profile"}
-                    className="file-card-image"
-                  />
-                )}
-              </>
+              <Avatar
+                src={newUrl + sourcePath}
+                alt={"user profile"}
+                className="file-card-image"
+              />
             )}
             {resizeImage.imageFound === false && (
               <Avatar alt={"user profile"} className="file-card-image">

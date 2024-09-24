@@ -234,8 +234,6 @@ function WasabiUpload(props: Props) {
 
         // const limitUpload =
         //   category === "premium" ? 1000 : category === "pro" ? 500 : 300;
-
-        console.log(imageFiles.current);
         const uppy = new Uppy({
           id: "upload-file-id",
           // restrictions: {
@@ -247,6 +245,7 @@ function WasabiUpload(props: Props) {
           // allowMultipleUploadBatches: true,
         });
 
+        
         uppy.on("file-added", async (file: any) => {
           setSelectFiles((prev: any) => [
             ...prev,
@@ -434,31 +433,36 @@ function WasabiUpload(props: Props) {
   }, [folderId, user]);
 
   useEffect(() => {
-    if (uppyInstance.getFiles().length > 0) {
-      const category = userAuth?.packageId?.category;
-      const numberOfFileUpload = userAuth?.packageId?.numberOfFileUpload || 10;
+    function handleUppySetting() {
+      if (uppyInstance.getFiles().length > 0) {
+        const category = userAuth?.packageId?.category;
+        const numberOfFileUpload =
+          userAuth?.packageId?.numberOfFileUpload || 10;
 
-      const limitUpload =
-        category === "premium" ? 1000 : category === "pro" ? 500 : 300;
+        const limitUpload =
+          category === "premium" ? 1000 : category === "pro" ? 500 : 300;
 
-      selectFileRef.current = uppyInstance.getFiles();
-      const allArraysHaveImages = uppyInstance
-        .getFiles()
-        .every((item) => item.data.type.startsWith("image"));
+        selectFileRef.current = uppyInstance.getFiles();
+        const allArraysHaveImages = uppyInstance
+          .getFiles()
+          .every((item) => item.data.type.startsWith("image"));
 
-      uppyInstance.setOptions({
-        restrictions: {
-          maxNumberOfFiles: allArraysHaveImages
-            ? limitUpload
-            : numberOfFileUpload,
-        },
-        autoProceed: false,
-        allowMultipleUploadBatches: true,
-      });
+        uppyInstance.setOptions({
+          restrictions: {
+            maxNumberOfFiles: allArraysHaveImages
+              ? limitUpload
+              : numberOfFileUpload,
+          },
+          autoProceed: false,
+          allowMultipleUploadBatches: true,
+        });
 
-      setIsImage(allArraysHaveImages);
+        setIsImage(allArraysHaveImages);
+      }
     }
-  }, [selectFiles, uppyInstance, isImage]);
+
+    handleUppySetting();
+  }, [selectFiles, uppyInstance, isImage, userAuth]);
 
   return (
     <Fragment>

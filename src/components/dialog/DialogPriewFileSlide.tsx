@@ -19,7 +19,7 @@ import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 import useClickOutside from "hooks/useClickOutside";
-import React, { useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { FileIcon } from "react-file-icon";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
@@ -195,8 +195,23 @@ function DialogPreviewFileSlide(props: DialogProps) {
       }`;
       break;
     case "extendFolder":
+      // sourcePath = `${
+      //   user?.newName + "-" + user?._id + "/" + isCurrentImage?.newPath
+      // }`;
+      pathToUse = isCurrentImage?.newPath;
+      if (pathToUse === null || pathToUse === "") {
+        real_path = "";
+      } else {
+        real_path = removeFileNameOutOfPath(pathToUse);
+      }
       sourcePath = `${
-        user?.newName + "-" + user?._id + "/" + isCurrentImage?.newPath
+        user?.newName +
+        "-" +
+        user?._id +
+        "/" +
+        real_path +
+        "" +
+        data.newFilename
       }`;
       break;
 

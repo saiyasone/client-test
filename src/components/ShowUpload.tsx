@@ -915,8 +915,9 @@ export default function ShowUpload(props: Props) {
                     PATH: user?.newName + "-" + user?._id + "/" + resultPath,
                     FILENAME: resultFileName?.substring(1),
                   };
-
+                  
                   const encryptedData = encryptData(headers);
+                  console.log({ resultFileName, headers, encryptedData });
                   const formData = new FormData();
                   formData.append("file", newFile);
 

@@ -30,8 +30,10 @@ Props) => {
 
   const source = CancelToken.source();
   const cancelToken = source.token;
-  // 484720865-703/f2c283d0-8d83-4d1a-bee9-e694e97718d7/0e78db66-1658-4a7c-869e-f8465769db62/6695a8b5-9456-44cf-9384-80d26a8ba60e/ceacbf1e-54c0-4494-83e9-ba672aabca6f_w2tpOTgifo5x0Ftjp2xtGjkOy.jpg
-  // 484720865-703/f2c283d0-8d83-4d1a-bee9-e694e97718d7/0e78db66-1658-4a7c-869e-f8465769db62/6695a8b5-9456-44cf-9384-80d26a8ba60e/70bab883-b6d9-44eb-9f69-505a52e74e27.png
+
+  // useEffect(() => {
+  //   console.log(imagePath);
+  // }, [imagePath]);
 
   useEffect(() => {
     if (fileType === "image") {
