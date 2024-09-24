@@ -483,13 +483,15 @@ const DialogOneTimeLink = (props) => {
                                     fileType={item.type}
                                   />
                                 </Box>
-                                {item?.name || item?.newFilename?.length <= 15
-                                  ? item?.newFilename
-                                  : item?.newFilename?.substring(0, 9) +
-                                    "..." +
-                                    item?.newFilename?.substring(
-                                      item?.newFilename?.length - 6,
-                                      item?.newFilename?.length,
+                                {item?.name || item?.filename?.length <= 15
+                                  ? item?.name || item?.filename
+                                  : item?.name?.substring(0, 9) ||
+                                    item?.filename?.substring(0, 9) +
+                                      "..." +
+                                      item?.name ||
+                                    item?.filename?.substring(
+                                      item?.name || item?.filename?.length - 6,
+                                      item?.name || item?.filename?.length,
                                     )}
                               </div>
                               <Typography>
