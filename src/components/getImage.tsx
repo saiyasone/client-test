@@ -13,13 +13,6 @@ const fetchResizeImage = async (imagePath: string, isPublic: string, userId: str
       height: 50,
     });
 
-    console.log({
-      path: imagePath,
-      createdBy: isPublic ? '0' : userId,
-      width: 50,
-      height: 50,
-    });
-
     const res = await axios.get(`${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/resize-image?file=${enData}`, {
       responseType: 'arraybuffer',
       cancelToken,

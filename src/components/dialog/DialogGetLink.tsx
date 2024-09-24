@@ -52,7 +52,7 @@ export const ButtonContainer = styled(Button)({
     password: string
   }
 
-const DialogOneTimeLink = (props) => {
+const DialogGetLink = (props) => {
     const { user }: any = useAuth();
     const { onClose, onCreate, data } = props;
     const qrCodeRef = useRef<SVGSVGElement | any>(null);
@@ -158,6 +158,7 @@ const DialogOneTimeLink = (props) => {
     };
 
     const handleSubmit = () => {
+        handleCopy(generatedLink);
         setGeneratedLink('');
         setExpiredAt('');
         setExpireDays(7);
@@ -189,21 +190,46 @@ const DialogOneTimeLink = (props) => {
 
         if(Array.isArray(data)){
             data.forEach((value)=>{
-                if(value && (value?.folder_type || value?.checkType) === 'folder'){
-                    setFolders((prevFolders) => [...prevFolders, value]);
+                if(value && (value?.folder_type || value?.checkType) === 'folder' || value?.folderId?._id){
+                    if(value?.folderId?._id){
+                        const validValue = value?.folderId;
+                        setFolders((prevFolders) => [...prevFolders, validValue]);
+                    }
+                    else{
+                        setFolders((prevFolders) => [...prevFolders, value]);
+                    }
                 }
                 else{
-                    setFiles((prevFiles) => [...prevFiles, value]);
+                    
+                    if(value?.fileId?._id){
+                        const validValue = value?.fileId;
+                        setFiles((prevFiles) => [...prevFiles, validValue]);
+                    }
+                    else{
+                        setFiles((prevFiles) => [...prevFiles, value]);
+                    }
                 }
             })
         }
         else
         {
-            if(data && (data?.folder_type || data?.checkType) === 'folder'){
-                setFolders((prevFolders) => [...prevFolders, data]);
+            if(data && (data?.folder_type || data?.checkType) === 'folder' || data?.folderId?._id){
+                if(data?.folderId?._id){
+                    const validValue = data?.folderId;
+                    setFolders((prevFolders) => [...prevFolders, validValue]);
+                }
+                else{
+                    setFolders((prevFolders) => [...prevFolders, data]);
+                }
             }
             else{
-                setFiles((prevFiles) => [...prevFiles, data]);
+                if(data?.fileId?._id){
+                    const validValue = data?.fileId;
+                    setFiles((prevFiles) => [...prevFiles, validValue]);
+                }
+                else{
+                    setFiles((prevFiles) => [...prevFiles, data]);
+                }
             }
         }
 
@@ -506,4 +532,4 @@ const DialogOneTimeLink = (props) => {
   )
 }
 
-export default DialogOneTimeLink;
+export default DialogGetLink;

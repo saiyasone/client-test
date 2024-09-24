@@ -178,7 +178,6 @@ const DialogOneTimeLink = (props) => {
             return false;
         }
 
-
         return await getManageLinks({
             variables:{
                 where: {
@@ -187,9 +186,9 @@ const DialogOneTimeLink = (props) => {
                 }
             },
             onCompleted: (response) => {
-                if(response && response?.getManageLinks?.data)
+                if(response && response?.getManageLinks?.data[0])
                 {
-                    const result = response?.getManageLinks?.data;
+                    const result = response?.getManageLinks?.data[0];
                     if(result?.password)
                     {
                         setOpenConfirmPWD(true);
@@ -252,6 +251,7 @@ const DialogOneTimeLink = (props) => {
     }
 
     const handleSubmit = () => {
+        handleCopy(generatedLink);
         setGeneratedLink('');
         setBurnLinkId('');
         setExpiredAt('');

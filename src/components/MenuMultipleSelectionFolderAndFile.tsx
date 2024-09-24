@@ -784,6 +784,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                           }}
                                           disabled={
                                             (item.action === "get link" ||
+                                              item.action === "one-time-link" ||
                                               item.action === "file-download" ||
                                               item.action === "password" ||
                                               item.action === "delete" ||
@@ -892,6 +893,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                           }}
                                           disabled={
                                             (item.action === "get link" ||
+                                            item.action === "one-time-link" ||
                                               item.action ===
                                                 "multiple-download" ||
                                               item.action === "password" ||

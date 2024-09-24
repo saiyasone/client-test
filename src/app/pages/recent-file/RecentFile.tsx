@@ -69,6 +69,7 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import RecentFileDataGrid from "./RecentFileDataGrid";
 import DialogGetLink from "components/dialog/DialogGetLink";
+import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
 
 function RecentFile() {
   const { user }: any = useAuth();
@@ -97,8 +98,8 @@ function RecentFile() {
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
   const [_total, setTotal] = useState<any>(0);
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
-  const [inputPassword, setInputPassword] = useState(false);
   const [openGetLink, setOpenGetLink] = useState(false);
+  const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
   const [toggle, setToggle] = useState<any>("list");
   const [totalItems, setTotalItems] = useState<any>(0);
   const { refreshAuto } = useRefreshState();
@@ -175,6 +176,40 @@ function RecentFile() {
     handleClearFileAndFolderData();
   };
 
+  const handleOneTimeLinkMultiFiles = () =>{
+    setDataForEvent({
+      data: {},
+      action: "",
+    });
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0)
+    {
+      setEventClick("one-time-link");
+      
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+
+        return {
+          ...prev,
+          data: data
+        }
+      })
+      
+      setOpenOneTimeLink(true);
+    }
+  }
+
   const handleGetLinkMultipe = () => {
     setDataForEvent({
       data: {},
@@ -230,7 +265,7 @@ function RecentFile() {
   }, [dataGetUrl]);
 
   const handleGetLink = async () => {
-    setDataGetUrl(dataForEvent.data);
+    // setDataGetUrl(dataForEvent.data);
     setDataForEvent((prev: IRecentTypes) => {
       return {
         ...prev,
@@ -332,7 +367,6 @@ function RecentFile() {
   // handle select multiple files
   const handleMultipleFileData = (data: IRecentTypes, dataFile: any) => {
     const optionValue = dataFile?.find((file: any) => file?._id === data);
-console.log('xxxx',{optionValue});
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
@@ -381,6 +415,27 @@ console.log('xxxx',{optionValue});
     });
 
     setOpenGetLink(false);
+  }
+
+  const handleOneTimeLinkClose = () => {
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    })
+    setOpenOneTimeLink(false);
+  }
+
+  const handleOneTimeLinkSubmit = () => {
+    setOpenOneTimeLink(false);
+    setDataGetUrl(null);
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    });
   }
 
   useEffect(() => {
@@ -515,17 +570,22 @@ console.log('xxxx',{optionValue});
         break;
       case "get link":
         setEventClick("get link");
-        alert('menuOnClick')
         if (checkPassword) {
-          // setShowEncryptPassword(true);
-          setInputPassword(true);
+          setShowEncryptPassword(true);
         } else {
           await handleGetLink();
         }
         break;
+      case "one-time-link":
+        setEventClick("one-time-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenOneTimeLink(true);
+        }
+        break;
       case "detail":
         setEventClick("detail");
-
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
@@ -568,8 +628,11 @@ console.log('xxxx',{optionValue});
         handleCloseDecryptedPassword();
         break;
       case "get link":
-        alert('handleSubmitDecryptedPassword func')
         await handleGetLink();
+        handleCloseDecryptedPassword();
+        break;
+      case "one-time-link":
+        setOpenOneTimeLink(true);
         handleCloseDecryptedPassword();
         break;
       case "preview":
@@ -1002,12 +1065,24 @@ console.log('xxxx',{optionValue});
         />
       }
 
+      {
+        openOneTimeLink && dataForEvent?.data &&
+        <DialogOneTimeLink
+          isOpen={openOneTimeLink}
+          onClose={handleOneTimeLinkClose}
+          onCreate={handleOneTimeLinkSubmit}
+          data={dataForEvent?.data }
+        />
+
+      }
+
       <MUI.TitleAndSwitch sx={{ my: 2 }}>
         {dataSelector?.selectionFileAndFolderData?.length ? (
           <MenuMultipleSelectionFolderAndFile
             onPressShare={() => {
               setShareMultipleDialog(true);
             }}
+            onOneTimeLinks={handleOneTimeLinkMultiFiles}
             onManageLink={handleGetLinkMultipe}
             onPressLockData={handleOpenMultiplePassword}
             onPressSuccess={() => {

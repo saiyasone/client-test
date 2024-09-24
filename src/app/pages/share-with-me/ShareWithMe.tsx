@@ -66,11 +66,13 @@ import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import { useRefreshState } from "contexts/RefreshProvider";
+import DialogGetLink from "components/dialog/DialogGetLink";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
   const navigate = useNavigate();
   const [toggle, setToggle] = useState<any>("list");
+  const [openGetLink, setOpenGetLink] = useState(false);
   const [notification, setNotification] = useState<any>(false);
   const [getShareMe, { refetch: refetchShare }] = useLazyQuery(QUERY_SHARE, {
     fetchPolicy: "no-cache",
@@ -212,17 +214,21 @@ function ShareWithMe() {
         handleCloseDecryptedPassword();
         handleOpenFolder(dataForEvent.data);
         break;
+      // case "get link":
+      //   {
+      //     let _id = "";
+      //     if (dataForEvent.data?.fileId?._id) {
+      //       _id = dataForEvent.data.fileId?._id;
+      //     } else {
+      //       _id = dataForEvent.data.folderId?._id;
+      //     }
+      //     handleCloseDecryptedPassword();
+      //     handleFileAndFolderURL?.({ ...dataForEvent.data, _id });
+      //   }
+      //   break;
       case "get link":
-        {
-          let _id = "";
-          if (dataForEvent.data?.fileId?._id) {
-            _id = dataForEvent.data.fileId?._id;
-          } else {
-            _id = dataForEvent.data.folderId?._id;
-          }
-          handleCloseDecryptedPassword();
-          handleFileAndFolderURL?.({ ...dataForEvent.data, _id });
-        }
+        setOpenGetLink(true);
+        handleCloseDecryptedPassword();
         break;
       case "preview":
         handleCloseDecryptedPassword();
@@ -347,28 +353,33 @@ function ShareWithMe() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
-      const checkPassword = isCheckPassword();
+  // useEffect(() => {
+  //   if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
+  //     const checkPassword = isCheckPassword();
 
-      if (checkPassword) {
-        setShowEncryptPassword(true);
-      } else {
-        let _id = "";
-        let shortUrl = "";
-        if (dataForEvent.data?.fileId?._id) {
-          _id = dataForEvent.data.fileId?._id;
-          shortUrl = dataForEvent.data.fileId?.shortUrl;
-        } else {
-          _id = dataForEvent.data.folderId?._id;
-          shortUrl = dataForEvent.data.folderId?.shortUrl;
-        }
-        handleFileAndFolderURL?.({ ...dataForEvent.data, shortUrl, _id });
-        setDataForEvent({
-          action: "",
-          data: {},
-        });
-      }
+  //     if (checkPassword) {
+  //       setShowEncryptPassword(true);
+  //     } else {
+  //       let _id = "";
+  //       let shortUrl = "";
+  //       if (dataForEvent.data?.fileId?._id) {
+  //         _id = dataForEvent.data.fileId?._id;
+  //         shortUrl = dataForEvent.data.fileId?.shortUrl;
+  //       } else {
+  //         _id = dataForEvent.data.folderId?._id;
+  //         shortUrl = dataForEvent.data.folderId?.shortUrl;
+  //       }
+  //       handleFileAndFolderURL?.({ ...dataForEvent.data, shortUrl, _id });
+  //       setDataForEvent({
+  //         action: "",
+  //         data: {},
+  //       });
+  //     }
+  //   }
+  // }, [dataForEvent.action]);
+  useEffect(() => {
+    if (dataForEvent.action && dataForEvent.data) {
+      menuOnClick(dataForEvent.action);
     }
   }, [dataForEvent.action]);
 
@@ -555,9 +566,18 @@ function ShareWithMe() {
           setShowPreview(true);
         }
         break;
+      // case "get link":
+      //   setEventClick("get link");
+      //   // await handleGetLink();
+      //   break;
       case "get link":
-        setEventClick("get link");
-        // await handleGetLink();
+        setEventClick("get-link");
+        if(checkPassword) {
+          setShowEncryptPassword(true);
+        } 
+        else {
+          setOpenGetLink(true);
+        }
         break;
       case "detail":
         setEventClick("detail");
@@ -911,6 +931,58 @@ function ShareWithMe() {
     setShareDialog(false);
   };
 
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  }
+
+  const handleGenerateGetLink = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  }
+
+  const handleGetLinkMultipe = () => {
+    setDataForEvent({
+      data: {},
+      action: "",
+    });
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0){
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+  
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+  
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+  
+        return {
+          ...prev,
+          data: data
+        }
+      });
+
+      setOpenGetLink(true);
+    }
+  }
+
   return (
     <Fragment>
       <Box
@@ -929,6 +1001,7 @@ function ShareWithMe() {
                 handleClearSelection();
                 queryGetShare();
               }}
+              onManageLink={handleGetLinkMultipe}
               onPressDeleteShare={handleMultipleDeleteShare}
               onPressShare={() => {
                 setShareMultipleDialog(true);
@@ -1259,10 +1332,8 @@ function ShareWithMe() {
                                                         ...(isCanEdit && {
                                                           onClick: () => {
                                                             if (
-                                                              menuItem.action ===
-                                                                "get link" ||
-                                                              menuItem.action ===
-                                                                "share"
+                                                              menuItem.action === "get link" ||
+                                                              menuItem.action === "share"
                                                             ) {
                                                               const dataItem = {
                                                                 ...data,
@@ -1512,6 +1583,15 @@ function ShareWithMe() {
         onClose={handleCloseFileDrop}
         handleChange={handleCreateFileDrop}
       />
+      {
+        openGetLink && dataForEvent.data &&
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      }
     </Fragment>
   );
 }

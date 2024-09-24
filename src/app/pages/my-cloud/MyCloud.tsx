@@ -1020,7 +1020,7 @@ export function MyCloud() {
     if (dataForEvent.data && dataForEvent.action) {
       menuOnClick(dataForEvent.action);
     }
-  }, [openGetLink,dataForEvent.action]);
+  }, [dataForEvent.action]);
 
   const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
@@ -2120,8 +2120,6 @@ export function MyCloud() {
           data={dataForEvent.data}
         />
       }
-      
-
       {
         openOneTimeLink && dataForEvent?.data &&
         <DialogOneTimeLink
@@ -2130,7 +2128,6 @@ export function MyCloud() {
           onCreate={handleOneTimeLinkSubmit}
           data={dataForEvent?.data }
         />
-
       }
     </Fragment>
   );

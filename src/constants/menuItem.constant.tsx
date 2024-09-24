@@ -27,18 +27,8 @@ const menuItems = [
   { icon: <FiLink />, title: "Get link", action: "get link", disabled: true },
   { icon: <FiLock />, title: "Password", action: "password", disabled: true },
   { icon: <FiEdit />, title: "Rename", action: "rename" },
-  {
-    icon: <MdOutlineFavoriteBorder />,
-    title: "Favourite",
-    action: "favourite",
-  },
-
-  {
-    icon: <FiDownload />,
-    title: "Download",
-    action: "download",
-    disabled: true,
-  },
+  { icon: <MdOutlineFavoriteBorder />, title: "Favourite", action: "favourite",},
+  { icon: <FiDownload />, title: "Download", action: "download", disabled: true, },
   { icon: <AddLinkIcon />, title: "One time link", action: "one-time-link", disabled: true },
   { icon: <HiOutlineTrash />, title: "Move to trash", action: "delete" },
 ];
@@ -47,12 +37,7 @@ export const shareWithMeFolderMenuItems = [
   { icon: <FiShare2 />, title: "Share", action: "share", disabled: true },
   { icon: <FiLink />, title: "Get Link", action: "get link", disabled: true },
   { icon: <FiEdit />, title: "Rename", action: "rename" },
-  {
-    icon: <FiDownload />,
-    title: "Download",
-    action: "download",
-    disabled: true,
-  },
+  { icon: <FiDownload />, title: "Download", action: "download", disabled: true, },
   // { icon: <FiFile />, title: "File Drop", action: "filedrop" },
   { icon: <HiOutlineTrash />, title: "Delete", action: "delete" },
 ];
@@ -62,12 +47,7 @@ export const shareWithMeFileMenuItems = [
   { icon: <FiShare2 />, title: "Share", action: "share", disabled: true },
   { icon: <FiLink />, title: "Get Link", action: "get link", disabled: true },
   { icon: <FiEdit />, title: "Rename", action: "rename" },
-  {
-    icon: <FiDownload />,
-    title: "Download",
-    action: "download",
-    disabled: true,
-  },
+  { icon: <FiDownload />, title: "Download", action: "download", disabled: true, },
   { icon: <HiOutlineTrash />, title: "Delete", action: "delete" },
 ];
 

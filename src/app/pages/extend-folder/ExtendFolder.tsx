@@ -82,6 +82,8 @@ import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
 import { TitleAndSwitch } from "styles/clientPage.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import { useRefreshState } from "contexts/RefreshProvider";
+import DialogGetLink from "components/dialog/DialogGetLink";
+import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
 
 const _ITEM_GRID_PER_PAGE = 20;
 
@@ -94,6 +96,8 @@ function ExtendFolder() {
   const [toggle, setToggle] = useState<any>(null);
   const [isUpdate, setIsUpdate] = useState<any>(false);
   const [_viewMore, _setViewMore] = useState<any>(20);
+  const [openGetLink, setOpenGetLink] = useState(false);
+  const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
   const parentFolderUrl = useMemo(() => {
     return Base64.decode(params.id);
   }, [params.id]);
@@ -291,7 +295,8 @@ function ExtendFolder() {
         setShowEncryptPassword(true);
       } else {
         setIsAutoClose(true);
-        handleGetFolderURL?.(dataForEvent.data);
+        setOpenGetLink(true);
+        // handleGetFolderURL?.(dataForEvent.data);
         resetDataForEvent();
       }
     }
@@ -375,6 +380,65 @@ function ExtendFolder() {
   const handleCloseMultiplePassword = () => {
     setIsMultiplePasswordLink(false);
   };
+
+  const handleGetLinkMultipe = () => {
+    resetDataForEvent();
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0){
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+  
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+  
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+  
+        return {
+          ...prev,
+          data: data
+        }
+      });
+
+      setOpenGetLink(true);
+    }
+  }
+
+  const handleOneTimeLinkMultiFiles = () =>{
+    resetDataForEvent();
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0)
+    {
+      setEventClick("one-time-link");
+      
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+
+        return {
+          ...prev,
+          data: data
+        }
+      })
+      
+      setOpenOneTimeLink(true);
+    }
+  }
 
   // handle multiple select files
   const handleMultipleFileData = (dataId) => {
@@ -567,9 +631,27 @@ function ExtendFolder() {
           setShowPreview(true);
         }
         break;
-      case "get link":
-        setEventClick("get link");
+      // case "get link":
+      //   setEventClick("get link");
+      //   break;
+      case "get link": {
+        setEventClick("get-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+        setOpenGetLink(true);
+        }
         break;
+      }
+      case "one-time-link":{
+        setEventClick("one-time-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenOneTimeLink(true);
+        }
+        break;
+      }
       case "detail":
         setEventClick("detail");
         if (checkPassword) {
@@ -654,8 +736,14 @@ function ExtendFolder() {
         await handleDeleteFilesAndFolders();
         break;
       case "get link":
+        // handleCloseDecryptedPassword();
+        // handleGetFolderURL?.(dataForEvent.data);
+        setOpenGetLink(true);
         handleCloseDecryptedPassword();
-        handleGetFolderURL?.(dataForEvent.data);
+        break;
+      case "one-time-link":
+        setOpenOneTimeLink(true);
+        handleCloseDecryptedPassword();
         break;
       case "rename":
         handleCloseDecryptedPassword();
@@ -874,6 +962,48 @@ function ExtendFolder() {
       },
     );
   };
+
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    // setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  }
+
+  const handleGenerateGetLink = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  }
+
+  const handleOneTimeLinkClose = () => {
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    })
+    setOpenOneTimeLink(false);
+  }
+
+  const handleOneTimeLinkSubmit = () => {
+    setOpenOneTimeLink(false);
+    setDataForEvent((prev: any)=>{
+      return {
+        ...prev,
+        action: ""
+      }
+    });
+  }
 
   const handleDeleteFilesAndFolders = async () => {
     try {
@@ -1151,6 +1281,8 @@ function ExtendFolder() {
             onPressShare={() => {
               setShareMultipleDialog(true);
             }}
+            onOneTimeLinks={handleOneTimeLinkMultiFiles}
+            onManageLink={handleGetLinkMultipe}
             onPressLockData={handleOpenMultiplePassword}
             onPressSuccess={() => {
               handleClearMultipleFileAndFolder();
@@ -1278,6 +1410,8 @@ function ExtendFolder() {
                                                   "download" ||
                                                 menuItem.action ===
                                                   "password" ||
+                                                menuItem.action ===
+                                                  "one-time-link" ||
                                                 menuItem.action === "export-csv"
                                                 ? {
                                                     disabled: true,
@@ -1750,6 +1884,24 @@ function ExtendFolder() {
           " will be deleted?"
         }
       />
+      {
+        openGetLink && dataForEvent.data &&
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      }
+      {
+        openOneTimeLink && dataForEvent?.data &&
+        <DialogOneTimeLink
+          isOpen={openOneTimeLink}
+          onClose={handleOneTimeLinkClose}
+          onCreate={handleOneTimeLinkSubmit}
+          data={dataForEvent?.data }
+        />
+      }
     </Fragment>
   );
 }
