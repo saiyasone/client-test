@@ -73,6 +73,7 @@ import useFetchShareFolder from "hooks/folder/useFetchShareFolder";
 import { TitleAndSwitch } from "styles/clientPage.style";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import { useRefreshState } from "contexts/RefreshProvider";
+import DialogGetLink from "components/dialog/DialogGetLink";
 
 const ITEM_PER_PAGE = 10;
 
@@ -85,6 +86,7 @@ function ExtendShare() {
   const [toggle, setToggle] = useState<any>(null);
   const parentFolderUrl: any = Base64.decode(params.id);
   const { refreshAuto } = useRefreshState();
+  const [openGetLink, setOpenGetLink] = useState(false);
 
   const handleToggle = (value) => {
     setToggle(value);
@@ -168,7 +170,14 @@ function ExtendShare() {
   useEffect(() => {
     if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
       setIsAutoClose(true);
-      handleGetFolderURL?.(dataForEvent.data);
+      // handleGetFolderURL?.(dataForEvent.data);
+      if(isCheckPassword()) {
+        setShowEncryptPassword(true);
+      } 
+      else {
+        setOpenGetLink(true);
+      }
+      handleCloseDecryptedPassword();
       resetDataForEvents();
     }
   }, [dataForEvent.action]);
@@ -374,7 +383,10 @@ function ExtendShare() {
         handleCloseDecryptedPassword();
         setShareDialog(true);
         break;
-
+      case "get link":
+        setOpenGetLink(true);
+        handleCloseDecryptedPassword();
+        break;
       default:
         break;
     }
@@ -932,6 +944,27 @@ function ExtendShare() {
     }
   };
 
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  }
+
+  const handleGenerateGetLink = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  }
+
   const handleDoubleClick = (data) => {
     const base64URL = Base64.encodeURI(data._id);
     navigate(`/folder/share/${base64URL}`);
@@ -1425,6 +1458,15 @@ function ExtendShare() {
         onConfirm={handleSubmitDecryptedPassword}
         onClose={handleCloseDecryptedPassword}
       />
+      {
+        openGetLink && dataForEvent.data &&
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      }
     </Fragment>
   );
 }

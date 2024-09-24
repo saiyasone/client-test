@@ -12,17 +12,17 @@ export const CREATE_ONE_TIME_LINK = gql`mutation CreateOneTimeLink($input: Creat
     }
   }`;
 
-export const GET_ONE_TIME_LINK = gql`query GetOneTimeLink($where: OneTimeLinkWhereInput) {
-  getOneTimeLink(where: $where) {
+export const GET_MANAGE_LINKS = gql`query GetManageLinks($where: ManageLinkWhereInput) {
+  getManageLinks(where: $where) {
     code
     message
     data {
-      _id
+       _id
       shortLink
-      longLink
       status
       createdAt
       password
+      type
     }
   }
 }`;

@@ -986,8 +986,6 @@ export function MyCloud() {
   };
 
   const handleGenerateGetLink = () => {
-    //not complete => waiting API
-    //Need to check in other functions for getLink event fire
     setDataGetUrl(null);
     setDataForEvent((prev: any) => {
       return {
@@ -1003,7 +1001,7 @@ export function MyCloud() {
     if (dataForEvent.data && dataForEvent.action) {
       menuOnClick(dataForEvent.action);
     }
-  }, [openGetLink, dataForEvent.action]);
+  }, [dataForEvent.action]);
 
   const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
@@ -2166,7 +2164,7 @@ export function MyCloud() {
 
       {openOneTimeLink && dataForEvent?.data && (
         <DialogOneTimeLink
-          isOpen={setOpenOneTimeLink}
+          isOpen={openOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
           data={dataForEvent?.data}

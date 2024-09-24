@@ -38,6 +38,7 @@ import {
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 import { IndexPropsType } from "./type";
+import { successMessage } from "utils/alert.util";
 
 const useStyles = makeStyles({
   container: {
@@ -246,12 +247,14 @@ function ShareSocial(props: IndexPropsType) {
     url,
     onSocialButtonClicked = () => {},
   } = props;
+
   const copyToClipboard = (text: string) => {
     if (navigator && navigator.clipboard)
       navigator.clipboard
         .writeText(text)
         .then(() => {
           setIsCopied(true);
+          successMessage('Url was copied!', 3000)
         })
         .catch((error) => {
           alert(`Copy failed! ${error}`);

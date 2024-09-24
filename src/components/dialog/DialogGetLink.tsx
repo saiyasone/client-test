@@ -197,17 +197,43 @@ const DialogOneTimeLink = (props) => {
 
     if (Array.isArray(data)) {
       data.forEach((value) => {
-        if (value && (value?.folder_type || value?.checkType) === "folder") {
-          setFolders((prevFolders) => [...prevFolders, value]);
+        if (
+          (value && (value?.folder_type || value?.checkType) === "folder") ||
+          value?.folderId?._id
+        ) {
+          if (value?.folderId?._id) {
+            const validValue = value?.folderId;
+            setFolders((prevFolders) => [...prevFolders, validValue]);
+          } else {
+            setFolders((prevFolders) => [...prevFolders, value]);
+          }
         } else {
-          setFiles((prevFiles) => [...prevFiles, value]);
+          if (value?.fileId?._id) {
+            const validValue = value?.fileId;
+            setFiles((prevFiles) => [...prevFiles, validValue]);
+          } else {
+            setFiles((prevFiles) => [...prevFiles, value]);
+          }
         }
       });
     } else {
-      if (data && (data?.folder_type || data?.checkType) === "folder") {
-        setFolders((prevFolders) => [...prevFolders, data]);
+      if (
+        (data && (data?.folder_type || data?.checkType) === "folder") ||
+        data?.folderId?._id
+      ) {
+        if (data?.folderId?._id) {
+          const validValue = data?.folderId;
+          setFolders((prevFolders) => [...prevFolders, validValue]);
+        } else {
+          setFolders((prevFolders) => [...prevFolders, data]);
+        }
       } else {
-        setFiles((prevFiles) => [...prevFiles, data]);
+        if (data?.fileId?._id) {
+          const validValue = data?.fileId;
+          setFiles((prevFiles) => [...prevFiles, validValue]);
+        } else {
+          setFiles((prevFiles) => [...prevFiles, data]);
+        }
       }
     }
   }, [data]);
@@ -369,15 +395,14 @@ const DialogOneTimeLink = (props) => {
                                       user?.newName +
                                       "-" +
                                       user?._id +
-                                      (item?.path
-                                        ? removeFileNameOutOfPath(item?.path)
+                                      "/" +
+                                      (item?.newPath
+                                        ? removeFileNameOutOfPath(item?.newPath)
                                         : "") +
                                       "/" +
                                       item?.newFilename
                                     }
                                     fileType={item?.fileType}
-                                    // isPublic={item?.isPublic}
-                                    // userId={user?._id}
                                   />
                                 </Box>
                                 {item.name

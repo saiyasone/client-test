@@ -27,16 +27,16 @@ import {
   handleDownloadQRCode,
   handleShareQR,
 } from "utils/image.share.download";
-import { ShareSocial } from "components/social-media";
 import { IoMdClose } from "react-icons/io";
 import {
   BURN_ONE_TIME_LINK,
   CREATE_ONE_TIME_LINK,
-  GET_ONE_TIME_LINK,
+  GET_MANAGE_LINKS,
 } from "api/graphql/onetimelink.graphql";
 import { useLazyQuery, useMutation } from "@apollo/client";
 import { calculateExpirationDate } from "utils/date.util";
 import DialogBackendVerifyPassword from "./DialogBackendVerifyPassword";
+import DialogShare from "./DialogShare.SocialMedia";
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -88,7 +88,7 @@ const DialogOneTimeLink = (props) => {
   const [isShared, setIsShared] = useState(false);
 
   const [createOneTimeLink] = useMutation(CREATE_ONE_TIME_LINK);
-  const [getOneTimeLink] = useLazyQuery(GET_ONE_TIME_LINK);
+  const [getManageLinks] = useLazyQuery(GET_MANAGE_LINKS);
   const [burnOneTimeLink] = useLazyQuery(BURN_ONE_TIME_LINK);
 
   const resetAll = () => {
@@ -192,15 +192,16 @@ const DialogOneTimeLink = (props) => {
       return false;
     }
 
-    return await getOneTimeLink({
+    return await getManageLinks({
       variables: {
         where: {
           _id: burnLinkId,
+          status: "active",
         },
       },
       onCompleted: (response) => {
-        if (response && response?.getOneTimeLink?.data) {
-          const result = response?.getOneTimeLink?.data;
+        if (response && response?.getManageLinks?.data[0]) {
+          const result = response?.getManageLinks?.data[0];
           if (result?.password) {
             setOpenConfirmPWD(true);
           } else {
@@ -209,6 +210,7 @@ const DialogOneTimeLink = (props) => {
         }
       },
       onError: (error) => {
+        console.log(error);
         errorMessage(error?.message || "Can not burn this secret Url.", 3000);
         setOpenConfirmPWD(false);
         return false;
@@ -267,6 +269,7 @@ const DialogOneTimeLink = (props) => {
   };
 
   const handleSubmit = () => {
+    handleCopy(generatedLink);
     setGeneratedLink("");
     setBurnLinkId("");
     setExpiredAt("");
@@ -466,21 +469,19 @@ const DialogOneTimeLink = (props) => {
                                     height: "100px !important",
                                   }}
                                 >
-                                  {item?.fileType?.startsWith("image") && (
-                                    <ImageComponent
-                                      imagePath={
-                                        user?.newName +
-                                        "-" +
-                                        user?._id +
-                                        (item?.path
-                                          ? removeFileNameOutOfPath(item?.path)
-                                          : "") +
-                                        "/" +
-                                        item?.newFilename
-                                      }
-                                      fileType={item.type}
-                                    />
-                                  )}
+                                  <ImageComponent
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      (item?.path
+                                        ? removeFileNameOutOfPath(item?.path)
+                                        : "") +
+                                      "/" +
+                                      item?.newFilename
+                                    }
+                                    fileType={item.type}
+                                  />
                                 </Box>
                                 {item?.name || item?.newFilename?.length <= 15
                                   ? item?.newFilename
@@ -729,27 +730,10 @@ const DialogOneTimeLink = (props) => {
                           setIsShared(!isShared);
                         }}
                       >
-                        <ShareSocial
-                          socialTypes={[
-                            "copy",
-                            "facebook",
-                            "twitter",
-                            "line",
-                            "linkedin",
-                            "whatsapp",
-                            "viber",
-                            "telegram",
-                            "reddit",
-                            "instapaper",
-                            "livejournal",
-                            "mailru",
-                            "ok",
-                            "hatena",
-                            "email",
-                            "workspace",
-                          ]}
+                        <DialogShare
+                          onClose={() => setIsShared(!isShared)}
+                          isOpen={isShared}
                           url={generatedLink}
-                          title="Social Media"
                         />
                       </Typography>
                     )}
