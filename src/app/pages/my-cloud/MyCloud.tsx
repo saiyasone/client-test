@@ -1004,9 +1004,7 @@ export function MyCloud() {
     });
   }
 
-  const handleGenerateGetLink = (values) => {
-    //not complete => waiting API
-    //Need to check in other functions for getLink event fire
+  const handleGenerateGetLink = () => {
     setDataGetUrl(null);
     setDataForEvent((prev: any) => {
       return {

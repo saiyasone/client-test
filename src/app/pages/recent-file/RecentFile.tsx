@@ -68,6 +68,7 @@ import {
 } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import RecentFileDataGrid from "./RecentFileDataGrid";
+import DialogGetLink from "components/dialog/DialogGetLink";
 
 function RecentFile() {
   const { user }: any = useAuth();
@@ -96,6 +97,8 @@ function RecentFile() {
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
   const [_total, setTotal] = useState<any>(0);
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
+  const [inputPassword, setInputPassword] = useState(false);
+  const [openGetLink, setOpenGetLink] = useState(false);
   const [toggle, setToggle] = useState<any>("list");
   const [totalItems, setTotalItems] = useState<any>(0);
   const { refreshAuto } = useRefreshState();
@@ -172,6 +175,37 @@ function RecentFile() {
     handleClearFileAndFolderData();
   };
 
+  const handleGetLinkMultipe = () => {
+    setDataForEvent({
+      data: {},
+      action: "",
+    });
+    
+    if(dataSelector.selectionFileAndFolderData?.length > 0){
+      setDataForEvent((prev)=>{
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType === 'folder' && item?.totalSize > 0;
+        });
+  
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
+          return item?.checkType ==='file';
+        });
+  
+        const data = [
+          ...validFolders,
+          ...validFiles
+        ];
+  
+        return {
+          ...prev,
+          data: data
+        }
+      });
+
+      setOpenGetLink(true);
+    }
+  }
+
   //share
   useEffect(() => {
     if (user) {
@@ -203,6 +237,8 @@ function RecentFile() {
         action: "",
       };
     });
+
+    setOpenGetLink(true);
   };
 
   const handleTotalItems = (result: any[]) => {
@@ -296,7 +332,7 @@ function RecentFile() {
   // handle select multiple files
   const handleMultipleFileData = (data: IRecentTypes, dataFile: any) => {
     const optionValue = dataFile?.find((file: any) => file?._id === data);
-
+console.log('xxxx',{optionValue});
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
@@ -308,6 +344,7 @@ function RecentFile() {
           totalDownload: optionValue?.totalDownload || 0,
           dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
+          size: optionValue?.size || 0,
           createdBy: {
             _id: optionValue?.createdBy?._id,
             newName: optionValue?.createdBy?.newName,
@@ -321,6 +358,30 @@ function RecentFile() {
   const handleClearFileAndFolderData = () => {
     dispatch(checkboxAction.setRemoveFileAndFolderData());
   };
+
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataGetUrl(null);
+    // setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  }
+
+  const handleGenerateGetLink = () => {
+    setDataGetUrl(null);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  }
 
   useEffect(() => {
     handleClearFileAndFolderData();
@@ -454,9 +515,10 @@ function RecentFile() {
         break;
       case "get link":
         setEventClick("get link");
-
+        alert('menuOnClick')
         if (checkPassword) {
-          setShowEncryptPassword(true);
+          // setShowEncryptPassword(true);
+          setInputPassword(true);
         } else {
           await handleGetLink();
         }
@@ -506,6 +568,7 @@ function RecentFile() {
         handleCloseDecryptedPassword();
         break;
       case "get link":
+        alert('handleSubmitDecryptedPassword func')
         await handleGetLink();
         handleCloseDecryptedPassword();
         break;
@@ -929,12 +992,23 @@ function RecentFile() {
         }
       />
 
+      {
+        openGetLink && dataForEvent.data &&
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      }
+
       <MUI.TitleAndSwitch sx={{ my: 2 }}>
         {dataSelector?.selectionFileAndFolderData?.length ? (
           <MenuMultipleSelectionFolderAndFile
             onPressShare={() => {
               setShareMultipleDialog(true);
             }}
+            onManageLink={handleGetLinkMultipe}
             onPressLockData={handleOpenMultiplePassword}
             onPressSuccess={() => {
               customGetRecentFiles();
