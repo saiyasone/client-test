@@ -48,8 +48,11 @@ export default function ChatFormReply(props: Props) {
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: onDropFile,
 
-    multiple: true,
+    multiple: false,
     maxFiles: 4,
+    accept: {
+      "image/*": [],
+    },
   });
 
   const handleIsFileClose = () => {

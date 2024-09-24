@@ -48,6 +48,7 @@ import useExportCSV from "hooks/useExportCSV";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 // import useScroll from "hooks/useScroll";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useFetchFile from "hooks/file/useFetchFile";
 import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
@@ -55,7 +56,6 @@ import { Base64 } from "js-base64";
 import moment from "moment";
 import {
   Fragment,
-  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -67,8 +67,15 @@ import { BiTime } from "react-icons/bi";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 import * as MUIFOLDER from "styles/clientPage.style";
 import * as MUI from "styles/my-cloud/myCloud.style";
+import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
   getFileType,
@@ -83,13 +90,8 @@ import FolderGridItem from "../../../components/FolderGridItem";
 import LinearProgress from "../../../components/LinearProgress";
 import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
-import { RootState } from "stores/store";
-import { useRefreshState } from "contexts/RefreshProvider";
-import { setMenuToggle } from "stores/features/useEventSlice";
-import { IMyCloudTypes } from "types/mycloudFileType";
 import DialogGetLink from "components/dialog/DialogGetLink";
 import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
-
 const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
@@ -194,7 +196,7 @@ export function MyCloud() {
   const {
     isOpenMenu: isMenu,
     isSelected,
-    isOnClicked,
+    isFolderSelected,
     isToggleMenu,
   } = useSelector((state: RootState) => state.event);
 
@@ -397,7 +399,7 @@ export function MyCloud() {
       handleCloseDecryptedPassword();
     }
 
-    if(eventClick ==='one-time-link'){
+    if (eventClick === "one-time-link") {
       setOpenOneTimeLink(true);
       handleCloseDecryptedPassword();
     }
@@ -427,28 +429,6 @@ export function MyCloud() {
   for (let k = 1; k <= Math.ceil(total / rowFilePage); k++) {
     countFilePage = k;
   }
-
-  const handleClickFolder = (
-    _e: any,
-    value: {
-      folder_type: string;
-      folder_name: SetStateAction<string>;
-      filename: SetStateAction<string>;
-      _id: SetStateAction<{}>;
-      path: SetStateAction<string>;
-    },
-  ) => {
-    if (value.folder_type === "folder") {
-      setName(value?.folder_name);
-    } else {
-      setName(value?.filename);
-    }
-
-    setChecked(value?._id);
-    setPath(value.path);
-    setOptionsValue(true);
-    setGetValue(value);
-  };
 
   const handleClose = () => {
     setOptionsValue(false);
@@ -634,7 +614,6 @@ export function MyCloud() {
 
   const handleViewMoreFile = () => {
     addMoreLimit();
-    // setFileViewMore((prev) => prev + 20);
   };
 
   const handleDownloadFile = async (inputData: any) => {
@@ -656,7 +635,7 @@ export function MyCloud() {
     await manageFile.handleDownloadSingleFile(
       { multipleData: newFileData },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           successMessage("Download successful", 3000);
           setGetValue((prev: any) => {
             return {
@@ -835,7 +814,7 @@ export function MyCloud() {
     );
   };
 
-  const handleMultipleFileData = (selectData: IMyCloudTypes) => {
+  const handleMultipleFileData = (selectData: string) => {
     const optionValue = mainFile?.find((file: any) => file._id === selectData);
 
     dispatch(
@@ -843,9 +822,11 @@ export function MyCloud() {
         data: {
           id: optionValue?._id,
           name: optionValue?.filename,
+          fileType: optionValue?.fileType,
           newPath: optionValue?.newPath || "",
           newFilename: optionValue?.newFilename || "",
           totalDownload: optionValue?.totalDownload || 0,
+          totalSize: optionValue?.size || 0,
           checkType: "file",
           dataPassword: optionValue?.filePassword || "",
           shortLink: optionValue?.shortUrl,
@@ -1002,7 +983,7 @@ export function MyCloud() {
         action: "",
       };
     });
-  }
+  };
 
   const handleGenerateGetLink = () => {
     setDataGetUrl(null);
@@ -1014,7 +995,7 @@ export function MyCloud() {
     });
 
     setOpenGetLink(false);
-  }
+  };
 
   useEffect(() => {
     if (dataForEvent.data && dataForEvent.action) {
@@ -1107,10 +1088,10 @@ export function MyCloud() {
           // setDataForEvent((prev: any) => {
           //   return {
           //     ...prev,
-          //     action: "",
+          //     action: action,
           //   };
           // });
-        setOpenGetLink(true);
+          setOpenGetLink(true);
         }
         break;
       }
@@ -1165,7 +1146,7 @@ export function MyCloud() {
             );
           }
         } else {
-          if (userPackage?.lockFile !== "on") {
+          if (userPackage?.lockFile === "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
@@ -1188,10 +1169,10 @@ export function MyCloud() {
         break;
       }
       case "preview": {
+        setEventClick(action);
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          setEventClick("preview");
           handleDataPreview();
         }
 
@@ -1211,7 +1192,7 @@ export function MyCloud() {
         }
         break;
       }
-      case "one-time-link":{
+      case "one-time-link": {
         setEventClick("one-time-link");
         if (checkPassword) {
           setShowEncryptPassword(true);
@@ -1225,62 +1206,63 @@ export function MyCloud() {
 
   const handleGetLinkMultipe = () => {
     resetDataForEvent();
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0){
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item?.totalSize > 0;
-        });
-  
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
-  
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
-  
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
         return {
           ...prev,
-          data: data
-        }
+          data: data,
+        };
       });
 
       setOpenGetLink(true);
     }
-  }
+  };
 
-  const handleOneTimeLinkMultiFiles = () =>{
+  const handleOneTimeLinkMultiFiles = () => {
     resetDataForEvent();
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0)
-    {
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
       setEventClick("one-time-link");
-      
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item?.totalSize > 0;
-        });
 
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
 
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
 
         return {
           ...prev,
-          data: data
-        }
-      })
-      
+          data: data,
+        };
+      });
+
       setOpenOneTimeLink(true);
     }
-  }
+  };
 
   // favourite function
   const handleFavourite = async (data: IMyCloudTypes) => {
@@ -1414,25 +1396,25 @@ export function MyCloud() {
   };
 
   const handleOneTimeLinkClose = () => {
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
-    })
+        action: "",
+      };
+    });
     setOpenOneTimeLink(false);
-  }
+  };
 
   const handleOneTimeLinkSubmit = () => {
     setOpenOneTimeLink(false);
     setDataGetUrl(null);
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
+        action: "",
+      };
     });
-  }
+  };
 
   useEffect(() => {
     handleClearMultipleFileAndFolder();
@@ -1459,6 +1441,42 @@ export function MyCloud() {
     });
   };
 
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+
+  const handleFolderClick = useCallback(
+    (data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+
+      if (
+        isMobile &&
+        !isFolderSelected &&
+        isToggleMenu.isStatus === "preview"
+      ) {
+        setDataForEvent({
+          action: "folder double click",
+          data: data,
+        });
+      } else {
+        handleMultipleFolderData(data?._id);
+      }
+    },
+    [
+      dispatch,
+      isMobile,
+      isToggleMenu.isStatus,
+      isToggleMenu.isToggle,
+      isFolderSelected,
+    ],
+  );
+
+  const handleFolderDoubleClick = (data: IFolderTypes) => {
+    setDataForEvent({
+      action: "folder double click",
+      data: data,
+    });
+  };
   return (
     <Fragment>
       <Box
@@ -1540,19 +1558,37 @@ export function MyCloud() {
                         >
                           Folders
                         </Typography>
-                        <Typography
-                          display={
-                            folder?.folders?.data?.length > 0 ? "" : "none"
-                          }
-                          variant="h5"
-                          sx={{
-                            fontSize: "1rem",
-                            color: "initial !important",
-                            fontWeight: "normal !important",
-                          }}
-                        >
-                          {totalPages} Items
-                        </Typography>
+                        <Box sx={{ display: "flex", alignItems: "center" }}>
+                          {isMobile && toggle !== "list" && (
+                            <Typography
+                              sx={{
+                                p: 2,
+                                fontSize: "1rem",
+                              }}
+                              onClick={() => {
+                                dispatch(
+                                  toggleFolderSelected(!isFolderSelected),
+                                );
+                                handleClearMultipleFileData();
+                              }}
+                            >
+                              {isFolderSelected ? "Deselect" : "Select"}
+                            </Typography>
+                          )}
+                          <Typography
+                            display={
+                              folder?.folders?.data?.length > 0 ? "" : "none"
+                            }
+                            variant="h5"
+                            sx={{
+                              fontSize: "1rem",
+                              color: "initial !important",
+                              fontWeight: "normal !important",
+                            }}
+                          >
+                            {totalPages} Items
+                          </Typography>
+                        </Box>
                       </Box>
                     </MUIFOLDER.TitleAndIcon>
                   )}
@@ -1590,35 +1626,30 @@ export function MyCloud() {
                               <Fragment key={index}>
                                 <FolderGridItem
                                   open={open}
-                                  file_id={
+                                  id={item?._id}
+                                  password={item?.access_password}
+                                  isContainFiles={
                                     parseInt(item?.total_size) > 0
                                       ? true
                                       : false
                                   }
-                                  id={item?._id}
                                   folder_name={item?.folder_name}
                                   selectType={"folder"}
                                   setIsOpenMenu={setIsOpenMenu}
                                   isOpenMenu={isOpenMenu}
+                                  isCheckbox={true}
                                   isPinned={item.pin ? true : false}
                                   onOuterClick={() => {
                                     setMultiChecked(multiChecked);
                                     setChecked({});
                                   }}
-                                  handleSelectionFolder={
-                                    handleMultipleFolderData
-                                  }
                                   cardProps={{
-                                    onClick: (e: any) => {
-                                      handleMultipleFolderData(item?._id);
-                                      handleClickFolder(e, item);
-                                    },
-                                    onDoubleClick: () => {
-                                      setDataForEvent({
-                                        action: "folder double click",
-                                        data: item,
-                                      });
-                                    },
+                                    onClick: () =>
+                                      isMobile
+                                        ? handleFolderClick(item)
+                                        : handleMultipleFolderData(item._id),
+                                    onDoubleClick: () =>
+                                      handleFolderDoubleClick(item),
 
                                     ...(multiChecked.find(
                                       (id) => id === item?._id,
@@ -1638,10 +1669,10 @@ export function MyCloud() {
                                       return (
                                         <MenuDropdownItem
                                           key={index}
-                                          disabled={(item.file_id[0]?._id ||
-                                                item.parentkey[0]?._id)
-                                                  ? false
-                                                  : menuItems.disabled
+                                          disabled={
+                                            parseInt(item.total_size) > 0
+                                              ? false
+                                              : menuItems.disabled
                                           }
                                           className="menu-item"
                                           isPinned={item.pin ? true : false}
@@ -1727,18 +1758,33 @@ export function MyCloud() {
                     >
                       Files
                     </Typography>
-
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        display: mainFile?.length > 0 ? "" : "none",
-                        fontSize: "1rem",
-                        color: "initial !important",
-                        fontWeight: "normal !important",
-                      }}
-                    >
-                      {total} Items
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {isMobile && toggle !== "list" && (
+                        <Typography
+                          sx={{
+                            p: 2,
+                            fontSize: "1rem",
+                          }}
+                          onClick={() => {
+                            dispatch(toggleSelected(!isSelected));
+                            handleClearMultipleFileData();
+                          }}
+                        >
+                          {isSelected ? "Deselect" : "Select"}
+                        </Typography>
+                      )}
+                      <Typography
+                        variant="h5"
+                        sx={{
+                          display: mainFile?.length > 0 ? "" : "none",
+                          fontSize: "1rem",
+                          color: "initial !important",
+                          fontWeight: "normal !important",
+                        }}
+                      >
+                        {total} Items
+                      </Typography>
+                    </Box>
                   </MUI.DivRecentFileHeader>
                   {toggle === "list" ? (
                     <Box>
@@ -1859,7 +1905,6 @@ export function MyCloud() {
                     </Box>
                   )}
                   {!detectResizeWindow.canBeScrolled &&
-                    // fileViewMore < total &&
                     limitScroll < total &&
                     toggle === "grid" && (
                       <Box
@@ -1891,7 +1936,6 @@ export function MyCloud() {
                 </>
               </MUI.DivRecentFile>
 
-              {/* create share popup */}
               {openShare && (
                 <DialogCreateShare
                   onDeletedUserFromShareSave={handleDeletedUserFromShareOnSave}
@@ -1921,7 +1965,6 @@ export function MyCloud() {
                 }}
                 open={shareMultipleDialog}
                 data={dataForEvent.data}
-                refetch={fileLoading}
                 dataSelector={dataSelector?.selectionFileAndFolderData}
               />
 
@@ -1954,7 +1997,6 @@ export function MyCloud() {
                     "YYYY-MM-DD h:mm:ss",
                   )}
                   totalDownload={getValue?.totalDownload}
-                  // totalDownload={dataForEvent.data?.totalDownload}
                   isOpen={fileDetailsDialog}
                   onClose={() => {
                     setFileDetailsDialog(false);
@@ -2111,24 +2153,23 @@ export function MyCloud() {
         mainFile={mainFile}
         propsStatus="mycloud"
       />
-      {
-        openGetLink && dataForEvent.data &&
+      {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
           onClose={handleGetLinkClose}
           onCreate={handleGenerateGetLink}
           data={dataForEvent.data}
         />
-      }
-      {
-        openOneTimeLink && dataForEvent?.data &&
+      )}
+
+      {openOneTimeLink && dataForEvent?.data && (
         <DialogOneTimeLink
           isOpen={openOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
-          data={dataForEvent?.data }
+          data={dataForEvent?.data}
         />
-      }
+      )}
     </Fragment>
   );
 }

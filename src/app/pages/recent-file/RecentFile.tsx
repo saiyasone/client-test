@@ -559,7 +559,7 @@ function RecentFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile === "on") {
+        if (userPackage?.lockFile !== "on") {
           handleOpenPasswordLink();
         } else {
           errorMessage(
@@ -720,6 +720,7 @@ function RecentFile() {
           });
 
           recentFileRefetch();
+          customGetRecentFiles();
         },
         onFailed: (error: any) => {
           errorMessage(error, 3000);
@@ -755,6 +756,7 @@ function RecentFile() {
         successMessage("Update File successful", 2000);
         await handleActionFile("edit");
         recentFileRefetch();
+        customGetRecentFiles();
         resetDataForEvents();
         setIsAutoClose(true);
       },
@@ -791,6 +793,7 @@ function RecentFile() {
             },
           }));
           recentFileRefetch();
+          customGetRecentFiles();
           setFileDetailsDialog(false);
         },
         onFailed: () => {
@@ -1018,6 +1021,7 @@ function RecentFile() {
         filename={dataForEvent.data?.filename || "Unknown"}
         isUpdate={dataForEvent.data?.filePassword ? true : false}
         onConfirm={() => {
+          customGetRecentFiles();
           recentFileRefetch();
         }}
         onClose={handleClosePasswordLink}
@@ -1028,6 +1032,7 @@ function RecentFile() {
         checkType="file"
         onConfirm={() => {
           handleClearFileAndFolderData();
+          customGetRecentFiles();
           recentFileRefetch();
         }}
         onClose={handleCloseMultiplePassword}

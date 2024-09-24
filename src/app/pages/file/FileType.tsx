@@ -1,6 +1,12 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { Box, Typography } from "@mui/material";
-import { Fragment, useContext, useEffect, useState } from "react";
+import {
+  Box,
+  Button,
+  ListItemText,
+  Typography,
+  useMediaQuery,
+} from "@mui/material";
+import { Fragment, useCallback, useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Base64 } from "js-base64";
@@ -25,7 +31,7 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import menuItems from "constants/menuItem.constant";
@@ -41,6 +47,9 @@ import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import { setMenuToggle, toggleSelected } from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
+import { IFileTypes } from "types/filesType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
   cutFileType,
@@ -52,13 +61,16 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import FileDataGrid from "./FileTypeDataGrid";
 import * as MUI from "./styles/fileType.style";
-import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { useRefreshState } from "contexts/RefreshProvider";
+import { ExpandMore } from "@mui/icons-material";
+import useDetectResizeWindow from "hooks/useDetectResizeWindow";
 
 const ITEM_PER_PAGE = 20;
 
 function FileType() {
   const { fileType }: any = useParams();
   const { user }: any = useAuth();
+  const isMobile = useMediaQuery("(max-width:600px)");
   const manageGraphqlError = useManageGraphqlError();
   const fileTypeDecode = Base64.decode(fileType);
   const isFirstRender = useFirstRender();
@@ -69,10 +81,12 @@ function FileType() {
   const [toggle, setToggle] = useState<any>("list");
   const [userPackage, setUserPackage] = useState<any>(null);
   const [mainFileTypes, setMainFileTypes] = useState<any>(null);
-
+  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+    (state: RootState) => state.event,
+  );
   const navigate = useNavigate();
-
-  const handleToggle = (value) => {
+  const detectResizeWindow = useDetectResizeWindow();
+  const handleToggle = (value: string) => {
     setToggle(value);
     localStorage.setItem("toggle", value);
   };
@@ -129,7 +143,7 @@ function FileType() {
   const [shareDialog, setShareDialog] = useState<any>(false);
   const [total, setTotal] = useState<any>(0);
   const [fileData, setFileData] = useState<any>([]);
-
+  const { setRefreshAuto, refreshAuto } = useRefreshState();
   const [fileAction] = useMutation(MUTATION_ACTION_FILE);
 
   /* data for Breadcrumb */
@@ -139,10 +153,15 @@ function FileType() {
     "",
   );
 
-  const { limitScroll } = useScroll({
+  const { limitScroll, addMoreLimit } = useScroll({
     total: total,
     limitData: ITEM_PER_PAGE,
   });
+
+  const handleViewMoreFile = () => {
+    addMoreLimit();
+    // setFileViewMore((prev) => prev + 20);
+  };
 
   const handleOpenPasswordLink = () => {
     setIsPasswordLink(true);
@@ -163,7 +182,7 @@ function FileType() {
     resetDataForEvents();
     setShowPreview(false);
   };
-  
+
   const queryFileGrid = async () => {
     if (toggle === "grid") {
       try {
@@ -181,8 +200,7 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
-              console.log(queryData);
-              setMainFileTypes(queryData)
+              setMainFileTypes(queryData);
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -199,8 +217,8 @@ function FileType() {
     }
   };
 
-  const handleMultipleFiles = (data) => {
-    const optionValue = fileData?.find((file) => file?._id === data);
+  const handleMultipleFiles = (data: any) => {
+    const optionValue = fileData?.find((file: any) => file?._id === data);
     dispatch(
       checkboxAction.setFileAndFolderData({
         data: {
@@ -239,7 +257,7 @@ function FileType() {
             if (data) {
               const queryData = data?.getFileCategoryDetails?.data || [];
               const queryTotal = data?.getFileCategoryDetails?.total || 0;
-              setMainFileTypes(queryData)
+              setMainFileTypes(queryData);
               setTotal(queryTotal);
               if (queryData?.length > 0) {
                 setFileData(queryData);
@@ -255,6 +273,13 @@ function FileType() {
       errorMessage(error, 3000);
     }
   };
+
+  useEffect(() => {
+    if (refreshAuto?.isStatus === "category") {
+      queryFileGrid();
+      queryFiles();
+    }
+  }, [refreshAuto?.isAutoClose]);
 
   useEffect(() => {
     handleClearSelectionData();
@@ -287,7 +312,7 @@ function FileType() {
 
   useEffect(() => {
     if (!isFirstRender) {
-      setDataFolderFilters((prevState) => {
+      setDataFolderFilters((prevState: any) => {
         const result = {
           ...prevState,
           skip: (currentFolderPage - 1) * ITEM_PER_PAGE,
@@ -323,7 +348,7 @@ function FileType() {
   };
 
   const resetDataForEvents = () => {
-    setDataForEvent((state) => ({
+    setDataForEvent((state: any) => ({
       ...state,
       action: "",
       data: {},
@@ -342,7 +367,7 @@ function FileType() {
   // get download url
   const [dataDownloadURL, setDataDownloadURL] = useState<any>(null);
 
-  const menuOnClick = async (action) => {
+  const menuOnClick = async (action: string) => {
     setIsAutoClose(true);
     const checkPassword = isCheckPassword();
 
@@ -438,7 +463,7 @@ function FileType() {
 
   const handleGetLink = async () => {
     await setDataGetURL(dataForEvent.data);
-    await setDataForEvent((prev) => {
+    await setDataForEvent((prev: IFileTypes) => {
       return {
         ...prev,
         action: "",
@@ -460,7 +485,7 @@ function FileType() {
 
   const handleGetDownloadLink = async () => {
     await setDataDownloadURL(dataForEvent.data);
-    await setDataForEvent((prev) => {
+    await setDataForEvent((prev: IFileTypes) => {
       return {
         ...prev,
         action: "",
@@ -468,7 +493,7 @@ function FileType() {
     });
   };
 
-  const handleActionFile = async (val) => {
+  const handleActionFile = async (val: string) => {
     try {
       await fileAction({
         variables: {
@@ -501,12 +526,12 @@ function FileType() {
     await manageFile.handleDownloadSingleFile(
       { multipleData },
       {
-        onFailed: async (error) => {
+        onFailed: async (error: any) => {
           errorMessage(error, 3000);
         },
         onSuccess: async () => {
           successMessage("Download successful", 2000);
-          setDataForEvent((state) => ({
+          setDataForEvent((state: { data: IFileTypes }) => ({
             ...state,
             action: null,
             data: {
@@ -587,7 +612,7 @@ function FileType() {
             successMessage("One File added to Favourite", 2000);
           }
           await handleActionFile("edit");
-          setDataForEvent((state) => ({
+          setDataForEvent((state: { data: IFileTypes }) => ({
             action: null,
             data: {
               ...state.data,
@@ -617,7 +642,7 @@ function FileType() {
 
   const handleCloseDecryptedPassword = () => {
     setEventClick("");
-    setDataForEvent((prev) => {
+    setDataForEvent((prev: IFileTypes) => {
       return {
         ...prev,
         action: "",
@@ -679,8 +704,9 @@ function FileType() {
     }
   }, [dataForEvent.action]);
 
-
-  const handleFileDetailDialogBreadcrumbFolderNavigate = async (link) => {
+  const handleFileDetailDialogBreadcrumbFolderNavigate = async (
+    link: string,
+  ) => {
     const result = await getFolders({
       variables: {
         where: {
@@ -697,10 +723,10 @@ function FileType() {
     }
   };
 
-  const handleDeletedUserFromShareOnSave = async (deletedUsers) => {
+  const handleDeletedUserFromShareOnSave = async (deletedUsers: IFileTypes) => {
     manageUserFromShare.handleDeletedUserFromShareOnSave(deletedUsers, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IFileTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -711,10 +737,12 @@ function FileType() {
     });
   };
 
-  const handleChangedUserPermissionFromShareSave = async (sharedData) => {
+  const handleChangedUserPermissionFromShareSave = async (
+    sharedData: IFileTypes,
+  ) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState) => ({
+        setDataForEvent((prevState: { data: IFileTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -723,6 +751,31 @@ function FileType() {
         successMessage("Changed user permission of share successful!!", 2000);
       },
     });
+  };
+
+  const handleClick = useCallback(
+    async (data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: any) => {
+    setDataForEvent({
+      action: "preview",
+      data,
+    });
+  };
+
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
   };
 
   return (
@@ -823,31 +876,6 @@ function FileType() {
           }}
         />
       )}
-
-      {/* {showPreview && (
-        <DialogPreviewFile
-          open={showPreview}
-          handleClose={() => {
-            resetDataForEvents();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            if (
-              userPackage?.downLoadOption === "another" ||
-              userPackage?.category === "free"
-            ) {
-              handleGetDownloadLink();
-            } else {
-              handleDownloadFile();
-            }
-          }}
-          filename={dataForEvent.data.filename}
-          newFilename={dataForEvent.data.newFilename}
-          fileType={dataForEvent.data.fileType}
-          path={dataForEvent.data.newPath}
-          user={user}
-        />
-      )} */}
 
       <DialogPreviewFileSlide
         open={showPreview}
@@ -950,6 +978,20 @@ function FileType() {
               <Typography variant="h3">
                 {_.capitalize(fileTypeDecode)}{" "}
               </Typography>
+              {isMobile && toggle !== "list" && (
+                <ListItemText
+                  sx={{
+                    p: 2,
+                    display: "flex",
+                    justifyContent: "flex-end",
+                  }}
+                  onClick={() => {
+                    dispatch(toggleSelected(!isSelected));
+                    handleClearMultipleFileData();
+                  }}
+                  primary={isSelected ? "Deselect" : "Select"}
+                />
+              )}
               {isDataFound !== null && isDataFound && (
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography
@@ -963,7 +1005,6 @@ function FileType() {
                   >
                     {total} Items
                   </Typography>
-
                   <SwitchPages
                     handleToggle={handleToggle}
                     toggle={toggle === "grid" ? "grid" : "list"}
@@ -982,17 +1023,17 @@ function FileType() {
                 <Fragment>
                   {toggle === "grid" && (
                     <FileCardContainer>
-                      {fileData?.map((data, index) => {
+                      {fileData?.map((data: IFileTypes, index: number) => {
                         return (
                           <FileCardItem
                             isCheckbox={true}
                             cardProps={{
-                              onDoubleClick: () => {
-                                setDataForEvent({
-                                  action: "preview",
-                                  data,
-                                });
-                              },
+                              onClick: isMobile
+                                ? async () => await handleClick(data)
+                                : undefined,
+                              onDoubleClick: !isMobile
+                                ? () => handleDoubleClick(data)
+                                : undefined,
                             }}
                             id={data?._id}
                             filePassword={data?.filePassword}
@@ -1032,7 +1073,7 @@ function FileType() {
                                     data?.filePassword ||
                                     data?.password ||
                                     data?.access_password ||
-                                    data?.access_passwordFolder
+                                    data?.access_password
                                       ? true
                                       : false
                                   }
@@ -1064,7 +1105,7 @@ function FileType() {
                       total={total}
                       data={fileData}
                       dataSelector={dataSelector}
-                      handleEvent={(action, data) => {
+                      handleEvent={(action: string, data: IFileTypes) => {
                         setDataForEvent({
                           data,
                           action,
@@ -1073,6 +1114,36 @@ function FileType() {
                       handleSelect={handleMultipleFiles}
                     />
                   )}
+
+                  {!detectResizeWindow.canBeScrolled &&
+                    limitScroll < total &&
+                    toggle === "grid" && (
+                      <Box
+                        sx={{
+                          my: 3,
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            position: "relative",
+                          }}
+                        >
+                          <Button
+                            endIcon={<ExpandMore />}
+                            sx={{ mt: 2 }}
+                            size="small"
+                            variant="outlined"
+                            onClick={handleViewMoreFile}
+                          >
+                            Load more
+                          </Button>
+                        </Box>
+                      </Box>
+                    )}
                 </Fragment>
               </MUI.FileTypeItem>
             </Fragment>

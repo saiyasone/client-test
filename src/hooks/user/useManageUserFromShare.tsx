@@ -3,6 +3,7 @@ import {
   MUTATION_DELETE_SHARE,
   MUTATION_UPDATE_SHARE,
   QUERY_SHARE,
+  // QUERY_USER_SHARE,
 } from "api/graphql/share.graphql";
 import { useEffect, useState } from "react";
 
@@ -28,25 +29,27 @@ const useManageUserFromShare = ({
   useEffect(() => {
     const fetchActiveShare = async () => {
       if (Object.keys(inputFileOrFolder).length > 0) {
-        const currentSharedUserList = (
-          await getShares({
-            variables: {
-              where: {
-                toAccount,
-                ...(inputType === "folder"
-                  ? {
-                      folderId: inputFileOrFolder._id,
-                    }
-                  : {
-                      fileId: inputFileOrFolder._id,
-                    }),
-                status: "active",
-                isShare: "yes",
+        const currentSharedUserList =
+          // .data?.getShareDetail?.data || [];
+          (
+            await getShares({
+              variables: {
+                where: {
+                  toAccount,
+                  ...(inputType === "folder"
+                    ? {
+                        folderId: inputFileOrFolder._id,
+                      }
+                    : {
+                        fileId: inputFileOrFolder._id,
+                      }),
+                  status: "active",
+                  isShare: "yes",
+                },
+                noLimit: true,
               },
-              noLimit: true,
-            },
-          })
-        ).data?.getShare.data;
+            })
+          ).data?.getShare?.data || [];
 
         setSharedUserList(currentSharedUserList);
       }

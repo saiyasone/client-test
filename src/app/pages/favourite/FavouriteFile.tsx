@@ -11,7 +11,6 @@ import React, {
 import {
   Box,
   Button,
-  ListItem,
   ListItemText,
   Typography,
   useMediaQuery,
@@ -535,7 +534,7 @@ function FavouriteFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile === "on") {
+        if (userPackage?.lockFile !== "on") {
           handleOpenPasswordLink();
         } else {
           errorMessage(
@@ -1184,7 +1183,6 @@ function FavouriteFile() {
         }}
         open={shareMultipleDialog}
         data={dataForEvent.data}
-        refetch={loadingFolders || filesRefetch}
         dataSelector={dataSelector?.selectionFileAndFolderData}
       />
 
@@ -1395,7 +1393,7 @@ function FavouriteFile() {
                               dispatch(toggleSelected(!isSelected));
                               handleClearMultipleFileData();
                             }}
-                            primary={isSelected ? "Unselect" : "Select"}
+                            primary={isSelected ? "Deselect" : "Select"}
                           />
                         )}
                       </Box>

@@ -14,12 +14,14 @@ import useHover from "hooks/useHover";
 import { useEffect, useRef, useState } from "react";
 import { BsPinAngleFill } from "react-icons/bs";
 import * as MUI from "styles/clientPage.style";
+import lockIcon from "assets/images/lock-icon.png";
 
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import MenuDropdown from "components/MenuDropdown";
 import useOuterClick from "hooks/useOuterClick";
 import { useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import { RootState } from "stores/store";
 import { cutStringWithEllipsis } from "utils/string.util";
 
 const CustomCheckbox: any = styled(Checkbox)({
@@ -27,6 +29,18 @@ const CustomCheckbox: any = styled(Checkbox)({
     fontSize: 25,
     fontWeight: "300",
   },
+});
+
+const BoxImage = styled("div")({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const ImageIcon = styled("img")({
+  width: "70px",
+  height: "70px",
+  objectFit: "cover",
 });
 
 const Item = styled(Paper)(({ theme, ...props }: any) => ({
@@ -90,14 +104,18 @@ const IconFolderContainer = styled("div")({
   minHeight: "201.58px",
 });
 
-export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
+export default function FolderGridItem({
+  onOuterClick,
+  cardProps,
+  ...props
+}: any) {
   const isMobile = useMediaQuery("(max-width:600px)");
   const itemRef = useRef(null);
   const isFolderItemHover = useHover(itemRef);
   const isCardOuterClicked = useOuterClick(itemRef);
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
+  const { isFolderSelected } = useSelector((state: RootState) => state.event);
   // redux store
   const dataSelector = useSelector(
     checkboxAction.checkboxFileAndFolderSelector,
@@ -106,7 +124,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
   const { onDoubleClick: onCardDoubleClick, ...cardDataProps } =
     cardProps || {};
 
-  const handleDropdownOpen = (isOpen) => {
+  const handleDropdownOpen = (isOpen: boolean) => {
     setIsDropdownOpen(isOpen);
   };
 
@@ -130,6 +148,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
           ...(!isDropdownOpen && {
             onDoubleClick: onCardDoubleClick,
           }),
+
           ischecked: cardDataProps?.ischecked?.toString(),
         }}
       >
@@ -138,7 +157,7 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
             <BsPinAngleFill />
           </Pin>
         )}
-        {props?.menuItem && isOpenMenu && (
+        {(isMobile || (props?.menuItem && isOpenMenu)) && (
           <MenuButtonContainer>
             <MenuDropdown
               customButton={props.customButton}
@@ -153,14 +172,17 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
             <CustomCheckbox
               className="checkbox-selected"
               sx={{
-                display:
-                  !!dataSelector?.selectionFileAndFolderData?.find(
-                    (el: any) =>
-                      el?.id === props?.id &&
-                      el.checkType === props?.selectType,
-                  ) && true
+                display: isMobile
+                  ? isFolderSelected
                     ? "block"
-                    : "none",
+                    : "none" // On mobile, show if folder is selected
+                  : dataSelector?.selectionFileAndFolderData?.find(
+                      (el: any) =>
+                        el?.id === props?.id &&
+                        el.checkType === props?.selectType,
+                    )
+                  ? "block"
+                  : "none",
               }}
               icon={<CheckBoxOutlineBlankRoundedIcon />}
               aria-label={"check-" + props?.id}
@@ -174,13 +196,19 @@ export default function FolderGridItem({ onOuterClick, cardProps, ...props }) {
           </MUI.SelectionContainer>
 
           <MUI.Folder>
-            <IconFolderContainer>
-              {props?.isContainFiles || props?.file_id ? (
-                <FolderNotEmptyIcon />
-              ) : (
-                <FolderEmptyIcon />
-              )}
-            </IconFolderContainer>
+            {props?.password ? (
+              <BoxImage>
+                <ImageIcon src={lockIcon} alt="lock-icon" />
+              </BoxImage>
+            ) : (
+              <IconFolderContainer>
+                {props?.isContainFiles ? (
+                  <FolderNotEmptyIcon />
+                ) : (
+                  <FolderEmptyIcon />
+                )}
+              </IconFolderContainer>
+            )}
 
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               {props.folder_name.length > 10 ? (

@@ -37,7 +37,10 @@ import {
 import { FaTimes } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
-import { toggleSelected } from "stores/features/useEventSlice";
+import {
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
 import { errorMessage, successMessage } from "utils/alert.util";
 import DialogAlert from "./dialog/DialogAlert";
 
@@ -45,6 +48,7 @@ const SelectContainer = styled("div")({
   width: "100%",
   padding: "0 16px",
   borderRadius: "6px",
+  // backgroundColor: "gray",
   backgroundColor: "#E9EDEF",
   paddingBottom: "8px",
   paddingTop: "6px",
@@ -142,9 +146,9 @@ function MenuMultipleSelectionFolderAndFile(props) {
           userPackage?.downLoadOption === "another" ||
           userPackage?.category === "free"
         ) {
-          handleGetLinkAnother();
+          handleGetLinkShareAnother();
         } else {
-          handleDownloadFile();
+          handleDownloadShare();
         }
         break;
 
@@ -247,7 +251,6 @@ function MenuMultipleSelectionFolderAndFile(props) {
   };
 
   const handleDownloadFile = () => {
-    // manageFileAction.handleDemo();
     dispatch(checkboxAction.setIsLoading(true));
     manageFileAction.handleMultipleDownloadFile(
       {
@@ -256,10 +259,28 @@ function MenuMultipleSelectionFolderAndFile(props) {
       {
         onSuccess: () => {
           dispatch(checkboxAction.setIsLoading(false));
-          // handleClearFile();
         },
         onFailed: () => {
           dispatch(checkboxAction.setIsLoading(false));
+        },
+      },
+    );
+  };
+
+  const handleDownloadShare = () => {
+    dispatch(checkboxAction.setIsLoading(true));
+    manageFileAction.handleMultipleDownloadFileAndFolder(
+      {
+        multipleData: dataSelector?.selectionFileAndFolderData,
+        isShare: true,
+      },
+      {
+        onSuccess: () => {
+          dispatch(checkboxAction.setIsLoading(false));
+        },
+        onFailed: (error) => {
+          dispatch(checkboxAction.setIsLoading(false));
+          console.error(error);
         },
       },
     );
@@ -305,6 +326,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const handleClearFile = () => {
     dispatch(checkboxAction.setRemoveFileAndFolderData());
     dispatch(toggleSelected(false));
+    dispatch(toggleFolderSelected(false));
   };
 
   const handleGetLink = () => {
@@ -337,6 +359,30 @@ function MenuMultipleSelectionFolderAndFile(props) {
   const handleGetLinkAnother = () => {
     dispatch(checkboxAction.setIsLoading(true));
     manageFileAction.handleMultipleGetLinks(
+      {
+        dataMultiple: dataSelector?.selectionFileAndFolderData,
+      },
+      {
+        onSuccess: async (result) => {
+          dispatch(checkboxAction.setIsLoading(false));
+          window.open(result.shortLink, "_blank");
+          handleClearFile();
+        },
+        onFailed: (error) => {
+          dispatch(checkboxAction.setIsLoading(false));
+          const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+          errorMessage(
+            manageGraphqlError.handleErrorMessage(cutErr) as string,
+            3000,
+          );
+        },
+      },
+    );
+  };
+
+  const handleGetLinkShareAnother = () => {
+    dispatch(checkboxAction.setIsLoading(true));
+    manageFileAction.handleMultipleShareGetLinks(
       {
         dataMultiple: dataSelector?.selectionFileAndFolderData,
       },
@@ -611,11 +657,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         let hasFile = false;
         let hasFolder = false;
         dataSelector.selectionFileAndFolderData?.forEach((item) => {
-          if (item.checkType === "folder" && item.checkType === "file") {
-            setMultipleTab("multiple");
-          } else if (item.checkType === "folder") {
+          if (item.checkType === "folder") {
             hasFolder = true;
-          } else if (item.checkType === "file") {
+          }
+          if (item.checkType === "file") {
             hasFile = true;
           }
         });

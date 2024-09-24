@@ -22,8 +22,12 @@ export const DivCloud = styled("div")(({ theme }) => ({
   marginBottom: "1rem",
   height: "100%",
   [theme.breakpoints.down("lg")]: {
-    margin: "0 10px",
-    padding: "0 10px",
+    paddingLeft: "30px",
+    paddingRight: "30px",
+  },
+  [theme.breakpoints.down("sm")]: {
+    paddingLeft: "10px",
+    paddingRight: "10px",
   },
 }));
 

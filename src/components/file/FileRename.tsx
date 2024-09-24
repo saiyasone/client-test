@@ -4,13 +4,16 @@ import {
   createTheme,
   OutlinedInput,
   styled,
-  Tooltip,
-  tooltipClasses,
   useMediaQuery,
 } from "@mui/material";
-import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
-import React, { useMemo, useRef } from "react";
+import useFetchFolder from "hooks/folder/useFetchFolder";
+import useManageFolder from "hooks/folder/useManageFolder";
+import useManageGraphqlError from "hooks/useManageGraphqlError";
+import { Base64 } from "js-base64";
+import React, { useMemo } from "react";
+import { useParams } from "react-router-dom";
 import { IFileTypes } from "types/filesType";
 import { IUserTypes } from "types/userType";
 import { errorMessage, successMessage } from "utils/alert.util";
@@ -25,8 +28,9 @@ const FormLabel = styled("label")({
 });
 
 interface RenameTypes {
-  data: IFileTypes;
+  data: any;
   filename?: string;
+  propsStatus?: string;
   setFilename: (value: string) => void;
   user: IUserTypes;
   setDataForEvent: (value: string) => void;
@@ -38,37 +42,82 @@ export default function FileRname({
   setFilename,
   user,
   setDataForEvent,
+  propsStatus,
 }: RenameTypes) {
   const isMobile = useMediaQuery("(max-width:600px)");
-  const { setIsAutoClose } = useMenuDropdownState();
   const manageFile = useManageFile({ user });
+  const manageFolder = useManageFolder({ user });
   const [newData, setNewData] = React.useState("");
   const defaultValueExtension = getFileNameExtension(data.filename);
+  const { setRefreshAuto } = useRefreshState();
+  const params: any = useParams();
+
+  const parentFolderUrl = useMemo(() => {
+    return Base64?.decode(params?.id);
+  }, [params.id]);
+  const { data: parentFolder } = useFetchFolder({
+    folderUrl: parentFolderUrl,
+    userId: user?._id,
+  });
 
   const handleUpdateFile = async () => {
-    await manageFile.handleRenameFile({ id: data._id }, filename, {
-      onSuccess: () => {
-        setIsAutoClose(true);
-        successMessage(RenameFileMessage.UpdateSuccess, 2000);
-        setDataForEvent("");
-      },
-      onFailed: () => {
-        errorMessage(RenameFileMessage.UpdateFailed, 2000);
-      },
-    });
+    if (data?.folder_type === "folder" && data?.folder_type !== undefined) {
+      if (parentFolder) {
+        await manageFolder.handleRenameFolder(
+          {
+            id: data._id,
+            inputNewFolderName: newData,
+            checkFolder: data.checkFolder,
+            parentKey: parentFolder?._id,
+            user: user,
+          },
+          {
+            onSuccess: async () => {
+              successMessage("Update Folder successful", 2000);
+            },
+            onFailed: async (_: any) => {
+              
+            },
+            onClosure: () => {},
+          },
+        );
+      }
+    } else {
+      await manageFile.handleRenameFile({ id: data._id }, filename, {
+        onSuccess: () => {
+          successMessage(RenameFileMessage.UpdateSuccess, 2000);
+          setDataForEvent("");
+          if (propsStatus) {
+            setRefreshAuto({
+              isAutoClose: true,
+              isStatus: propsStatus || "recent",
+            });
+          }
+        },
+        onFailed: () => {
+          errorMessage(RenameFileMessage.UpdateFailed, 2000);
+        },
+      });
+    }
   };
   React.useEffect(() => {
-    const extensionIndex = data.filename.lastIndexOf(".");
-
-    setNewData(data.filename.substring(0, extensionIndex));
+    if (data?.folder_type !== "folder") {
+      const extensionIndex = data.filename.lastIndexOf(".");
+      setNewData(data.filename.substring(0, extensionIndex));
+    } else {
+      setNewData(data.folder_name);
+    }
   }, []);
 
   React.useEffect(() => {
-    setFilename(newData + defaultValueExtension);
+    if (data?.folder_type !== "folder") {
+      setFilename(newData + defaultValueExtension);
+    }
   }, [newData]);
+
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const newName = event.target.value;
-    const newFilename = newData.substring(0, defaultValueExtension);
+    const _ = newData.substring(0, defaultValueExtension);
     if (!/[\\/:*?"'<>]/.test(newName)) {
       setNewData(newName);
     }

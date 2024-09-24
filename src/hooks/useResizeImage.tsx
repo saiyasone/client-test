@@ -31,6 +31,10 @@ Props) => {
   const source = CancelToken.source();
   const cancelToken = source.token;
 
+  // useEffect(() => {
+  //   console.log(imagePath);
+  // }, [imagePath]);
+
   useEffect(() => {
     if (fileType === "image") {
       const fetchResizeImage = async (imagePath: string, userId: string) => {
@@ -47,6 +51,7 @@ Props) => {
             {
               responseType: "arraybuffer",
               cancelToken,
+              headers: { "Cache-Control": "no-cache" },
             },
           );
           if (_.isArrayBuffer(res.data)) {
@@ -68,15 +73,12 @@ Props) => {
           setImageFound(false);
         }
       };
+
       if (imagePath && user?._id) {
         fetchResizeImage(imagePath, user?._id);
       } else {
         setImageFound(false);
       }
-
-      return () => {
-        // source.cancel("Operation canceled due to route change.");
-      };
     }
   }, [imagePath, user, fileType]);
 

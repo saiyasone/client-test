@@ -185,7 +185,7 @@ const ClientDashboardLayout = () => {
     setSelectMore(false);
   };
 
-  const { getRootProps, getInputProps } = useDropzone({
+  const {} = useDropzone({
     disabled: !isAllowed,
     onDrop,
     onDragEnter: handleDragEnter,
@@ -259,9 +259,9 @@ const ClientDashboardLayout = () => {
             border: hasFile ? "2px dashed #5D9F97" : "none",
             padding: hasFile ? "1.5rem" : "0",
           }}
-          {...getRootProps()}
+          // {...getRootProps()}
         >
-          <input {...getInputProps()} />
+          {/* <input {...getInputProps()} /> */}
           <Outlet />
 
           <ShowUpload

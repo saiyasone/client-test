@@ -48,6 +48,8 @@ function NavbarUserDropdown() {
   };
 
   const [userAccount, setUserAccount] = useState<any>({});
+  const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
+  const sourcePath = `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`;
   const resizeImage = useResizeImage({
     imagePath: `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
     fileType: "image",
@@ -97,7 +99,6 @@ function NavbarUserDropdown() {
     return _.toUpper(`${userAccount.firstName} ${userAccount.lastName}`);
   }, [userAccount]);
 
-
   return (
     <React.Fragment>
       <Grid
@@ -122,15 +123,11 @@ function NavbarUserDropdown() {
             >
               {resizeImage.imageFound === null && <Loader />}
               {resizeImage.imageFound === true && (
-                <>
-                  {resizeImage.imageSrc && (
-                    <Avatar
-                      src={resizeImage.imageSrc}
-                      alt={"user profile"}
-                      className="file-card-image"
-                    />
-                  )}
-                </>
+                <Avatar
+                  src={newUrl + sourcePath}
+                  alt={"user profile"}
+                  className="file-card-image"
+                />
               )}
               {resizeImage.imageFound === false && (
                 <Avatar alt={"user profile"} className="file-card-image">
@@ -151,15 +148,11 @@ function NavbarUserDropdown() {
           <MUI.BoxShowCurrentUser>
             {resizeImage.imageFound === null && <Loader />}
             {resizeImage.imageFound === true && (
-              <>
-                {resizeImage.imageSrc && (
-                  <Avatar
-                    src={resizeImage.imageSrc}
-                    alt={"user profile"}
-                    className="file-card-image"
-                  />
-                )}
-              </>
+              <Avatar
+                src={newUrl + sourcePath}
+                alt={"user profile"}
+                className="file-card-image"
+              />
             )}
             {resizeImage.imageFound === false && (
               <Avatar alt={"user profile"} className="file-card-image">

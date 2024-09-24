@@ -128,7 +128,7 @@ export const shortFavouriteMenuItems = [
     action: "download",
     disabled: true,
   },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
 ];
 
 export const shortMyCloudMenuItems = [
@@ -177,7 +177,7 @@ export const shortFileShareMenu = [
     action: "download",
     disabled: true,
   },
-  { icon: <FiEdit />, title: "Rename", action: "rename" },
+  { icon: <FiEdit />, title: "Rename", action: "rename", disabled: true },
 ];
 
 export const multipleSelectionFileItems = [

@@ -151,7 +151,7 @@ export const FolderGrid = ({ ...props }) => {
   return (
     <div>
       <Box sx={{ flexGrow: 1 }}>
-        <Grid container spacing={5}>
+        <Grid container spacing={{ xs: 2, sm: 3, lg: 5 }}>
           {props.children}
         </Grid>
       </Box>

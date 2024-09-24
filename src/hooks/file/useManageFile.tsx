@@ -339,11 +339,12 @@ const useManageFile = ({ user }) => {
 
   // download single file
   const handleDownloadSingleFile = async (
-    { multipleData },
-    { onSuccess, onFailed, onClosure },
+    { multipleData}:any,
+    { onSuccess, onFailed, onClosure }:any,
   ) => {
+    const { id, createdBy } = multipleData[0];
     try {
-      const newModelData = multipleData.map((file) => {
+      const newModelData = multipleData.map((file:any) => {
         let real_path = "";
         if (file.newPath) {
           real_path = removeFileNameOutOfPath(file?.newPath);
@@ -368,6 +369,11 @@ const useManageFile = ({ user }) => {
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
       startDownload({ baseUrl });
+      await handleActionFile({
+        id: id,
+        event: "download",
+        userId: createdBy?._id,
+      });
       onSuccess();
     } catch (error) {
       onFailed?.(error);
@@ -377,11 +383,11 @@ const useManageFile = ({ user }) => {
   };
 
   const handleSingleFileDropDownload = async (
-    { multipleData },
-    { onSuccess, onFailed, onClosure },
+    { multipleData }:any,
+    { onSuccess, onFailed, onClosure }:any,
   ) => {
     try {
-      const newModelData = multipleData.map((file) => {
+      const newModelData = multipleData.map((file:any) => {
         let real_path = "";
         if (file.createdBy?._id !== "0") {
           real_path = removeFileNameOutOfPath(file?.newPath);
@@ -441,6 +447,8 @@ const useManageFile = ({ user }) => {
         lists: newModelData,
         createdBy: newModelData?.[0]?.createdBy,
       };
+
+      console.log({ headers });
 
       const encryptedData = dataEncrypted({ headers });
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
@@ -535,6 +543,37 @@ const useManageFile = ({ user }) => {
     }
   };
 
+  const handleMultipleDownloadTicketFileAndFolder = async (
+    { multipleData },
+    { onSuccess, onFailed },
+  ) => {
+    try {
+      const newModelData = multipleData.map((file) => {
+        return {
+          isFolder: false,
+          path: `${file.createdBy?.newName}-${file.createdBy?._id}/${file.newPath}/${file.newFilename}`,
+          createdBy: file.createdBy?._id,
+        };
+      });
+
+      const headers = {
+        accept: "*/*",
+        lists: newModelData,
+        downloadBy: multipleData[0]?.toAccount?.email,
+        createdBy: multipleData[0].createdBy?._id,
+      };
+      const encryptedData = dataEncrypted({ headers });
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
+
+      startDownload({ baseUrl });
+      setTimeout(() => {
+        onSuccess();
+      }, 1000);
+    } catch (error) {
+      onFailed?.(error);
+    }
+  };
+
   const handleMultipleGetLinks = async (
     { dataMultiple },
     { onSuccess, onFailed },
@@ -543,6 +582,36 @@ const useManageFile = ({ user }) => {
       const dataItems = dataMultiple?.map((item) => {
         return {
           [item.checkType === "file" ? "fileId" : "folderId"]: item.id,
+          type: item.checkType,
+        };
+      });
+
+      const res = await createMultipleLink({
+        variables: {
+          input: dataItems,
+        },
+      });
+
+      if (res.data?.createManageLink?._id) {
+        const result = res.data?.createManageLink;
+        onSuccess({
+          id: result._id,
+          shortLink: result.shortLink,
+        });
+      }
+    } catch (error) {
+      onFailed(error);
+    }
+  };
+
+  const handleMultipleShareGetLinks = async (
+    { dataMultiple },
+    { onSuccess, onFailed },
+  ) => {
+    try {
+      const dataItems = dataMultiple?.map((item) => {
+        return {
+          [item.checkType === "file" ? "fileId" : "folderId"]: item.dataId,
           type: item.checkType,
         };
       });
@@ -636,7 +705,9 @@ const useManageFile = ({ user }) => {
     handleMultipleFileDropDownloadFile,
     handleMultipleSaveToClound,
     handleDownloadSingleFile,
+    handleMultipleShareGetLinks,
     handleSingleFileDropDownload,
+    handleMultipleDownloadTicketFileAndFolder,
   };
 };
 

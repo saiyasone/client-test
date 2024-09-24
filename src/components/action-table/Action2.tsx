@@ -69,8 +69,9 @@ export default function Action2(props) {
               return (
                 <IconButton
                   disabled={
-                    params?.row?.file_id?.[0]?._id ||
-                    params.row.parentkey?.[0]?._id ||
+                    params?.row?.total_size > 0 ||
+                    // params?.row?.file_id?.[0]?._id ||
+                    // params.row.parentkey?.[0]?._id ||
                     props?.isContainFile ||
                     params?.row?.isContainsFiles
                       ? false
@@ -104,8 +105,9 @@ export default function Action2(props) {
               return (
                 <MenuDropdownItem
                   disabled={
-                    params?.row?.file_id?.[0]?._id ||
-                    params.row.parentkey?.[0]?._id ||
+                    params?.row?.total_size > 0 ||
+                    // params?.row?.file_id?.[0]?._id ||
+                    // params.row.parentkey?.[0]?._id ||
                     props?.isContainFile ||
                     params?.row?.isContainsFiles
                       ? false
@@ -149,8 +151,9 @@ export default function Action2(props) {
             return (
               <MenuDropdownItem
                 disabled={
-                  params?.row?.file_id?.[0]?._id ||
-                  params.row.parentkey?.[0]?._id ||
+                  params?.row?.total_size > 0 ||
+                  // params?.row?.file_id?.[0]?._id ||
+                  // params.row.parentkey?.[0]?._id ||
                   props.isContainFile ||
                   params?.row?.isContainsFiles
                     ? false
