@@ -195,24 +195,24 @@ function DialogPreviewFileSlide(props: DialogProps) {
       }`;
       break;
     case "extendFolder":
-      // sourcePath = `${
-      //   user?.newName + "-" + user?._id + "/" + isCurrentImage?.newPath
-      // }`;
-      pathToUse = isCurrentImage?.newPath;
-      if (pathToUse === null || pathToUse === "") {
-        real_path = "";
-      } else {
-        real_path = removeFileNameOutOfPath(pathToUse);
-      }
       sourcePath = `${
-        user?.newName +
-        "-" +
-        user?._id +
-        "/" +
-        real_path +
-        "" +
-        data.newFilename
+        user?.newName + "-" + user?._id + "/" + isCurrentImage?.newPath
       }`;
+      // pathToUse = isCurrentImage?.newPath;
+      // if (pathToUse === null || pathToUse === "") {
+      //   real_path = "";
+      // } else {
+      //   real_path = removeFileNameOutOfPath(pathToUse);
+      // }
+      // sourcePath = `${
+      //   user?.newName +
+      //   "-" +
+      //   user?._id +
+      //   "/" +
+      //   real_path +
+      //   "" +
+      //   data.newFilename
+      // }`;
       break;
 
     case "recent":
