@@ -245,7 +245,6 @@ function WasabiUpload(props: Props) {
           // allowMultipleUploadBatches: true,
         });
 
-        
         uppy.on("file-added", async (file: any) => {
           setSelectFiles((prev: any) => [
             ...prev,
@@ -449,9 +448,7 @@ function WasabiUpload(props: Props) {
 
         uppyInstance.setOptions({
           restrictions: {
-            maxNumberOfFiles: allArraysHaveImages
-              ? limitUpload
-              : numberOfFileUpload,
+            maxNumberOfFiles: numberOfFileUpload,
           },
           autoProceed: false,
           allowMultipleUploadBatches: true,
