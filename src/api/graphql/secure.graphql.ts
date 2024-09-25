@@ -94,6 +94,7 @@ export const USER_LOGIN = gql`
           totalImageUpload
           multipleUpload
           numberOfFileUpload
+          numberOfQueueUpload
           uploadPerDay
           fileUploadPerDay
           maxUploadSize

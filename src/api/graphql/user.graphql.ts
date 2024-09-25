@@ -33,6 +33,7 @@ export const QUERY_USER = gql`
           numberOfFileUpload
           uploadPerDay
           fileUploadPerDay
+          numberOfQueueUpload
           maxUploadSize
           multipleDownload
           downLoadOption
