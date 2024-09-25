@@ -186,7 +186,7 @@ function WasabiUpload(props: Props) {
   async function handleCancelUpload({ index }) {
     try {
       const _id = fileIdRef.current[index];
-      
+
       if (_id) {
         setFileId((prev) => {
           const newFileId = { ...prev };
@@ -250,7 +250,6 @@ function WasabiUpload(props: Props) {
       try {
         const numberOfFileUpload =
           userAuth?.packageId?.numberOfFileUpload || 15;
-        // console.log(userAuth?.packageId);
 
         const limitUpload = userAuth?.packageId?.totalImageUpload;
 
