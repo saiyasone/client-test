@@ -1715,6 +1715,7 @@ function ShareWithMe() {
       {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
+          dataShare={true}
           onClose={handleGetLinkClose}
           onCreate={handleGenerateGetLink}
           data={dataForEvent.data}
