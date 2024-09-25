@@ -188,7 +188,7 @@ function RecentFile() {
       
       setDataForEvent((prev)=>{
         const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item?.totalSize > 0;
+          return item?.checkType === 'folder' && item.totalSize! > 0;
         });
 
         const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
@@ -219,7 +219,7 @@ function RecentFile() {
     if(dataSelector.selectionFileAndFolderData?.length > 0){
       setDataForEvent((prev)=>{
         const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item?.totalSize > 0;
+          return item?.checkType === 'folder' && item.totalSize! > 0;
         });
   
         const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
