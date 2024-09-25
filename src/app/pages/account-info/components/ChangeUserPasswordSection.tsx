@@ -20,8 +20,9 @@ import useAuth from "hooks/useAuth";
 import { useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
-import { successMessage } from "utils/alert.util";
+import { errorMessage, successMessage } from "utils/alert.util";
 import * as MUI from "../styles/accountInfo.styles";
+import useManageGraphqlError from "hooks/useManageGraphqlError";
 
 const BpIcon = styled("span")(({ theme }) => ({
   borderRadius: 3,
@@ -75,6 +76,7 @@ function ChangeUserPasswordSection() {
   const navigate = useNavigate();
   const isMobile = useMediaQuery("(max-width:600px)");
 
+  const manageGraphError = useManageGraphqlError();
   const [showPassword, setShowPassword] = useState<any>(false);
   const [showConfirm, setShowConfirm] = useState<any>(false);
   const [showCurrent, setShowCurrent] = useState<any>(false);
@@ -154,7 +156,12 @@ function ChangeUserPasswordSection() {
         }
       }
     } catch (error: any) {
-      setErrMessage(error.message);
+      errorMessage(
+        manageGraphError.handleErrorMessage(
+          error?.message || "Something went wrong, Please try again",
+        ) as string,
+        2000,
+      );
     }
   };
 

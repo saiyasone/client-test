@@ -91,9 +91,7 @@ export const USER_LOGIN = gql`
           monthlyPrice
           discount
           description
-          storage
-          ads
-          captcha
+          totalImageUpload
           multipleUpload
           numberOfFileUpload
           uploadPerDay
@@ -101,11 +99,6 @@ export const USER_LOGIN = gql`
           maxUploadSize
           multipleDownload
           downLoadOption
-          support
-          sort
-          totalUsed
-          textColor
-          bgColor
           status
           createdAt
           updatedAt
