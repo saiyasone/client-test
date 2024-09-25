@@ -5,11 +5,11 @@ import { FiFile } from "react-icons/fi";
 import { HiOutlineShare } from "react-icons/hi";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { TbDashboard } from "react-icons/tb";
-// import { RiHome5Fill } from "react-icons/ri";
-// import { MdOutlineExplore } from "react-icons/md";
-// import { RiUserAddLine } from "react-icons/ri";
-// import { PiUserCircle } from "react-icons/pi";
-// import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import { RiHome5Fill } from "react-icons/ri";
+import { MdOutlineExplore } from "react-icons/md";
+import { RiUserAddLine } from "react-icons/ri";
+import { PiUserCircle } from "react-icons/pi";
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 
 const dashboard = [
   {
@@ -75,46 +75,46 @@ const trash = [
   },
 ];
 
-///Feed
-// const feedForyou = [
-//   {
-//     href: "/feed-for-you",
-//     icon: RiHome5Fill,
-//     title: "For you",
-//   },
-// ];
+//Feed
+const feedForyou = [
+  {
+    href: "/feed-for-you",
+    icon: RiHome5Fill,
+    title: "For you",
+  },
+];
 
-// const feedExplore = [
-//   {
-//     href: "/feed-explore",
-//     icon: MdOutlineExplore,
-//     title: "Explore",
-//   },
-// ];
+const feedExplore = [
+  {
+    href: "/feed-explore",
+    icon: MdOutlineExplore,
+    title: "Explore",
+  },
+];
 
-// const feedFollowing = [
-//   {
-//     href: "/feed-following",
-//     icon: RiUserAddLine,
-//     title: "Following",
-//   },
-// ];
+const feedFollowing = [
+  {
+    href: "/feed-following",
+    icon: RiUserAddLine,
+    title: "Following",
+  },
+];
 
-// const feedFriend = [
-//   {
-//     href: "/feed-friend",
-//     icon: PeopleOutlineIcon,
-//     title: "Frieds",
-//   },
-// ];
+const feedFriend = [
+  {
+    href: "/feed-friend",
+    icon: PeopleOutlineIcon,
+    title: "Frieds",
+  },
+];
 
-// const feedProfile = [
-//   {
-//     href: "/feed-profile",
-//     icon: PiUserCircle,
-//     title: "Profile",
-//   },
-// ];
+const feedProfile = [
+  {
+    href: "/feed-profile",
+    icon: PiUserCircle,
+    title: "Profile",
+  },
+];
 
 const navItems: any = [
   {
@@ -145,30 +145,30 @@ const navItems: any = [
     title: "",
     pages: trash,
   },
-  // {
-  //   title: "SHORT",
-  //   pages: null,
-  // },
-  // {
-  //   title: "",
-  //   pages: feedForyou,
-  // },
-  // {
-  //   title: "",
-  //   pages: feedExplore,
-  // },
-  // {
-  //   title: "",
-  //   pages: feedFollowing,
-  // },
-  // {
-  //   title: "",
-  //   pages: feedFriend,
-  // },
-  // {
-  //   title: "",
-  //   pages: feedProfile,
-  // },
+  {
+    title: "SHORT",
+    pages: null,
+  },
+  {
+    title: "",
+    pages: feedForyou,
+  },
+  {
+    title: "",
+    pages: feedExplore,
+  },
+  {
+    title: "",
+    pages: feedFollowing,
+  },
+  {
+    title: "",
+    pages: feedFriend,
+  },
+  {
+    title: "",
+    pages: feedProfile,
+  },
 ];
 
 export default navItems;

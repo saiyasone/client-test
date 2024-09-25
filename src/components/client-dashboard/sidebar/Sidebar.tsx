@@ -52,7 +52,7 @@ const Sidebar = ({ items = true, ...rest }) => {
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
-          marginTop: "40%",
+          marginTop: "16%",
         }}
       >
         <Typography variant="h5" sx={{ color: "#5D596C" }}>
