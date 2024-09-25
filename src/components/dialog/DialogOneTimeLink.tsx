@@ -415,7 +415,7 @@ const DialogOneTimeLink = (props) => {
                                 }}
                               >
                                 <IconFolderContainer>
-                                  {(item?.total_size || item?.totalSize) > 0 ? (
+                                  {(item?.total_size || item.totalSize!) > 0 ? (
                                     <FolderNotEmptyIcon />
                                   ) : (
                                     <FolderEmptyIcon />
@@ -428,7 +428,7 @@ const DialogOneTimeLink = (props) => {
                               </div>
                               <Typography>
                                 {convertBytetoMBandGB(
-                                  item?.total_size || item?.totalSize,
+                                  item?.total_size || item.totalSize!,
                                 )}
                               </Typography>
                             </Box>
@@ -474,13 +474,14 @@ const DialogOneTimeLink = (props) => {
                                       user?.newName +
                                       "-" +
                                       user?._id +
-                                      (item?.path
-                                        ? removeFileNameOutOfPath(item?.path)
+                                      "/" +
+                                      (item?.newPath
+                                        ? removeFileNameOutOfPath(item?.newPath)
                                         : "") +
                                       "/" +
                                       item?.newFilename
                                     }
-                                    fileType={item.type}
+                                    fileType={item?.fileType}
                                   />
                                 </Box>
                                 {item?.name || item?.filename?.length <= 15
@@ -496,7 +497,7 @@ const DialogOneTimeLink = (props) => {
                               </div>
                               <Typography>
                                 {convertBytetoMBandGB(
-                                  item?.size || item?.totalSize,
+                                  item?.size || item.totalSize!,
                                 )}
                               </Typography>
                             </Box>

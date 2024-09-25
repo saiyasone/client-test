@@ -755,7 +755,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                   dataSelector?.selectionFileAndFolderData?.find(
                                     (item) =>
                                       item?.permission === "view" ||
-                                      item?.totalSize === 0,
+                                      item.totalSize! === 0,
                                   ) &&
                                   true
                                 }
