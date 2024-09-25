@@ -33,7 +33,7 @@ import { FolderContext } from "contexts/FolderProvider";
 import useAuth from "hooks/useAuth";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { UAParser } from "ua-parser-js";
-import { errorMessage, successMessage } from "utils/alert.util";
+import { errorMessage, successMessage, warningMessage } from "utils/alert.util";
 import { getFileNameExtension } from "utils/file.util";
 import { encryptData } from "utils/secure.util";
 
@@ -44,10 +44,9 @@ type Props = {
 
 function WasabiUpload(props: Props) {
   const [canClose, setCanClose] = useState(false);
-  const [isImage, setIsImage] = useState(false);
 
-  // const [fileId, setFileId] = useState({});
-  const [fileId, setFileId] = useState<any[]>([]);
+  const [fileId, setFileId] = useState({});
+  // const [fileId, setFileId] = useState<any[]>([]);
   const [selectFiles, setSelectFiles] = useState<any>([]);
 
   const [subPath, setSubPath] = useState("");
@@ -59,7 +58,6 @@ function WasabiUpload(props: Props) {
 
   const UA = new UAParser();
   const result = UA.getResult();
-  const imageFiles = useRef<boolean>(false);
 
   const [actionFile] = useMutation(MUTATION_ACTION_FILE);
 
@@ -71,13 +69,6 @@ function WasabiUpload(props: Props) {
   const user = trackingFolderData?.createdBy?._id
     ? trackingFolderData?.createdBy
     : userAuth;
-
-  // useUnloadHandler({
-  //   isData: canClose,
-  //   onReload: () => {
-  //     console.log("User is reloading...");
-  //   },
-  // });
 
   //   graphql
   const [uploadFileAction] = useMutation<{ createFiles: { _id?: string } }>(
@@ -91,34 +82,19 @@ function WasabiUpload(props: Props) {
   const manageGraphError = useManageGraphqlError();
 
   async function handleAllCancelUpload() {
-    // const dataFiles = selectFileRef.current;
+    const dataFiles = selectFileRef.current;
 
     try {
-      // console.log(fileIdRef.current)
-      const deletePromise = await fileIdRef.current?.map(
-        async (file, index) => {
-          const fileId = file[index];
-
-          if (fileId) {
-            await deleteFile({
-              variables: { id: fileId },
-              onCompleted: () => {},
-              onError: () => {},
-            });
-          }
-        },
-      );
-      // const deletePromise = await dataFiles.map(async (_, index) => {
-      //   const fileId = fileIdRef.current[index];
-      //   console.log(fileId);
-
-      //   if (fileId) {
-      //     await deleteFile({
-      //       variables: { id: fileId },
-      //       onCompleted: () => {},
-      //     });
-      //   }
-      // });
+      const deletePromise = await dataFiles.map(async (file, index) => {
+        const fileId = fileIdRef.current[index];
+        console.log({ cancelAll: fileId });
+        if (file.status === "uploading" && fileId) {
+          await deleteFile({
+            variables: { id: fileId },
+            onCompleted: () => {},
+          });
+        }
+      });
 
       await Promise.all(deletePromise);
       handleDoneUpload();
@@ -164,21 +140,21 @@ function WasabiUpload(props: Props) {
 
         if (fileId) {
           await handleActionFile(fileId);
-          // setFileId(fileIdRef.current);
-          setFileId((prev) => [...prev, { [index]: fileId, isSuccess: false }]);
-          fileIdRef.current = [
+
+          fileIdRef.current = {
             ...fileIdRef.current,
-            {
-              [index]: fileId,
-              isSucces: false,
-            },
-          ];
-          // fileIdRef.current = {
+            [index]: fileId,
+          };
+
+          setFileId(fileIdRef.current);
+          // setFileId((prev) => [...prev, { [index]: fileId, isSuccess: false }]);
+          // fileIdRef.current = [
           //   ...fileIdRef.current,
-          //   [index]: fileId,
-          //   isSucces: false,
-          // };
-          // setFileId(fileIdRef.current);
+          //   {
+          //     [index]: fileId,
+          //     isSucces: false,
+          //   },
+          // ];
         }
       });
 
@@ -209,25 +185,27 @@ function WasabiUpload(props: Props) {
 
   async function handleCancelUpload({ index }) {
     try {
-      const file = fileIdRef.current[index];
+      const _id = fileIdRef.current[index];
 
-      const fileId = Object.values(file)[0];
-      if (fileId) {
+      if (_id) {
         setFileId((prev) => {
-          const newFileId = [...prev];
-          delete newFileId[Object.values[file][0]];
+          const newFileId = { ...prev };
+          delete newFileId[index];
+          fileIdRef.current = newFileId;
 
           return newFileId;
         });
 
+        console.log({ cancel: _id });
         await deleteFile({
           variables: {
-            id: fileId,
+            id: _id,
           },
           onCompleted: () => {},
         });
       }
     } catch (error: any) {
+      console.log(error);
       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
       errorMessage(
         manageGraphError.handleErrorMessage(
@@ -255,10 +233,8 @@ function WasabiUpload(props: Props) {
 
   async function handleDoneUpload() {
     setCanClose(false);
-    setFileId([]);
-    fileIdRef.current = [];
-    // setFileId({});
-    // fileIdRef.current = {};
+    setFileId({});
+    fileIdRef.current = {};
     setSelectFiles([]);
     selectFileRef.current = [];
   }
@@ -272,46 +248,51 @@ function WasabiUpload(props: Props) {
   useEffect(() => {
     const initializeUppy = () => {
       try {
-        const category = userAuth?.packageId?.category;
         const numberOfFileUpload =
           userAuth?.packageId?.numberOfFileUpload || 15;
+        // console.log(userAuth?.packageId);
 
-        const limitUpload =
-          category === "premium" ? 1000 : category === "pro" ? 500 : 300;
+        const limitUpload = userAuth?.packageId?.totalImageUpload;
+
         const uppy = new Uppy({
           id: "upload-file-id",
-          // restrictions: {
-          //   maxNumberOfFiles: imageFiles.current
-          //     ? limitUpload
-          //     : numberOfFileUpload,
-          // },
-          // autoProceed: false,
-          // allowMultipleUploadBatches: true,
-        });
-
-        uppy.on("upload-success", (file, index) => {
-          console.log({ file, index });
+          autoProceed: false,
+          allowMultipleUploadBatches: true,
         });
 
         uppy.on("file-added", async (file: any) => {
-          const fileTypes = uppy.getFiles().map((f) => f.data.type);
+          const files = uppy.getFiles();
+          const fileTypes = files.map((f) => f.data.type);
+
           const nonImageTypes = fileTypes.filter(
             (type) => !type.startsWith("image/"),
           );
 
-          if (nonImageTypes.length > 0) {
-            uppy.setOptions({
-              restrictions: {
-                maxNumberOfFiles: numberOfFileUpload,
-              },
-            });
-          } else {
-            uppy.setOptions({
-              restrictions: {
-                maxNumberOfFiles: limitUpload,
-              },
-            });
+          const maxFiles =
+            nonImageTypes.length > 0 ? numberOfFileUpload : limitUpload;
+
+          if (files.length >= maxFiles) {
+            uppy.removeFile(file.id);
+            warningMessage(
+              `You can only upload a maximum of ${maxFiles} files.`,
+              3000,
+            );
+
+            return;
           }
+          // if (nonImageTypes.length > 0) {
+          //   uppy.setOptions({
+          //     restrictions: {
+          //       maxNumberOfFiles: numberOfFileUpload,
+          //     },
+          //   });
+          // } else {
+          //   uppy.setOptions({
+          //     restrictions: {
+          //       maxNumberOfFiles: limitUpload,
+          //     },
+          //   });
+          // }
 
           setSelectFiles((prev: any) => [
             ...prev,
@@ -321,6 +302,7 @@ function WasabiUpload(props: Props) {
               name: file.name,
               size: file.size,
               type: file.data.type,
+              status: "uploading",
             },
           ]);
 
@@ -335,6 +317,17 @@ function WasabiUpload(props: Props) {
           } catch (error) {
             console.error("Error removing file:", error);
           }
+        });
+
+        uppy.on("upload-success", (file) => {
+          setSelectFiles((prev: any) => {
+            return prev.map((f) => {
+              if (f.id === file!.id) {
+                return { ...f, status: "uploaded" }; // Mark as uploaded
+              }
+              return f;
+            });
+          });
         });
 
         uppy.on("cancel-all", () => {
@@ -464,7 +457,7 @@ function WasabiUpload(props: Props) {
     };
 
     initializeUppy();
-  }, [subPath, user, userAuth, fileIdRef, imageFiles]);
+  }, [subPath, user, userAuth, fileIdRef]);
 
   useEffect(() => {
     async function querySubFolder() {
@@ -498,42 +491,16 @@ function WasabiUpload(props: Props) {
   }, [folderId, user]);
 
   useEffect(() => {
-    // function handleUppySetting() {
-    //   if (uppyInstance.getFiles().length > 0) {
-    //     const category = userAuth?.packageId?.category;
-    //     const numberOfFileUpload =
-    //       userAuth?.packageId?.numberOfFileUpload || 15;
-    //     const limitUpload =
-    //       category === "premium" ? 1000 : category === "pro" ? 500 : 300;
-    //     console.log(numberOfFileUpload);
-    //     selectFileRef.current = uppyInstance.getFiles();
-    //     const allArraysHaveImages = uppyInstance
-    //       .getFiles()
-    //       .every((item) => item.data.type.startsWith("image"));
-    //     uppyInstance.setOptions({
-    //       restrictions: {
-    //         maxNumberOfFiles: numberOfFileUpload,
-    //       },
-    //       autoProceed: false,
-    //       allowMultipleUploadBatches: true,
-    //     });
-    //     setIsImage(allArraysHaveImages);
-    //   }
-    // }
-    // handleUppySetting();
-  }, [selectFiles, uppyInstance, isImage, userAuth]);
-
-  useEffect(() => {
     if (selectFiles?.length > 0) {
       selectFileRef.current = selectFiles;
     }
   }, [selectFiles]);
 
-  useEffect(() => {
-    if (fileId.length > 0) {
-      fileIdRef.current = fileId;
-    }
-  }, [fileId]);
+  // useEffect(() => {
+  //   if (fileId.length > 0) {
+  //     fileIdRef.current = fileId;
+  //   }
+  // }, [fileId]);
 
   return (
     <Fragment>
@@ -544,10 +511,7 @@ function WasabiUpload(props: Props) {
       >
         <MUI.UploadUppyContainer>
           <MUI.UppyHeader>
-            <Typography variant="h2">
-              {" "}
-              {JSON.stringify(fileIdRef.current)} Upload and attach files
-            </Typography>
+            <Typography variant="h2">Upload and attach files</Typography>
           </MUI.UppyHeader>
           {uppyInstance && (
             <Fragment>
@@ -571,16 +535,14 @@ function WasabiUpload(props: Props) {
               <MUI.ButtonActionBody>
                 <MUI.ButtonActionContainer>
                   <MUI.ButtonCancelAction
-                    // disabled={canClose}
-                    // onClick={canClose ? () => {} : handleCloseDialog}
-
-                    onClick={handleCloseDialog}
+                    disabled={canClose}
+                    onClick={canClose ? () => {} : handleCloseDialog}
                   >
                     Cancel
                   </MUI.ButtonCancelAction>
                   <MUI.ButtonUploadAction
                     onClick={handleUploadToStorage}
-                    // disabled={canClose}
+                    disabled={canClose}
                   >
                     Upload now
                   </MUI.ButtonUploadAction>
