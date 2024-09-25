@@ -71,16 +71,27 @@ const DialogOneTimeLink = (props) => {
   const { user }: any = useAuth();
   const { onClose, onCreate, data } = props;
   const qrCodeRef = useRef<SVGSVGElement | any>(null);
-  const [expireDays, setExpireDays] = useState(7);
+  const [expireDays, setExpireDays] = useState(0);
   const [expiredAt, setExpiredAt] = useState("");
   const [password, setPassword] = useState("");
   const [folders, setFolders] = useState<any[]>([]);
   const [files, setFiles] = useState<any[]>([]);
   const [step, setStep] = useState(1);
-  const [generatedLink, setGeneratedLink] = useState("");
+  const [generatedLink, setGeneratedLink] = useState({
+    shortLink:'',
+    longLink:''
+  });
   const [isShared, setIsShared] = useState(false);
 
   const [createManageLink] = useMutation(CREATE_MANAGE_LINK);
+
+  const resetGenerateLink = () => {
+    setGeneratedLink({
+      shortLink:'',
+      longLink:''
+    });
+  }
+
   const resetAll = () => {
     setExpireDays(7);
     setExpiredAt("");
@@ -88,7 +99,7 @@ const DialogOneTimeLink = (props) => {
     setFolders([]);
     setFiles([]);
     setStep(1);
-    setGeneratedLink("");
+    resetGenerateLink();
     setIsShared(false);
     ////close the modal anyway.
     onClose();
@@ -101,23 +112,16 @@ const DialogOneTimeLink = (props) => {
 
     const days = Number(e?.target?.value);
 
-    const expirationDateTime = calculateExpirationDate(days);
+    if(days > 0)
+    {
+      const expirationDateTime = calculateExpirationDate(days);
 
-    setExpiredAt(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
-    setExpireDays(days);
+      setExpiredAt(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
+      setExpireDays(days);
+    }
   };
 
   const handleGenerate = async () => {
-    if (!expireDays) {
-      errorMessage("Please, select expire date", 3000);
-      return false;
-    }
-
-    if (!expiredAt) {
-      errorMessage("Please, select expire date", 3000);
-      return false;
-    }
-
     const data: apiProps[] = [];
 
     if (folders && folders?.length > 0) {
@@ -152,8 +156,11 @@ const DialogOneTimeLink = (props) => {
         input: [...data],
       },
       onCompleted: (result) => {
-        if (result && result?.createManageLink?.shortLink) {
-          setGeneratedLink(result?.createManageLink?.shortLink);
+        if (result && result?.createManageLink?.longLink) {
+          setGeneratedLink({
+            shortLink: result?.createManageLink?.shortLink,
+            longLink: result?.createManageLink?.longLink
+          });
           setStep(2);
         }
         return true;
@@ -166,7 +173,8 @@ const DialogOneTimeLink = (props) => {
   };
 
   const handleSubmit = () => {
-    setGeneratedLink("");
+    handleCopy(generatedLink.shortLink);
+    resetGenerateLink();
     setExpiredAt("");
     setExpireDays(7);
     setStep(1);
@@ -293,7 +301,7 @@ const DialogOneTimeLink = (props) => {
                 }}
               >
                 <Typography variant="h6">
-                  Paste a password, secret message or private link below
+                  Paste a password, secret message or private key below
                 </Typography>
                 <Typography
                   component={"p"}
@@ -483,6 +491,7 @@ const DialogOneTimeLink = (props) => {
                       },
                     }}
                   >
+                    <MenuItem value={0}>1 Never</MenuItem>
                     <MenuItem value={1}>1 days</MenuItem>
                     <MenuItem value={3}>3 days</MenuItem>
                     <MenuItem value={5}>5 days</MenuItem>
@@ -526,7 +535,7 @@ const DialogOneTimeLink = (props) => {
                 variant="h6"
                 sx={{ width: "100%", mb: 4, textAlign: "center" }}
               >
-                Your Onetime Secret URL
+                Keep Your Secret Url In Safe
               </Typography>
               <Box
                 sx={{
@@ -544,11 +553,11 @@ const DialogOneTimeLink = (props) => {
                     backgroundColor: "rgba(174, 247, 40, 0.3)",
                   }}
                 >
-                  {generatedLink}
+                  {generatedLink.shortLink}
                 </Typography>
                 <Button
                   variant="contained"
-                  onClick={() => handleCopy(generatedLink)}
+                  onClick={() => handleCopy(generatedLink.shortLink)}
                   color="primary"
                   sx={{ width: "auto", alignSelf: "end" }}
                 >
@@ -580,7 +589,7 @@ const DialogOneTimeLink = (props) => {
                 >
                   <QRCode
                     style={{ width: "100px", height: "100px" }}
-                    value={generatedLink}
+                    value={generatedLink.longLink}
                     viewBox={`0 0 256 256`}
                   />
                 </div>
@@ -588,11 +597,11 @@ const DialogOneTimeLink = (props) => {
                   <Typography sx={{ mb: 4 }}>
                     This link
                     <span style={{ color: "#2e7d32", margin: "0 4px" }}>
-                      {generatedLink}
+                      {generatedLink.shortLink}
                     </span>
                     will be expired on
                     <span style={{ color: "#2e7d32", margin: "0 5px" }}>
-                      {expiredAt}
+                      {expiredAt ? expiredAt : <span style={{fontWeight: 900}}>Never</span>}
                     </span>
                   </Typography>
                   <Box sx={{ display: "flex", gap: 5, position: "relative" }}>
@@ -626,7 +635,7 @@ const DialogOneTimeLink = (props) => {
                     >
                       Share
                     </ButtonContainer>
-                    {isShared && generatedLink && (
+                    {isShared && generatedLink.shortLink && (
                       <Typography
                         component={"div"}
                         sx={{
@@ -666,7 +675,7 @@ const DialogOneTimeLink = (props) => {
                             "email",
                             "workspace",
                           ]}
-                          url={generatedLink}
+                          url={generatedLink.shortLink}
                           title="Social Media"
                         />
                       </Typography>
