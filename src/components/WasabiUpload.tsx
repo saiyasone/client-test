@@ -186,7 +186,7 @@ function WasabiUpload(props: Props) {
   async function handleCancelUpload({ index }) {
     try {
       const _id = fileIdRef.current[index];
-
+      
       if (_id) {
         setFileId((prev) => {
           const newFileId = { ...prev };
@@ -312,8 +312,10 @@ function WasabiUpload(props: Props) {
 
         uppy.on("file-removed", (file) => {
           try {
-            const index = getIndex(file.id);
-            handleCancelUpload({ index });
+            if (canClose) {
+              const index = getIndex(file.id);
+              handleCancelUpload({ index });
+            }
           } catch (error) {
             console.error("Error removing file:", error);
           }
@@ -323,7 +325,7 @@ function WasabiUpload(props: Props) {
           setSelectFiles((prev: any) => {
             return prev.map((f) => {
               if (f.id === file!.id) {
-                return { ...f, status: "uploaded" }; // Mark as uploaded
+                return { ...f, status: "uploaded" };
               }
               return f;
             });
