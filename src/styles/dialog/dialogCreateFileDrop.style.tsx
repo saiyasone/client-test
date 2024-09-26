@@ -43,6 +43,7 @@ export const ShowHeaderDetail = styled(Box)({
   textAlign: "start",
   justifyContent: "start",
   flexDirection: "column",
+  marginBottom: '1rem',
   h3: {
     color: "#4B465C",
     fontSize: "0.9rem",

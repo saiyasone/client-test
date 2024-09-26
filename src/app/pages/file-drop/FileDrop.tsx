@@ -705,18 +705,7 @@ function FileDrop() {
                           onChange={handleAllowDownloadChange}
                         />
                       }
-                      label="Allow Download"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          id="allow-upload"
-                          name="allow-upload"
-                          checked={headerData.allowUpload}
-                          onChange={handleAllowUploadChange}
-                        />
-                      }
-                      label="Allow Upload"
+                      label="Enable Single Download"
                     />
                     <FormControlLabel
                       control={
@@ -727,9 +716,20 @@ function FileDrop() {
                           onChange={handleAllowMultiplesChange}
                         />
                       }
-                      label="Allow Multiples Download"
+                      label="Enable Multi-Download"
                     />
                   </FormControl>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-upload"
+                          name="allow-upload"
+                          checked={headerData.allowUpload}
+                          onChange={handleAllowUploadChange}
+                        />
+                      }
+                      label="Enable Upload"
+                    />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Button
@@ -746,7 +746,7 @@ function FileDrop() {
                       width: "100%",
                       fontSize: "18px !important",
                       color: "grey !important",
-                      backgroundColor: "#E9E9E9"
+                      // backgroundColor: "#E9E9E9"
                     }}
                     size="small"
                     InputLabelProps={{
