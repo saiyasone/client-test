@@ -577,6 +577,7 @@ const DialogOneTimeLink = (props) => {
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection: {xs: 'column', md: 'row'},
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 5,
@@ -602,14 +603,14 @@ const DialogOneTimeLink = (props) => {
                     viewBox={`0 0 256 256`}
                   />
                 </div>
-                <Box sx={{ display:'flex',flexDirection:'column',justifyContent:'space-between',width:'100%', padding: 2 }}>
-                <Typography sx={{ mb: 4 }}>
+                <Box sx={{ display:'flex',flexDirection:'column',justifyContent: {xs:'center', md: 'space-between'},width:'100%', padding: 2, ml:{sm: 0, md: 15}}}>
+                <Typography sx={{ mb: 4, alignSelf: {xs: 'center', md: 'start'} }}>
                     This link
                     <span style={{ color: "#2e7d32", margin: "0 4px" }}>
                       {generatedLink.shortLink}
                     </span>
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 5, mt:4, position: "relative"}}>
+                  <Box sx={{ display: "flex", justifyContent: {xs:'center', md: 'start'}, gap: 5, mt:4, position: "relative"}}>
                     <ButtonContainer
                       variant="contained"
                       onClick={(e) =>
