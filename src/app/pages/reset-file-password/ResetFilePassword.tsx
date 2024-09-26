@@ -1,11 +1,12 @@
 import { Box, Paper, Typography, styled } from "@mui/material";
-import CryptoJS from "crypto-js";
+ 
 import { Fragment, useEffect, useState } from "react";
 import { FaCheckCircle, FaLock } from "react-icons/fa";
 import { useLocation } from "react-router-dom";
 import vshareIcon from "assets/images/file-password-icon.png";
 import ResetFilePasswordComponent from "components/reset-file-password/ResetFilePassword";
-import { ENV_KEYS } from "constants/env.constant";
+ 
+import { decryptDataLink } from "utils/secure.util";
 
 const ResetPasswordContainer = styled("div")({
   width: "100%",
@@ -54,13 +55,9 @@ function ResetFilePassword() {
 
   useEffect(() => {
     try {
-      const bytes = CryptoJS.AES.decrypt(
-        fileURL || "",
-        ENV_KEYS.VITE_APP_RESET,
-      );
-      const decryptedData = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      const bytes = decryptDataLink(fileURL);
       setDataForEvent({
-        data: decryptedData,
+        data: bytes,
       });
     } catch (error) {
       console.error(error);

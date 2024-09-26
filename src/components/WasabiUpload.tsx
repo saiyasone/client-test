@@ -179,7 +179,7 @@ function WasabiUpload(props: Props) {
       });
     } catch (error) {
       console.error(error);
-      errorMessage("You action file wrong", 2000);
+      // errorMessage("You action file wrong", 2000);
     }
   };
 
@@ -196,7 +196,6 @@ function WasabiUpload(props: Props) {
           return newFileId;
         });
 
-        console.log({ cancel: _id });
         await deleteFile({
           variables: {
             id: _id,
@@ -512,12 +511,6 @@ function WasabiUpload(props: Props) {
       selectFileRef.current = selectFiles;
     }
   }, [selectFiles]);
-
-  // useEffect(() => {
-  //   if (fileId.length > 0) {
-  //     fileIdRef.current = fileId;
-  //   }
-  // }, [fileId]);
 
   return (
     <Fragment>
