@@ -6,7 +6,7 @@ import {
   InputLabel as label,
   styled,
 } from "@mui/material";
-import { MUTATION_RESET_FILE_PASSWORD } from "api/graphql/secure.graphql";
+import { MUTATION_RESET_FOLDER_AND_FILE_PASSWORD } from "api/graphql/secure.graphql";
 import { Formik } from "formik";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import { Fragment } from "react";
@@ -34,7 +34,9 @@ function ResetFilePasswordComponent(props) {
   const { dataValue, onPressDone } = props;
   const manageGraphqlError = useManageGraphqlError();
   // graph ql
-  const [resetPasswordAction] = useMutation(MUTATION_RESET_FILE_PASSWORD);
+  const [resetPasswordAction] = useMutation(
+    MUTATION_RESET_FOLDER_AND_FILE_PASSWORD,
+  );
 
   const schemaValidation = yup.object().shape({
     newPassword: yup.string().required("New password is required"),
@@ -59,7 +61,7 @@ function ResetFilePasswordComponent(props) {
         },
       });
 
-      if (result.data?.changePasswordFolderAndFile?.status === 200) {
+      if (result.data?.resetPasswordFolderAndFile?.status === 200) {
         resetForm();
         onPressDone();
         successMessage("Your password has been successfully reset", 3000);
