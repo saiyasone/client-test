@@ -213,7 +213,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
           padding: "1.5rem",
         }}
       >
-        Modify Information
+        Modify drop link
       </Typography>
       <DialogPreviewFileV1Boby>
         <Formik
