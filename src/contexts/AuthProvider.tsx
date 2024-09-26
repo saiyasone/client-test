@@ -700,7 +700,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       await userForgotPasword({
         variables: {
           email: email,
-          captcha: window.__reCaptcha!,
+          captcha: window.__reCaptcha! || "",
         },
         onCompleted: (data) => {
           if (data?.forgotPassword?.token) {
