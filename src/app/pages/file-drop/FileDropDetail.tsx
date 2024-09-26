@@ -34,7 +34,6 @@ import MenuDropdownItem from "components/MenuDropdownItem";
 import MenuMultipleSelectionFolderAndFile from "components/MenuMultipleSelectionFolderAndFile";
 import SwitchPages from "components/SwitchPage";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import ProgressingBar from "components/loading/ProgressingBar";
@@ -277,7 +276,10 @@ function FileDropDetail() {
         if (checkPassword) {
           setShowEncryptPassword(true);
         } else {
-          if (userPackage?.downLoadOption === "another") {
+          if (
+            userPackage?.downLoadOption === "another" ||
+            userPackage?.category === "free"
+          ) {
             handleGetDownloadLink();
           } else {
             handleDownloadFile();

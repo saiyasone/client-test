@@ -87,7 +87,7 @@ function WasabiUpload(props: Props) {
     try {
       const deletePromise = await dataFiles.map(async (file, index) => {
         const fileId = fileIdRef.current[index];
-        console.log({ cancelAll: fileId });
+
         if (file.status === "uploading" && fileId) {
           await deleteFile({
             variables: { id: fileId },
@@ -252,11 +252,27 @@ function WasabiUpload(props: Props) {
           userAuth?.packageId?.numberOfFileUpload || 15;
 
         const limitUpload = userAuth?.packageId?.totalImageUpload;
+        const maxFileSize = userAuth?.packageId?.maxUploadSize;
 
         const uppy = new Uppy({
           id: "upload-file-id",
           autoProceed: false,
           allowMultipleUploadBatches: true,
+          restrictions: {
+            maxFileSize,
+          },
+          locale: {
+            strings: {
+              exceedsSize: "File size is too large, max size is %{size}.",
+              youCanOnlyUploadX: {
+                0: "You can only upload %{smart_count} file",
+                1: "You can only upload %{smart_count} files",
+              },
+              cancel: "no-cancel",
+              failedToUpload:
+                "Failed to upload %{smart_count} file due to an error.",
+            },
+          },
         });
 
         uppy.on("file-added", async (file: any) => {

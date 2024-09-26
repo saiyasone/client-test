@@ -254,8 +254,8 @@ export const QUERY_STAFF_LOGIN = gql`
 `;
 
 export const MUTATION_VERIFY_2FA = gql`
-  mutation Validate2FA($input: TwoFactorInput!, $id: ID!) {
-    validate2FA(input: $input, ID: $id) {
+  mutation Validate2FA($id: ID!, $token: String!, $input: TwoFactorInput!) {
+    validate2FA(ID: $id, token: $token, input: $input) {
       _id
     }
   }

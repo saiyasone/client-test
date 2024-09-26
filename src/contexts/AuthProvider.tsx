@@ -38,12 +38,16 @@ const SIGN_OUT = "SIGN_OUT";
 const SIGN_UP = "SIGN_UP";
 const FORGET_PASSWORD = "FORGET_PASSWORD";
 const RESET_FORGET_PASSWORD = "RESET_FORGET_PASSWORD";
+const ENABLE_2FACTOR = "ENABLE_2FACTOR";
+const ENABLE_TOKEN = "ENABLE_TOKEN";
 
 const initialState = {
   isAuthenticated: false,
   isInitialized: false,
   user: null,
   dateForgetPassword: "",
+  open2Factor: false,
+  token: "",
 };
 
 const JWTReducer = (state, action) => {
@@ -60,6 +64,19 @@ const JWTReducer = (state, action) => {
         isAuthenticated: true,
         user: action.payload.user,
       };
+
+    case ENABLE_2FACTOR: {
+      return {
+        ...state,
+        open2Factor: action.payload.open,
+      };
+    }
+    case ENABLE_TOKEN: {
+      return {
+        ...state,
+        token: action.payload.token,
+      };
+    }
     case FORGET_PASSWORD:
       return { ...state, dateForgetPassword: action.payload };
     case SIGN_IN:
@@ -176,6 +193,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
           );
 
+          console.log({ decoded });
           const dataDecode = JSON.parse(decryptId(userStaff) as string);
 
           if (dataDecode?.role?._id) {
@@ -213,6 +231,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
               },
               onCompleted: (data) => {
                 const user = data?.getUser?.data[0];
+
                 const userEncrypted = encryptId(
                   JSON.stringify(user),
                   ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
@@ -363,6 +382,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       const checkRole = token;
       const user = data;
       const enable2FA = data?.twoFactorIsEnabled;
+
       const authen = true;
       const decoded = checkRole;
       const tokenData = decryptToken(
@@ -374,7 +394,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           JSON.stringify(data),
           ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
         );
-        checkAccessToken(checkRole);
+        checkAccessToken(decoded);
         localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
 
         dispatch({
@@ -385,6 +405,14 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         });
         successMessage("Login Success!!", 3000);
         navigate("/dashboard");
+      } else if (enable2FA === 1) {
+        handleOpen2Factor(true);
+        dispatch({
+          type: ENABLE_TOKEN,
+          payload: {
+            token: decoded,
+          },
+        });
       } else {
         return { authen, user, checkRole, refreshId: tokenData.refreshID };
       }
@@ -518,6 +546,12 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
       },
     });
+    dispatch({
+      type: ENABLE_2FACTOR,
+      payload: {
+        open: false,
+      },
+    });
 
     successMessage("Login Success!!", 3000);
     navigate("/dashboard");
@@ -649,6 +683,15 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const handleOpen2Factor = (val: boolean) => {
+    dispatch({
+      type: ENABLE_2FACTOR,
+      payload: {
+        open: val,
+      },
+    });
+  };
+
   const handleForgetPassword = async (email) => {
     /* reset captcha */
     window.grecaptcha?.reset();
@@ -712,6 +755,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
         forgetPassowrd,
         resetForgetPassword,
         authentication2FA,
+        handleOpen2Factor,
         permission:
           permissionData?.role_staffs?.data[0]?.permision || localPermission,
       }}
