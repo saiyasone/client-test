@@ -33,6 +33,7 @@ import {
 import { useLazyQuery, useMutation } from "@apollo/client";
 import DialogBackendVerifyPassword from "./DialogBackendVerifyPassword";
 import DialogShare from "./DialogShare.SocialMedia";
+import { LuCopy } from "react-icons/lu";
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -517,10 +518,9 @@ const DialogOneTimeLink = (props) => {
                     md={5}
                     sx={{ paddingLeft: { md: 5, lg: 7 } }}
                   >
-                    <ButtonLoadingContainer
+                    <ButtonContainer
                     type="button"
                     variant="contained"
-                    color="success"
                     size="small"
                     fullWidth
                     onClick={() => handleGenerate()}
@@ -533,7 +533,7 @@ const DialogOneTimeLink = (props) => {
                     }
                   >
                     Generate secret link Url
-                  </ButtonLoadingContainer>
+                  </ButtonContainer>
                   </Grid>
                 </Grid>
                 <Box
@@ -549,50 +549,40 @@ const DialogOneTimeLink = (props) => {
                 </Box>
             </Typography>
           ) : (
-            <Box sx={{ paddingY: 3 }}>
+            <Box>
               <Typography
                 variant="h6"
                 sx={{ width: "100%", mb: 4, textAlign: "center" }}
               >
                 Your Onetime Secret URL
               </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 3,
-                  my: 2,
-                }}
-              >
-                <Typography
+              <Typography component={'div'}
                   sx={{
-                    padding: "0.1rem .7rem",
+                    display:'flex',
+                    alignContent:'center',
+                    justifyContent:'space-between',
+                    padding: "0.4rem 1rem",
                     fontWeight: 600,
-                    backgroundColor: "rgba(174, 247, 40, 0.3)",
+                    backgroundColor: "#E9E9E9",
+                    borderRadius:'3px',
+                    mt: 5
                   }}
                 >
                   {generatedLink.shortLink}
+                  <Box sx={{display:'inline-block', position:'relative', "&:hover":{cursor: "pointer", color: "#17766B"}}} onClick={() => handleCopy(generatedLink.shortLink)}>
+                    <LuCopy fontSize={18} style={{position:'absolute', top:1, right: 0}}/>
+                  </Box>
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={() => handleCopy(generatedLink.shortLink)}
-                  color="primary"
-                  sx={{ width: "auto", alignSelf: "end" }}
-                >
-                  Copy
-                </Button>
-              </Box>
-              <Divider sx={{ marginY: 2 }} />
+              {/* <Divider sx={{ marginY: 2 }} /> */}
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 5,
-                  border: "1px solid #d6d6d6",
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
-                  padding: 7,
+                  paddingY: 7,
                 }}
               >
                 <div
@@ -601,7 +591,7 @@ const DialogOneTimeLink = (props) => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    padding: "7px",
+                    // padding: "7px",
                     border: "1px solid gray",
                     borderRadius: "7px",
                   }}
@@ -612,17 +602,16 @@ const DialogOneTimeLink = (props) => {
                     viewBox={`0 0 256 256`}
                   />
                 </div>
-                <Box sx={{ padding: 2, width:'100%' }}>
-                  <Typography sx={{ mb: 4 }}>
+                <Box sx={{ display:'flex',flexDirection:'column',justifyContent:'space-between',width:'100%', padding: 2 }}>
+                <Typography sx={{ mb: 4 }}>
                     This link
                     <span style={{ color: "#2e7d32", margin: "0 4px" }}>
                       {generatedLink.shortLink}
                     </span>
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 5, position: "relative" }}>
+                  <Box sx={{ display: "flex", gap: 5, mt:4, position: "relative"}}>
                     <ButtonContainer
-                      variant="outlined"
-                      color="success"
+                      variant="contained"
                       onClick={(e) =>
                         handleDownloadQRCode(e, qrCodeRef, {
                           title: "Secret Url",
@@ -634,7 +623,7 @@ const DialogOneTimeLink = (props) => {
                       Download
                     </ButtonContainer>
                     <ButtonContainer
-                      variant="outlined"
+                      variant="contained"
                       onClick={async (e) => {
                         if (isShared) {
                           setIsShared(false);
@@ -684,9 +673,9 @@ const DialogOneTimeLink = (props) => {
               <Box
                 sx={{
                   mt: 5,
-                  px: 7,
-                  py: 4,
-                  border: "1px solid #d6d6d6",
+                  // px: 7,
+                  pt: 4,
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
                 }}
               >
@@ -697,7 +686,7 @@ const DialogOneTimeLink = (props) => {
                 >
                   Finish
                 </ButtonContainer>
-                <Divider sx={{ color: "#aaa" }}>Or</Divider>
+                <Divider sx={{ color: "#aaa", my: 2}}>Or</Divider>
                 <ButtonContainer
                   variant="outlined"
                   color="error"
@@ -706,8 +695,11 @@ const DialogOneTimeLink = (props) => {
                 >
                   Burn this Secret URL
                 </ButtonContainer>
-                * Burning this secret will delete it before it has been read
-                (click to cofnirm).
+                
+                <Box sx={{mt: 4, textAlign:'center'}}>
+                  * Burning this secret will delete it before it has been read
+                  (click to cofnirm).
+                </Box>
               </Box>
             </Box>
           )}

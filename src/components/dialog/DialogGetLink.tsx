@@ -27,11 +27,12 @@ import {
   handleDownloadQRCode,
   handleShareQR,
 } from "utils/image.share.download";
-import { ShareSocial } from "components/social-media";
+import DialogShare from "./DialogShare.SocialMedia";
 import { IoMdClose } from "react-icons/io";
 import { useMutation } from "@apollo/client";
 import { calculateExpirationDate } from "utils/date.util";
 import { CREATE_MANAGE_LINK } from "api/graphql/getlink.graphsql";
+import { LuCopy } from "react-icons/lu";
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -112,13 +113,13 @@ const DialogOneTimeLink = (props) => {
 
     const days = Number(e?.target?.value);
 
-    if(days > 0)
-    {
+    // if(days > 0)
+    // {
       const expirationDateTime = calculateExpirationDate(days);
 
       setExpiredAt(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
       setExpireDays(days);
-    }
+    // }
   };
 
   const handleGenerate = async () => {
@@ -130,7 +131,7 @@ const DialogOneTimeLink = (props) => {
           type: "folder",
           folderId: folder?._id || folder?.id,
           expiredAt,
-          password: password,
+          password,
         }),
       );
     }
@@ -141,7 +142,7 @@ const DialogOneTimeLink = (props) => {
           type: "file",
           fileId: file?._id || file?.id,
           expiredAt,
-          password: password,
+          password,
         }),
       );
     }
@@ -150,7 +151,6 @@ const DialogOneTimeLink = (props) => {
       errorMessage("Please, can not get source to create Url.", 3000);
       return false;
     }
-
     return await createManageLink({
       variables: {
         input: [...data],
@@ -492,7 +492,7 @@ const DialogOneTimeLink = (props) => {
                     }}
                   >
                     <MenuItem value={0}>1 Never</MenuItem>
-                    <MenuItem value={1}>1 days</MenuItem>
+                    <MenuItem value={-1}>1 days</MenuItem>
                     <MenuItem value={3}>3 days</MenuItem>
                     <MenuItem value={5}>5 days</MenuItem>
                     <MenuItem value={7}>7 days</MenuItem>
@@ -530,50 +530,39 @@ const DialogOneTimeLink = (props) => {
               </Box>
             </Typography>
           ) : (
-            <Box sx={{ paddingY: 3 }}>
+            <Box>
               <Typography
                 variant="h6"
                 sx={{ width: "100%", mb: 4, textAlign: "center" }}
               >
                 Keep Your Secret Url In Safe
               </Typography>
-              <Box
+              <Typography component={'div'}
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 3,
-                  my: 2,
+                  display:'flex',
+                  alignContent:'center',
+                  justifyContent:'space-between',
+                  padding: "0.4rem 1rem",
+                  fontWeight: 600,
+                  backgroundColor: "#E9E9E9",
+                  borderRadius:'3px',
+                  mt: 5
                 }}
               >
-                <Typography
-                  sx={{
-                    padding: "0.1rem .7rem",
-                    fontWeight: 600,
-                    backgroundColor: "rgba(174, 247, 40, 0.3)",
-                  }}
-                >
-                  {generatedLink.shortLink}
-                </Typography>
-                <Button
-                  variant="contained"
-                  onClick={() => handleCopy(generatedLink.shortLink)}
-                  color="primary"
-                  sx={{ width: "auto", alignSelf: "end" }}
-                >
-                  Copy
-                </Button>
-              </Box>
-              <Divider sx={{ marginY: 2 }} />
+                {generatedLink.shortLink}
+                <Box sx={{display:'inline-block', position:'relative', "&:hover":{cursor: "pointer", color: "#17766B"}}} onClick={() => handleCopy(generatedLink.shortLink)}>
+                  <LuCopy fontSize={18} style={{position:'absolute', top:1, right: 0}}/>
+                </Box>
+              </Typography>
               <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 5,
-                  border: "1px solid #d6d6d6",
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
-                  padding: 7,
+                  paddingY: 7,
                 }}
               >
                 <div
@@ -582,8 +571,8 @@ const DialogOneTimeLink = (props) => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    padding: "7px",
-                    border: "1px solid gray",
+                    // padding: "7px",
+                    // border: "1px solid gray",
                     borderRadius: "7px",
                   }}
                 >
@@ -593,7 +582,7 @@ const DialogOneTimeLink = (props) => {
                     viewBox={`0 0 256 256`}
                   />
                 </div>
-                <Box sx={{ padding: 2 }}>
+                <Box sx={{ display:'flex',flexDirection:'column', justifyContent:'space-evenly', width:'100%', padding: 2 }}>
                   <Typography sx={{ mb: 4 }}>
                     This link
                     <span style={{ color: "#2e7d32", margin: "0 4px" }}>
@@ -604,10 +593,9 @@ const DialogOneTimeLink = (props) => {
                       {expiredAt ? expiredAt : <span style={{fontWeight: 900}}>Never</span>}
                     </span>
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 5, position: "relative" }}>
+                  <Box sx={{ display: "flex", gap: 5, mt:4, position: "relative"}}>
                     <ButtonContainer
-                      variant="outlined"
-                      color="success"
+                      variant="contained"
                       onClick={(e) =>
                         handleDownloadQRCode(e, qrCodeRef, {
                           title: "Secret Url",
@@ -619,7 +607,7 @@ const DialogOneTimeLink = (props) => {
                       Download
                     </ButtonContainer>
                     <ButtonContainer
-                      variant="outlined"
+                      variant="contained"
                       onClick={async (e) => {
                         if (isShared) {
                           setIsShared(false);
@@ -656,27 +644,10 @@ const DialogOneTimeLink = (props) => {
                           setIsShared(!isShared);
                         }}
                       >
-                        <ShareSocial
-                          socialTypes={[
-                            "copy",
-                            "facebook",
-                            "twitter",
-                            "line",
-                            "linkedin",
-                            "whatsapp",
-                            "viber",
-                            "telegram",
-                            "reddit",
-                            "instapaper",
-                            "livejournal",
-                            "mailru",
-                            "ok",
-                            "hatena",
-                            "email",
-                            "workspace",
-                          ]}
+                        <DialogShare
+                          onClose={() => setIsShared(!isShared)}
+                          isOpen={isShared}
                           url={generatedLink.shortLink}
-                          title="Social Media"
                         />
                       </Typography>
                     )}
@@ -686,9 +657,9 @@ const DialogOneTimeLink = (props) => {
               <Box
                 sx={{
                   mt: 5,
-                  px: 7,
+                  // px: 7,
                   py: 4,
-                  border: "1px solid #d6d6d6",
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
                 }}
               >
@@ -699,6 +670,9 @@ const DialogOneTimeLink = (props) => {
                 >
                   Finish
                 </ButtonContainer>
+                <Box sx={{mt: 4, textAlign:'center'}}>
+                  * Share this secret Url to trust people who may access to this file.
+                </Box>
               </Box>
             </Box>
           )}
