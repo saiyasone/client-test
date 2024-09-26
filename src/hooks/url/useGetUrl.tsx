@@ -17,6 +17,7 @@ const useGetUrl = (data: any) => {
   }
 
   const [_copied, setCoppied] = useState(false);
+
   if (data) {
     const handleGetFolderURL = async (data: any) => {
       const dataType =
@@ -30,8 +31,10 @@ const useGetUrl = (data: any) => {
         await copyTextToClipboard(data?.shortUrl)
           .then(() => {
             setCoppied(true);
-            setTimeout(async () => {
-              if (dataUrl.type === "folder") {
+            setTimeout(async () => 
+            {
+              if (dataUrl.type === "folder") 
+              {
                 const result = await updateFolder({
                   variables: {
                     where: {
@@ -47,7 +50,9 @@ const useGetUrl = (data: any) => {
                   setCoppied(false);
                   successMessage("Link is copied!", 2000);
                 }
-              } else {
+              } 
+              else 
+              {
                 const result = await updateFile({
                   variables: {
                     where: {

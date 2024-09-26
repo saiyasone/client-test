@@ -91,7 +91,7 @@ function ExtendFolderDataGrid(props) {
       editable: false,
       sortable: false,
       maxWidth: isMobile ? 40 : 70,
-      renderCell: (params:{row:IFolderTypes}) => {
+      renderCell: (params: { row: IFolderTypes }) => {
         const { _id } = params?.row || {};
         const isChecked =
           !!props?.dataSelector?.selectionFileAndFolderData?.find(
@@ -146,7 +146,7 @@ function ExtendFolderDataGrid(props) {
       headerName: "Name",
       editable: false,
       minWidth: 120,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const { name, isContainsFiles, _id } = params.row || {};
         return (
           <div
@@ -191,7 +191,7 @@ function ExtendFolderDataGrid(props) {
       align: "right",
       editable: false,
       sortable: false,
-      renderCell: (params:any) => {
+      renderCell: (params: any) => {
         const { isContainsFiles } = params.row || {};
 
         return (
@@ -202,7 +202,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action:string, data:any) =>
+                  handleEvent: (action: string, data: any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={shareWithMeFolderMenuItems}
@@ -217,7 +217,7 @@ function ExtendFolderDataGrid(props) {
                 eventActions={{
                   hover,
                   setHover,
-                  handleEvent: (action:string, data:any) =>
+                  handleEvent: (action: string, data: any) =>
                     props.handleEvent(action, data),
                 }}
                 menuItems={favouriteMenuItems}
@@ -233,16 +233,16 @@ function ExtendFolderDataGrid(props) {
 
   function handleDoubleClick() {
     if (dataForEvents.data) {
-      const { id } = dataForEvents.data || {};
+      const { url, id } = dataForEvents.data || {};
       if (props.user.permission) {
         const base64URL = Base64.encodeURI(
-          // props.user?._id +
-          //   "/" +
-          //   props.user?.newName +
-          //   "/" +
-          //   props.user.permission +
-          //   "/" +
-          id,
+          props.user?._id +
+            "/" +
+            props.user?.newName +
+            "/" +
+            props.user.permission +
+            "/" +
+            url,
         );
         if (props?.isShare) {
           navigate(`/folder/share/${base64URL}`);
@@ -250,10 +250,11 @@ function ExtendFolderDataGrid(props) {
           navigate(`/folder/${base64URL}`);
         }
       } else {
-        const base64URL = Base64.encodeURI(id);
         if (props?.isShare) {
+          const base64URL = Base64.encodeURI(id);
           navigate(`/folder/share/${base64URL}`);
         } else {
+          const base64URL = Base64.encodeURI(url);
           navigate(`/folder/${base64URL}`);
         }
       }

@@ -108,8 +108,6 @@ const useManageFile = ({ user }) => {
   };
 
   const handleActionFile = async ({ event, userId, id }) => {
-    console.log("total download");
-
     try {
       await fileAction({
         variables: {
@@ -450,6 +448,8 @@ const useManageFile = ({ user }) => {
         createdBy: newModelData?.[0]?.createdBy,
       };
 
+      console.log({ headers });
+
       const encryptedData = dataEncrypted({ headers });
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
@@ -543,6 +543,37 @@ const useManageFile = ({ user }) => {
     }
   };
 
+  const handleMultipleDownloadTicketFileAndFolder = async (
+    { multipleData },
+    { onSuccess, onFailed },
+  ) => {
+    try {
+      const newModelData = multipleData.map((file) => {
+        return {
+          isFolder: false,
+          path: `${file.createdBy?.newName}-${file.createdBy?._id}/${file.newPath}/${file.newFilename}`,
+          createdBy: file.createdBy?._id,
+        };
+      });
+
+      const headers = {
+        accept: "*/*",
+        lists: newModelData,
+        downloadBy: multipleData[0]?.toAccount?.email,
+        createdBy: multipleData[0].createdBy?._id,
+      };
+      const encryptedData = dataEncrypted({ headers });
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
+
+      startDownload({ baseUrl });
+      setTimeout(() => {
+        onSuccess();
+      }, 1000);
+    } catch (error) {
+      onFailed?.(error);
+    }
+  };
+
   const handleMultipleGetLinks = async (
     { dataMultiple },
     { onSuccess, onFailed },
@@ -551,6 +582,36 @@ const useManageFile = ({ user }) => {
       const dataItems = dataMultiple?.map((item) => {
         return {
           [item.checkType === "file" ? "fileId" : "folderId"]: item.id,
+          type: item.checkType,
+        };
+      });
+
+      const res = await createMultipleLink({
+        variables: {
+          input: dataItems,
+        },
+      });
+
+      if (res.data?.createManageLink?._id) {
+        const result = res.data?.createManageLink;
+        onSuccess({
+          id: result._id,
+          shortLink: result.shortLink,
+        });
+      }
+    } catch (error) {
+      onFailed(error);
+    }
+  };
+
+  const handleMultipleShareGetLinks = async (
+    { dataMultiple },
+    { onSuccess, onFailed },
+  ) => {
+    try {
+      const dataItems = dataMultiple?.map((item) => {
+        return {
+          [item.checkType === "file" ? "fileId" : "folderId"]: item.dataId,
           type: item.checkType,
         };
       });
@@ -648,7 +709,9 @@ const useManageFile = ({ user }) => {
     handleMultipleFileDropDownloadFile,
     handleMultipleSaveToClound,
     handleDownloadSingleFile,
+    handleMultipleShareGetLinks,
     handleSingleFileDropDownload,
+    handleMultipleDownloadTicketFileAndFolder,
   };
 };
 

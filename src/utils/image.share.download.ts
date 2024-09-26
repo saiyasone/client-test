@@ -26,7 +26,7 @@ export const handleShareQR = async (event: React.MouseEvent<HTMLButtonElement>, 
 
       const file = new File([blob], `${fileName}.jpg`, { type: 'image/jpeg' });
   
-      if (navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
+      if (!navigator.canShare && navigator.canShare({ files: [file], text: text.description })) {
        
         await navigator.share({
           title: fileName,

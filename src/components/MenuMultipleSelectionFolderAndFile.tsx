@@ -48,6 +48,7 @@ const SelectContainer = styled("div")({
   width: "100%",
   padding: "0 16px",
   borderRadius: "6px",
+  // backgroundColor: "gray",
   backgroundColor: "#E9EDEF",
   paddingBottom: "8px",
   paddingTop: "6px",
@@ -94,6 +95,8 @@ function MenuMultipleSelectionFolderAndFile(props) {
     onPressLockData,
     onPressSuccess,
     onPressDeleteShare,
+    onOneTimeLinks,
+    onManageLink,
     country,
     device,
   } = props;
@@ -143,9 +146,9 @@ function MenuMultipleSelectionFolderAndFile(props) {
           userPackage?.downLoadOption === "another" ||
           userPackage?.category === "free"
         ) {
-          handleGetLinkAnother();
+          handleGetLinkShareAnother();
         } else {
-          handleDownloadFile();
+          handleDownloadShare();
         }
         break;
 
@@ -203,6 +206,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
         break;
 
       case "get link":
+        // handleGetLink();
         handleGetLink();
         break;
 
@@ -225,6 +229,9 @@ function MenuMultipleSelectionFolderAndFile(props) {
       case "delete-drop":
         handleDeleteFileDrop();
         break;
+      case "one-time-link":
+        onOneTimeLinks();
+        break;
     }
   };
 
@@ -244,7 +251,6 @@ function MenuMultipleSelectionFolderAndFile(props) {
   };
 
   const handleDownloadFile = () => {
-    // manageFileAction.handleDemo();
     dispatch(checkboxAction.setIsLoading(true));
     manageFileAction.handleMultipleDownloadFile(
       {
@@ -253,10 +259,28 @@ function MenuMultipleSelectionFolderAndFile(props) {
       {
         onSuccess: () => {
           dispatch(checkboxAction.setIsLoading(false));
-          // handleClearFile();
         },
         onFailed: () => {
           dispatch(checkboxAction.setIsLoading(false));
+        },
+      },
+    );
+  };
+
+  const handleDownloadShare = () => {
+    dispatch(checkboxAction.setIsLoading(true));
+    manageFileAction.handleMultipleDownloadFileAndFolder(
+      {
+        multipleData: dataSelector?.selectionFileAndFolderData,
+        isShare: true,
+      },
+      {
+        onSuccess: () => {
+          dispatch(checkboxAction.setIsLoading(false));
+        },
+        onFailed: (error) => {
+          dispatch(checkboxAction.setIsLoading(false));
+          console.error(error);
         },
       },
     );
@@ -306,20 +330,46 @@ function MenuMultipleSelectionFolderAndFile(props) {
   };
 
   const handleGetLink = () => {
-    dispatch(checkboxAction.setIsGetLinkLoading(true));
+    onManageLink();
+    // alert('gggg')
+    // dispatch(checkboxAction.setIsGetLinkLoading(true));
+    // manageFileAction.handleMultipleGetLinks(
+    //   {
+    //     dataMultiple: dataSelector?.selectionFileAndFolderData,
+    //   },
+    //   {
+    //     onSuccess: async (result) => {
+    //       dispatch(checkboxAction.setIsGetLinkLoading(false));
+    //       await copyTextToClipboard(result.shortLink);
+    //       successMessage("Link is copied", 3000);
+    //       handleClearFile();
+    //     },
+    //     onFailed: (error) => {
+    //       dispatch(checkboxAction.setIsGetLinkLoading(false));
+    //       const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+    //       errorMessage(
+    //         manageGraphqlError.handleErrorMessage(cutErr) as string,
+    //         3000,
+    //       );
+    //     },
+    //   },
+    // );
+  };
+
+  const handleGetLinkAnother = () => {
+    dispatch(checkboxAction.setIsLoading(true));
     manageFileAction.handleMultipleGetLinks(
       {
         dataMultiple: dataSelector?.selectionFileAndFolderData,
       },
       {
         onSuccess: async (result) => {
-          dispatch(checkboxAction.setIsGetLinkLoading(false));
-          await copyTextToClipboard(result.shortLink);
-          successMessage("Link is copied", 3000);
+          dispatch(checkboxAction.setIsLoading(false));
+          window.open(result.shortLink, "_blank");
           handleClearFile();
         },
         onFailed: (error) => {
-          dispatch(checkboxAction.setIsGetLinkLoading(false));
+          dispatch(checkboxAction.setIsLoading(false));
           const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
           errorMessage(
             manageGraphqlError.handleErrorMessage(cutErr) as string,
@@ -330,9 +380,9 @@ function MenuMultipleSelectionFolderAndFile(props) {
     );
   };
 
-  const handleGetLinkAnother = () => {
+  const handleGetLinkShareAnother = () => {
     dispatch(checkboxAction.setIsLoading(true));
-    manageFileAction.handleMultipleGetLinks(
+    manageFileAction.handleMultipleShareGetLinks(
       {
         dataMultiple: dataSelector?.selectionFileAndFolderData,
       },
@@ -607,11 +657,10 @@ function MenuMultipleSelectionFolderAndFile(props) {
         let hasFile = false;
         let hasFolder = false;
         dataSelector.selectionFileAndFolderData?.forEach((item) => {
-          if (item.checkType === "folder" && item.checkType === "file") {
-            setMultipleTab("multiple");
-          } else if (item.checkType === "folder") {
+          if (item.checkType === "folder") {
             hasFolder = true;
-          } else if (item.checkType === "file") {
+          }
+          if (item.checkType === "file") {
             hasFile = true;
           }
         });
@@ -706,7 +755,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                   dataSelector?.selectionFileAndFolderData?.find(
                                     (item) =>
                                       item?.permission === "view" ||
-                                      item?.totalSize === 0,
+                                      item.totalSize! === 0,
                                   ) &&
                                   true
                                 }
@@ -780,6 +829,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                           }}
                                           disabled={
                                             (item.action === "get link" ||
+                                              item.action === "one-time-link" ||
                                               item.action === "file-download" ||
                                               item.action === "password" ||
                                               item.action === "delete" ||
@@ -840,6 +890,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                             item.action === "folder-download" ||
                                             item.action === "password" ||
                                             item.action === "delete" ||
+                                            item.action === "one-time-link" ||
                                             item.action === "share") &&
                                           dataSelector?.selectionFileAndFolderData?.some(
                                             (selector) =>
@@ -887,6 +938,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                           }}
                                           disabled={
                                             (item.action === "get link" ||
+                                            item.action === "one-time-link" ||
                                               item.action ===
                                                 "multiple-download" ||
                                               item.action === "password" ||

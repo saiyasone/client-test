@@ -54,8 +54,15 @@ export const QUERY_TICKET_TYPE = gql`
     $skip: Int
     $orderBy: OrderByFolderAndFileInput
     $where: TypeticketsWhereInput
+    $request: Request
   ) {
-    typetickets(limit: $limit, skip: $skip, orderBy: $orderBy, where: $where) {
+    typetickets(
+      limit: $limit
+      skip: $skip
+      orderBy: $orderBy
+      where: $where
+      request: $request
+    ) {
       total
       data {
         _id

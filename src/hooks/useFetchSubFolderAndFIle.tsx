@@ -81,7 +81,6 @@ const useFetchSubFolderAndFile = ({
                   };
                 }) || [],
               );
-
               setFolderTotal(data?.folders?.total);
               setFolderDataFound(true);
             } else {

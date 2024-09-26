@@ -13,8 +13,8 @@ const MenuDropdownItem: React.FC<any> = ({
 }) => {
   let result;
   const { isglobals, statusshare } = props;
-
   switch (true) {
+
     case title === "Favourite":
       if (isFavorite) {
         result = <MdFavorite fill="#17766B" />;

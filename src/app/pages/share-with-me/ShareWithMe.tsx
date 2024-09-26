@@ -1,14 +1,21 @@
 import { useLazyQuery, useMutation } from "@apollo/client";
 // import material ui
 import { Typography } from "@mui/material";
-import { Box } from "@mui/system";
+import { Box, useMediaQuery } from "@mui/system";
 import { BiTime } from "react-icons/bi";
 // components
 import ShareWithMeEmpty from "assets/images/empty/share-with-me-empty.svg?react";
 import { Base64 } from "js-base64";
 import _ from "lodash";
 import moment from "moment";
-import { Fragment, useContext, useEffect, useMemo, useState } from "react";
+import {
+  Fragment,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Snackbar from "../../../components/Notification";
@@ -35,7 +42,7 @@ import DialogCreateMultipleFilePassword from "components/dialog/DialogCreateMult
 import DialogCreateMultipleShare from "components/dialog/DialogCreateMultipleShare";
 import DialogCreateShare from "components/dialog/DialogCreateShare";
 import DialogFileDetail from "components/dialog/DialogFileDetail";
-import DialogPreviewFile from "components/dialog/DialogPreviewFile";
+import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
 import DialogRenameFile from "components/dialog/DialogRenameFile";
 import DialogValidateFilePassword from "components/dialog/DialogValidateFilePassword";
 import {
@@ -45,6 +52,7 @@ import {
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import { FolderContext } from "contexts/FolderProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
+import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
 import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
@@ -52,6 +60,12 @@ import useManageGraphqlError from "hooks/useManageGraphqlError";
 import useScroll from "hooks/useScroll";
 import useManageUserFromShare from "hooks/user/useManageUserFromShare";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
+import {
+  setMenuToggle,
+  toggleFolderSelected,
+  toggleSelected,
+} from "stores/features/useEventSlice";
+import { RootState } from "stores/store";
 import * as MUI from "styles/clientPage.style";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
@@ -64,13 +78,14 @@ import useAuth from "../../../hooks/useAuth";
 import useBreadcrumbData from "../../../hooks/useBreadcrumbData";
 import ShareWithMeDataGrid from "./ShareWithMeDataGrid";
 import * as MUI_CLOUD from "./styles/shareWithMe.style";
-import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
-import { useRefreshState } from "contexts/RefreshProvider";
+import DialogGetLink from "components/dialog/DialogGetLink";
 
 function ShareWithMe() {
   const { user }: any = useAuth();
   const navigate = useNavigate();
+  const isMobile = useMediaQuery("(max-width:600px)");
   const [toggle, setToggle] = useState<any>("list");
+  const [openGetLink, setOpenGetLink] = useState(false);
   const [notification, setNotification] = useState<any>(false);
   const [getShareMe, { refetch: refetchShare }] = useLazyQuery(QUERY_SHARE, {
     fetchPolicy: "no-cache",
@@ -80,6 +95,7 @@ function ShareWithMe() {
 
   const [getFolders] = useLazyQuery(QUERY_FOLDER, { fetchPolicy: "no-cache" });
   const [updateFile] = useMutation(MUTATION_UPDATE_FILE);
+
   const [deleteShareFileAndFolder] = useMutation(MUTATION_DELETE_SHARE, {
     fetchPolicy: "no-cache",
   });
@@ -95,10 +111,15 @@ function ShareWithMe() {
   const [fileshare, setFileshare] = useState<any>(null);
   const manageGraphqlError = useManageGraphqlError();
   const { setFolderId }: any = useContext(FolderContext);
+  const {
+    isOpenMenu: isMenu,
+    isSelected,
+    isFolderSelected,
+    isToggleMenu,
+  } = useSelector((state: RootState) => state.event);
 
   const [name, setName] = useState<any>("");
   const [_checked, setChecked] = useState<any>({});
-  const [multiSelectId, setMultiSelectId] = useState<any>([]);
   const [multiChecked, setMultiChecked] = useState<any>([]);
   const [isOpenMenu, setIsOpenMenu] = useState<any>(false);
   const [dataForEvent, setDataForEvent] = useState<any>({
@@ -190,6 +211,7 @@ function ShareWithMe() {
 
   async function handleSubmitDecryptedPassword() {
     setFilePassword("");
+
     switch (eventClick) {
       case "download":
         if (userPackage?.downLoadOption === "another") {
@@ -212,17 +234,21 @@ function ShareWithMe() {
         handleCloseDecryptedPassword();
         handleOpenFolder(dataForEvent.data);
         break;
+      // case "get link":
+      //   {
+      //     let _id = "";
+      //     if (dataForEvent.data?.fileId?._id) {
+      //       _id = dataForEvent.data.fileId?._id;
+      //     } else {
+      //       _id = dataForEvent.data.folderId?._id;
+      //     }
+      //     handleCloseDecryptedPassword();
+      //     handleFileAndFolderURL?.({ ...dataForEvent.data, _id });
+      //   }
+      //   break;
       case "get link":
-        {
-          let _id = "";
-          if (dataForEvent.data?.fileId?._id) {
-            _id = dataForEvent.data.fileId?._id;
-          } else {
-            _id = dataForEvent.data.folderId?._id;
-          }
-          handleCloseDecryptedPassword();
-          handleFileAndFolderURL?.({ ...dataForEvent.data, _id });
-        }
+        setOpenGetLink(true);
+        handleCloseDecryptedPassword();
         break;
       case "preview":
         handleCloseDecryptedPassword();
@@ -347,28 +373,33 @@ function ShareWithMe() {
     }
   }, []);
 
-  useEffect(() => {
-    if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
-      const checkPassword = isCheckPassword();
+  // useEffect(() => {
+  //   if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
+  //     const checkPassword = isCheckPassword();
 
-      if (checkPassword) {
-        setShowEncryptPassword(true);
-      } else {
-        let _id = "";
-        let shortUrl = "";
-        if (dataForEvent.data?.fileId?._id) {
-          _id = dataForEvent.data.fileId?._id;
-          shortUrl = dataForEvent.data.fileId?.shortUrl;
-        } else {
-          _id = dataForEvent.data.folderId?._id;
-          shortUrl = dataForEvent.data.folderId?.shortUrl;
-        }
-        handleFileAndFolderURL?.({ ...dataForEvent.data, shortUrl, _id });
-        setDataForEvent({
-          action: "",
-          data: {},
-        });
-      }
+  //     if (checkPassword) {
+  //       setShowEncryptPassword(true);
+  //     } else {
+  //       let _id = "";
+  //       let shortUrl = "";
+  //       if (dataForEvent.data?.fileId?._id) {
+  //         _id = dataForEvent.data.fileId?._id;
+  //         shortUrl = dataForEvent.data.fileId?.shortUrl;
+  //       } else {
+  //         _id = dataForEvent.data.folderId?._id;
+  //         shortUrl = dataForEvent.data.folderId?.shortUrl;
+  //       }
+  //       handleFileAndFolderURL?.({ ...dataForEvent.data, shortUrl, _id });
+  //       setDataForEvent({
+  //         action: "",
+  //         data: {},
+  //       });
+  //     }
+  //   }
+  // }, [dataForEvent.action]);
+  useEffect(() => {
+    if (dataForEvent.action && dataForEvent.data) {
+      menuOnClick(dataForEvent.action);
     }
   }, [dataForEvent.action]);
 
@@ -413,9 +444,9 @@ function ShareWithMe() {
   useEffect(() => {
     if (dataForEvent.action) {
       if (dataForEvent?.data?.folderId?.folder_type) {
-        setName(dataForEvent.data.folderId.folder_name);
+        setName(dataForEvent.data?.folderId?.folder_name);
       } else {
-        setName(dataForEvent.data.fileId.filename);
+        setName(dataForEvent.data?.fileId?.filename);
       }
     }
   }, [dataForEvent.action]);
@@ -505,7 +536,6 @@ function ShareWithMe() {
   const menuOnClick = async (action) => {
     setIsAutoClose(true);
     const checkPassword = isCheckPassword();
-
     switch (action) {
       case "download":
         setEventClick("download");
@@ -555,9 +585,17 @@ function ShareWithMe() {
           setShowPreview(true);
         }
         break;
+      // case "get link":
+      //   setEventClick("get link");
+      //   // await handleGetLink();
+      //   break;
       case "get link":
-        setEventClick("get link");
-        // await handleGetLink();
+        setEventClick("get-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenGetLink(true);
+        }
         break;
       case "detail":
         setEventClick("detail");
@@ -608,17 +646,17 @@ function ShareWithMe() {
     }
   }, [renameDialogOpen]);
 
-  const handleClickFolder = (e, value) => {
-    if (e.ctrlKey && !multiChecked.includes(value?._id)) {
-      setMultiChecked([...multiChecked, value?._id]);
-      setMultiSelectId([...multiSelectId, value]);
-    } else {
-      setMultiChecked(multiChecked.filter((id) => id !== value?._id));
-      setMultiSelectId(multiSelectId.filter((id) => id?._id !== value?._id));
-    }
+  // const handleClickFolder = (e, value) => {
+  //   if (e.ctrlKey && !multiChecked.includes(value?._id)) {
+  //     setMultiChecked([...multiChecked, value?._id]);
+  //     setMultiSelectId([...multiSelectId, value]);
+  //   } else {
+  //     setMultiChecked(multiChecked.filter((id) => id !== value?._id));
+  //     setMultiSelectId(multiSelectId.filter((id) => id?._id !== value?._id));
+  //   }
 
-    setChecked(value?._id);
-  };
+  //   setChecked(value?._id);
+  // };
 
   const handleOpenFolder = (value) => {
     setFolderId(value?._id);
@@ -812,24 +850,57 @@ function ShareWithMe() {
 
   const handleDeleteShare = async () => {
     try {
-      await deleteShareFileAndFolder({
-        variables: {
-          id: dataForEvent.data?._id,
-          email: dataForEvent.data?.toAccount?.email,
-        },
+      // await deleteShareFileAndFolder({
+      //   variables: {
+      //     id: dataForEvent.data?._id,
+      //     email: dataForEvent.data?.toAccount?.email,
+      //   },
 
-        onCompleted: async () => {
-          if (dataForEvent.data?.folderId?._id) {
+      //   onCompleted: async () => {
+      //     if (dataForEvent.data?.folderId?._id) {
+      //       successMessage("Delete folder successful !", 2000);
+      //     } else {
+      //       successMessage("Delete file successful !", 2000);
+      //     }
+      //     queryGetShare();
+      //   },
+      // });
+      if (dataForEvent.data?.folderId?._id) {
+        // folder
+        await updateFolder({
+          variables: {
+            where: {
+              _id: parseInt(dataForEvent.data.folderId._id),
+            },
+            data: {
+              status: "deleted",
+            },
+          },
+          onCompleted: () => {
+            queryGetShare();
             successMessage("Delete folder successful !", 2000);
-          } else {
+          },
+        });
+      } else {
+        // file
+        await updateFile({
+          variables: {
+            where: {
+              _id: parseInt(dataForEvent.data.fileId._id),
+            },
+            data: {
+              status: "deleted",
+            },
+          },
+
+          onCompleted: () => {
+            queryGetShare();
             successMessage("Delete file successful !", 2000);
-          }
-          queryGetShare();
-        },
-      });
+          },
+        });
+      }
     } catch (error: any) {
-      errorMessage(error, 3000);
-      errorMessage("Sorry! Something went wrong. Please try again!", 3000);
+      errorMessage(error.message, 3000);
     }
   };
 
@@ -911,6 +982,115 @@ function ShareWithMe() {
     setShareDialog(false);
   };
 
+  const handleClearMultipleFileData = () => {
+    dispatch(checkboxAction.setRemoveFileAndFolderData());
+  };
+
+  const handleClick = useCallback(
+    async (data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (isToggleMenu.isStatus !== "preview" || isSelected) {
+        return;
+      }
+      setDataForEvent({
+        action: "preview",
+        data,
+      });
+    },
+    [dispatch, isToggleMenu.isStatus, isToggleMenu.isToggle, isSelected],
+  );
+
+  const handleDoubleClick = (data: any) => {
+    setDataForEvent({
+      action: "preview",
+      data,
+    });
+  };
+
+  const handleFolderClick = useCallback(
+    (selected: any, data: any) => {
+      dispatch(setMenuToggle({ isStatus: "preview" }));
+      if (
+        isMobile &&
+        !isFolderSelected &&
+        isToggleMenu.isStatus === "preview"
+      ) {
+        setDataForEvent({
+          action: "double click",
+          data: selected,
+        });
+      } else {
+        handleMultipleData(selected?._id, data);
+      }
+    },
+    [
+      dispatch,
+      isMobile,
+      isToggleMenu.isStatus,
+      isToggleMenu.isToggle,
+      isFolderSelected,
+    ],
+  );
+
+  const handleFolderDoubleClick = (data: any) => {
+    setDataForEvent({
+      action: "double click",
+      data: data,
+    });
+  };
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  };
+
+  const handleGenerateGetLink = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  };
+
+  const handleGetLinkMultipe = () => {
+    setDataForEvent({
+      data: {},
+      action: "",
+    });
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item!.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
+        return {
+          ...prev,
+          data: data,
+        };
+      });
+
+      setOpenGetLink(true);
+    }
+  };
+
   return (
     <Fragment>
       <Box
@@ -929,6 +1109,7 @@ function ShareWithMe() {
                 handleClearSelection();
                 queryGetShare();
               }}
+              onManageLink={handleGetLinkMultipe}
               onPressDeleteShare={handleMultipleDeleteShare}
               onPressShare={() => {
                 setShareMultipleDialog(true);
@@ -972,13 +1153,38 @@ function ShareWithMe() {
                     <Fragment key={index}>
                       {listItem?.data?.length > 0 && (
                         <Fragment>
-                          <Typography
-                            variant="h4"
-                            fontWeight="bold"
-                            sx={{ mb: 2, mt: "25px" }}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                            }}
                           >
-                            {listItem.data ? listItem.title : ""}
-                          </Typography>
+                            <Typography
+                              variant="h4"
+                              fontWeight="bold"
+                              sx={{ mb: 2, mt: "25px" }}
+                            >
+                              {listItem.data ? listItem.title : ""}
+                            </Typography>
+                            {isMobile && toggle !== "list" && (
+                              <Typography
+                                sx={{
+                                  p: 2,
+                                  fontSize: "1rem",
+                                }}
+                                onClick={() => {
+                                  dispatch(
+                                    toggleFolderSelected(!isFolderSelected),
+                                  );
+                                  dispatch(toggleSelected(!isSelected));
+                                  handleClearMultipleFileData();
+                                }}
+                              >
+                                {isFolderSelected ? "Deselect" : "Select"}
+                              </Typography>
+                            )}
+                          </Box>
                           {toggle === "list" && (
                             <Fragment>
                               <ShareWithMeDataGrid
@@ -1007,12 +1213,6 @@ function ShareWithMe() {
                                       data,
                                     });
                                   }
-                                }}
-                                onDoubleClick={(data) => {
-                                  setDataForEvent({
-                                    data,
-                                    action: "double click",
-                                  });
                                 }}
                                 handleSelection={(data) => {
                                   handleMultipleData(data, listItem.data);
@@ -1058,25 +1258,24 @@ function ShareWithMe() {
                                           );
                                         }}
                                         cardProps={{
-                                          onClick: (e) => {
-                                            handleMultipleData(
-                                              data?._id,
-                                              listItem?.data,
-                                            );
-                                            handleClickFolder(e, data);
-                                          },
-                                          onDoubleClick: () => {
-                                            setDataForEvent({
-                                              data,
-                                              action: "double click",
-                                            });
-                                          },
+                                          onClick: () =>
+                                            isMobile
+                                              ? handleFolderClick(
+                                                  data,
+                                                  listItem?.data,
+                                                )
+                                              : handleMultipleData(
+                                                  data._id,
+                                                  listItem?.data,
+                                                ),
+                                          onDoubleClick: () =>
+                                            handleFolderDoubleClick(data),
                                           ...(multiChecked.find(
                                             (id) => id === data?.folderId?._id,
                                           ) && {
                                             ischecked: true,
                                           }),
-                                          ...(dataSelector?.selectionFileAndFolder?.find(
+                                          ...(dataSelector?.selectionFileAndFolderData?.find(
                                             (el) =>
                                               el?.id === data?.folderId?._id,
                                           ) && {
@@ -1180,7 +1379,6 @@ function ShareWithMe() {
                                     </Fragment>
                                   );
                                 }
-
                                 // Files
                                 else {
                                   if (data?.fileId?.filename) {
@@ -1196,15 +1394,22 @@ function ShareWithMe() {
                                         }
                                         isCheckbox={true}
                                         cardProps={{
-                                          onDoubleClick: () => {
-                                            setDataForEvent({
-                                              action: "preview",
-                                              data: {
-                                                ...data,
-                                                _id: data?.fileId?._id,
-                                              },
-                                            });
-                                          },
+                                          // onDoubleClick: () => {
+                                          //   setDataForEvent({
+                                          //     action: "preview",
+                                          //     data: {
+                                          //       ...data,
+                                          //       _id: data?.fileId?._id,
+                                          //     },
+                                          //   });
+                                          // },
+                                          onClick: isMobile
+                                            ? async () =>
+                                                await handleClick(data)
+                                            : undefined,
+                                          onDoubleClick: !isMobile
+                                            ? () => handleDoubleClick(data)
+                                            : undefined,
                                         }}
                                         handleSelect={(dataId) => {
                                           handleMultipleData(
@@ -1382,7 +1587,7 @@ function ShareWithMe() {
               setName={setName}
             />
 
-            {showPreview && (
+            {showPreview && dataForEvent.data && (
               <DialogPreviewFileSlide
                 open={showPreview}
                 handleClose={handleClosePreview}
@@ -1435,12 +1640,7 @@ function ShareWithMe() {
                 user={dataForEvent.data.ownerId}
                 {...{
                   favouriteIcon: {
-                    isShow: true,
-                    handleFavouriteOnClick: async () =>
-                      await handleAddFavourite(),
-                    isFavourite: dataForEvent.data.fileId?.favorite
-                      ? true
-                      : false,
+                    isShow: false,
                   },
                   downloadIcon: {
                     isShow:
@@ -1512,6 +1712,15 @@ function ShareWithMe() {
         onClose={handleCloseFileDrop}
         handleChange={handleCreateFileDrop}
       />
+      {openGetLink && dataForEvent.data && (
+        <DialogGetLink
+          isOpen={openGetLink}
+          dataShare={true}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      )}
     </Fragment>
   );
 }

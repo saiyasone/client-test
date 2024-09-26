@@ -80,7 +80,6 @@ import {
   toggleSelected,
 } from "stores/features/useEventSlice";
 import { RootState } from "stores/store";
-import { TitleAndSwitch } from "styles/clientPage.style";
 import { IFolderTypes, IMyCloudTypes } from "types/mycloudFileType";
 import { errorMessage, successMessage } from "utils/alert.util";
 import {
@@ -97,6 +96,9 @@ import { replacetDotWithDash } from "utils/string.util";
 import useFirstRender from "../../../hooks/useFirstRender";
 import ExtendFileDataGrid from "./ExtendFileDataGrid";
 import ExtendFolderDataGrid from "./ExtendFolderDataGrid";
+import { TitleAndSwitch } from "styles/clientPage.style";
+import DialogGetLink from "components/dialog/DialogGetLink";
+import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
 import SearchExtend from "./SearchExtend";
 
 const _ITEM_GRID_PER_PAGE = 20;
@@ -110,8 +112,10 @@ function ExtendFolder() {
   const [toggle, setToggle] = useState<any>(null);
   const [isUpdate, setIsUpdate] = useState<any>(false);
   const [_viewMore, _setViewMore] = useState<any>(20);
+  const [openGetLink, setOpenGetLink] = useState(false);
+  const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
   const parentFolderUrl = useMemo(() => {
-    return Base64.decode(params.id);
+    return Base64?.decode(params?.id);
   }, [params.id]);
   const { triggerFolder, handleTriggerFolder }: any = useContext(FolderContext);
   const { refreshAuto } = useRefreshState();
@@ -306,7 +310,7 @@ function ExtendFolder() {
   const [shareDialog, setShareDialog] = useState<any>(false);
   const [fileAction] = useMutation(MUTATION_ACTION_FILE);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
-  const handleGetFolderURL = useGetUrlExtendFolder(dataForEvent.data);
+  // const handleGetFolderURL = useGetUrlExtendFolder(dataForEvent.data);
 
   useEffect(() => {
     if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
@@ -315,7 +319,8 @@ function ExtendFolder() {
         setShowEncryptPassword(true);
       } else {
         setIsAutoClose(true);
-        handleGetFolderURL?.(dataForEvent.data);
+        setOpenGetLink(true);
+        // handleGetFolderURL?.(dataForEvent.data);
         resetDataForEvent();
       }
     }
@@ -343,6 +348,11 @@ function ExtendFolder() {
     };
   }, [parentFolder]);
 
+  useEffect(() => {
+    if (params) {
+      handleCloseSearch();
+    }
+  }, [params]);
   /* folders pagination */
   useEffect(() => {
     if (!isFirstRender) {
@@ -399,6 +409,66 @@ function ExtendFolder() {
   };
   const handleCloseMultiplePassword = () => {
     setIsMultiplePasswordLink(false);
+  };
+
+  const handleGetLinkMultipe = () => {
+    resetDataForEvent();
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
+        return {
+          ...prev,
+          data: data,
+        };
+      });
+
+      setOpenGetLink(true);
+    }
+  };
+
+  const handleOneTimeLinkMultiFiles = () => {
+    resetDataForEvent();
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setEventClick("one-time-link");
+
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
+        return {
+          ...prev,
+          data: data,
+        };
+      });
+
+      setOpenOneTimeLink(true);
+    }
   };
 
   // handle multiple select files
@@ -494,6 +564,10 @@ function ExtendFolder() {
     const url = value?.url;
 
     const base64URL = Base64.encodeURI(url);
+    setDataForEvent((prev) => ({
+      ...prev,
+      action: "",
+    }));
     navigate(`/folder/${base64URL}`);
   };
   useEffect(() => {
@@ -608,9 +682,27 @@ function ExtendFolder() {
           setShowPreview(true);
         }
         break;
-      case "get link":
-        setEventClick("get link");
+      // case "get link":
+      //   setEventClick("get link");
+      //   break;
+      case "get link": {
+        setEventClick("get-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenGetLink(true);
+        }
         break;
+      }
+      case "one-time-link": {
+        setEventClick("one-time-link");
+        if (checkPassword) {
+          setShowEncryptPassword(true);
+        } else {
+          setOpenOneTimeLink(true);
+        }
+        break;
+      }
       case "detail":
         setEventClick("detail");
         if (checkPassword) {
@@ -695,8 +787,14 @@ function ExtendFolder() {
         await handleDeleteFilesAndFolders();
         break;
       case "get link":
+        // handleCloseDecryptedPassword();
+        // handleGetFolderURL?.(dataForEvent.data);
+        setOpenGetLink(true);
         handleCloseDecryptedPassword();
-        handleGetFolderURL?.(dataForEvent.data);
+        break;
+      case "one-time-link":
+        setOpenOneTimeLink(true);
+        handleCloseDecryptedPassword();
         break;
       case "rename":
         handleCloseDecryptedPassword();
@@ -914,6 +1012,48 @@ function ExtendFolder() {
         },
       },
     );
+  };
+
+  const handleGetLinkClose = () => {
+    setOpenGetLink(false);
+    // setDataGetUrl(dataForEvent.data);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+  };
+
+  const handleGenerateGetLink = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+
+    setOpenGetLink(false);
+  };
+
+  const handleOneTimeLinkClose = () => {
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
+    setOpenOneTimeLink(false);
+  };
+
+  const handleOneTimeLinkSubmit = () => {
+    setOpenOneTimeLink(false);
+    setDataForEvent((prev: any) => {
+      return {
+        ...prev,
+        action: "",
+      };
+    });
   };
 
   const handleDeleteFilesAndFolders = async () => {
@@ -1242,6 +1382,8 @@ function ExtendFolder() {
             onPressShare={() => {
               setShareMultipleDialog(true);
             }}
+            onOneTimeLinks={handleOneTimeLinkMultiFiles}
+            onManageLink={handleGetLinkMultipe}
             onPressLockData={handleOpenMultiplePassword}
             onPressSuccess={() => {
               handleClearMultipleFileAndFolder();
@@ -1296,7 +1438,7 @@ function ExtendFolder() {
             <Box sx={{ display: "flex", alignItems: "center" }}>
               {isMobile && (
                 <span style={{ marginTop: "8px" }}>
-                  <CiSearch size={20} onClick={() => setSearchOpen(true)} />
+                  <CiSearch size={24} onClick={() => setSearchOpen(true)} />
                 </span>
               )}
               {fetchSubFoldersAndFiles.folders.isDataFound !== null &&
@@ -1323,132 +1465,132 @@ function ExtendFolder() {
               <Fragment>
                 {fetchSubFoldersAndFiles.folders.total > 0 && (
                   <MUI.ExtendItem>
-                    <Fragment>
-                      {toggle === "grid" && (
-                        <Fragment>
-                          <Box
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Typography variant="h4" fontWeight="bold">
+                        Folders
+                      </Typography>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        {isMobile && toggle !== "list" && (
+                          <Typography
                             sx={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
+                              p: 2,
+                              fontSize: "1rem",
+                            }}
+                            onClick={() => {
+                              dispatch(toggleFolderSelected(!isFolderSelected));
+                              handleClearMultipleFileData();
                             }}
                           >
-                            <Typography variant="h4" fontWeight="bold">
-                              Folders
-                            </Typography>
-                            <Box
-                              sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                              }}
-                            >
-                              {isMobile && toggle !== "list" && (
-                                <Typography
-                                  sx={{
-                                    p: 2,
-                                    fontSize: "1rem",
-                                  }}
-                                  onClick={() => {
-                                    dispatch(
-                                      toggleFolderSelected(!isFolderSelected),
-                                    );
-                                    handleClearMultipleFileData();
-                                  }}
-                                >
-                                  {isFolderSelected ? "Deselect" : "Select"}
-                                </Typography>
-                              )}
+                            {isFolderSelected ? "Deselect" : "Select"}
+                          </Typography>
+                        )}
 
-                              <Typography
-                                variant="h5"
-                                sx={{
-                                  fontSize: "1rem",
-                                  color: "initial !important",
-                                  fontWeight: "normal !important",
-                                }}
-                                mr={3}
-                              >
-                                {fetchSubFoldersAndFiles.folderTotal || 0} Items
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <FileCardContainer>
-                            {fetchSubFoldersAndFiles.folders.data.map(
-                              (data: any, index: number) => {
-                                return (
-                                  <FolderGridItem
-                                    key={index}
-                                    open={open}
-                                    file_id={
-                                      parseInt(data?.total_size) > 0
-                                        ? true
-                                        : false
-                                    }
-                                    id={data?._id}
-                                    folder_name={data?.folder_name}
-                                    selectType={"folder"}
-                                    setIsOpenMenu={setIsOpenMenu}
-                                    isOpenMenu={isOpenMenu}
-                                    isCheckbox={true}
-                                    isPinned={data.pin ? true : false}
-                                    onOuterClick={() => {
-                                      setMultiChecked(multiChecked);
-                                      setChecked({});
-                                    }}
-                                    cardProps={{
-                                      onClick: () =>
-                                        isMobile
-                                          ? handleFolderClick(data)
-                                          : handleMultipleFolderData(data._id),
-                                      onDoubleClick: () =>
-                                        handleFolderDoubleClick(data),
+                        <Typography
+                          variant="h5"
+                          sx={{
+                            fontSize: "1rem",
+                            color: "initial !important",
+                            fontWeight: "normal !important",
+                          }}
+                          mr={3}
+                        >
+                          {fetchSubFoldersAndFiles.folderTotal || 0} Items
+                        </Typography>
+                      </Box>
+                    </Box>
+                    <Fragment>
+                      {toggle === "grid" && (
+                        <FileCardContainer>
+                          {fetchSubFoldersAndFiles.folders.data.map(
+                            (data: any, index: number) => {
+                              return (
+                                <FolderGridItem
+                                  key={index}
+                                  open={open}
+                                  file_id={
+                                    parseInt(data?.total_size) > 0
+                                      ? true
+                                      : false
+                                  }
+                                  id={data?._id}
+                                  isContainFiles={
+                                    parseInt(data?.total_size) > 0
+                                      ? true
+                                      : false
+                                  }
+                                  folder_name={data?.folder_name}
+                                  selectType={"folder"}
+                                  setIsOpenMenu={setIsOpenMenu}
+                                  isOpenMenu={isOpenMenu}
+                                  isCheckbox={true}
+                                  isPinned={data.pin ? true : false}
+                                  onOuterClick={() => {
+                                    setMultiChecked(multiChecked);
+                                    setChecked({});
+                                  }}
+                                  cardProps={{
+                                    onClick: () =>
+                                      isMobile
+                                        ? handleFolderClick(data)
+                                        : handleMultipleFolderData(data._id),
+                                    onDoubleClick: () =>
+                                      handleFolderDoubleClick(data),
 
-                                      ...(dataSelector?.selectionFileAndFolderData?.find(
-                                        (el: any) =>
-                                          el?.id === data?._id &&
-                                          el?.checkType === "folder",
-                                      ) && {
-                                        ishas: "true",
-                                      }),
-                                    }}
-                                    menuItem={favouriteMenuItems?.map(
-                                      (menuItems, index) => {
-                                        return (
-                                          <MenuDropdownItem
-                                            key={index}
-                                            disabled={
-                                              data.file_id[0]?._id ||
-                                              data.parentkey[0]?._id
-                                                ? false
-                                                : menuItems.disabled
-                                            }
-                                            className="menu-item"
-                                            isPinned={data.pin ? true : false}
-                                            isPassword={
-                                              data.filePassword ||
-                                              data.access_password
-                                                ? true
-                                                : false
-                                            }
-                                            title={menuItems.title}
-                                            icon={menuItems.icon}
-                                            onClick={() => {
-                                              setDataForEvent({
-                                                data: data,
-                                                action: menuItems.action,
-                                              });
-                                            }}
-                                          />
-                                        );
-                                      },
-                                    )}
-                                  />
-                                );
-                              },
-                            )}
-                          </FileCardContainer>
-                        </Fragment>
+                                    ...(dataSelector?.selectionFileAndFolderData?.find(
+                                      (el: any) =>
+                                        el?.id === data?._id &&
+                                        el?.checkType === "folder",
+                                    ) && {
+                                      ishas: "true",
+                                    }),
+                                  }}
+                                  menuItem={favouriteMenuItems?.map(
+                                    (menuItems, index) => {
+                                      return (
+                                        <MenuDropdownItem
+                                          key={index}
+                                          disabled={
+                                            data?.total_size > 0
+                                              ? false
+                                              : menuItems.disabled
+                                          }
+                                          className="menu-item"
+                                          isPinned={data.pin ? true : false}
+                                          isPassword={
+                                            data.filePassword ||
+                                            data.access_password
+                                              ? true
+                                              : false
+                                          }
+                                          title={menuItems.title}
+                                          icon={menuItems.icon}
+                                          onClick={() => {
+                                            setDataForEvent({
+                                              data: data,
+                                              action: menuItems.action,
+                                            });
+                                          }}
+                                        />
+                                      );
+                                    },
+                                  )}
+                                />
+                              );
+                            },
+                          )}
+                        </FileCardContainer>
                       )}
                       {toggle !== "grid" && (
                         <ExtendFolderDataGrid
@@ -1770,7 +1912,7 @@ function ExtendFolder() {
             downloadIcon: {
               isShow: true,
               handleDownloadOnClick: async () => {
-                setDataForEvent((prev) => {
+                setDataForEvent((prev: any) => {
                   return {
                     ...prev,
                     action: "download",
@@ -1854,30 +1996,6 @@ function ExtendFolder() {
         data={dataForEvent.data}
       />
 
-      {/* {showPreview && (
-        <DialogPreviewFile
-          open={showPreview}
-          handleClose={() => {
-            resetDataForEvent();
-            setShowPreview(false);
-          }}
-          onClick={() => {
-            if (dataForEvent.type === "folder") {
-              handleDownloadFolder();
-            } else {
-              setDataForEvent((prev) => ({
-                ...prev,
-                action: "download",
-              }));
-            }
-          }}
-          filename={dataForEvent.data.name}
-          newFilename={dataForEvent.data.newName}
-          fileType={dataForEvent.data.type}
-          path={dataForEvent.data.newPath}
-          user={user}
-        />
-      )} */}
       {showPreview && (
         <DialogPreviewFileSlide
           open={showPreview}
@@ -1917,6 +2035,22 @@ function ExtendFolder() {
           " will be deleted?"
         }
       />
+      {openGetLink && dataForEvent.data && (
+        <DialogGetLink
+          isOpen={openGetLink}
+          onClose={handleGetLinkClose}
+          onCreate={handleGenerateGetLink}
+          data={dataForEvent.data}
+        />
+      )}
+      {openOneTimeLink && dataForEvent?.data && (
+        <DialogOneTimeLink
+          isOpen={openOneTimeLink}
+          onClose={handleOneTimeLinkClose}
+          onCreate={handleOneTimeLinkSubmit}
+          data={dataForEvent?.data}
+        />
+      )}
     </Fragment>
   );
 }

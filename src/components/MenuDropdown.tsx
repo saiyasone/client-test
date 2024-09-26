@@ -86,6 +86,7 @@ const MenuDropdown = ({ ...props }) => {
       handleToggleMenu();
     }
   };
+
   return (
     <MenuDropdownStyled className="menu-dropdown">
       {props.customButton ? (
@@ -130,7 +131,9 @@ const MenuDropdown = ({ ...props }) => {
               style: {
                 position: "relative",
                 width: isMobile ? "180px" : "max-content",
-                boxShadow: "0px 0px 5px rgba(0, 0, 0, 0.05)",
+                boxShadow: props?.customButton?.shadows
+                  ? props?.customButton?.shadows
+                  : "0px 0px 5px rgba(0, 0, 0, 0.05)",
               },
             },
           }}

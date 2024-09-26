@@ -37,15 +37,15 @@ export const QUERY_FOLDER = gql`
           firstName
           lastName
         }
-        file_id {
-          _id
-          filename
-          size
-          status
-        }
-        parentkey {
-          _id
-        }
+        # file_id {
+        #   _id
+        #   filename
+        #   size
+        #   status
+        # }
+        # parentkey {
+        #   _id
+        # }
         updatedAt
       }
     }
@@ -83,6 +83,7 @@ export const MUTATION_CREATE_FOLDER = gql`
   mutation CreateFolders($data: FoldersInput!) {
     createFolders(data: $data) {
       _id
+      newPath
     }
   }
 `;
@@ -136,11 +137,11 @@ export const QUERY_FOLDER_PUBLIC = gql`
         path
         url
         expired
-        file_id {
-          _id
-          filename
-          size
-        }
+        # file_id {
+        #   _id
+        #   filename
+        #   size
+        # }
         permissionSharePublic
         aproveDownloadPublic
         pin

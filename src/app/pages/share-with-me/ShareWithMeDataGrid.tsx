@@ -21,6 +21,8 @@ import "styles/pagination.style.css";
 import { getFileType } from "utils/file.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import Loader from "../../../components/Loader";
+import CheckBoxIcon from "@mui/icons-material/CheckBox";
+import CheckBoxOutlineBlankIcon from "@mui/icons-material/CheckBoxOutlineBlank";
 
 const FolderIconContainer = styled(Box)({
   width: "30px",
@@ -43,14 +45,6 @@ function ShareWithMeDataGrid(props) {
   const isTablet = useMediaQuery("(min-width:600px) and (max-width:1024px)");
   const dataSelector = useSelector(checkboxFileAndFolderSelector);
 
-  const hanleOpenFile = (params) => {
-    if (params?.row?.folderId?.folder_type) {
-      onDoubleClick(params?.row);
-    } else {
-      props.handleEvent("preview", params?.row);
-    }
-  };
-
   const [showLoader, setShowLoader] = React.useState(true);
 
   React.useEffect(() => {
@@ -61,24 +55,52 @@ function ShareWithMeDataGrid(props) {
     return () => clearTimeout(timeout);
   }, []);
 
-  const handleOnClick = (data) => {
-    if ((data.folderId?.folder_type && isTablet) || isMobile) {
-      const userData =
-        data?.fromAccount?._id +
-        "/" +
-        data?.fromAccount?.newName +
-        "/" +
-        data?.permission +
-        "/" +
-        data?.folderId?.url;
-      const base64URL = Base64.encodeURI(userData);
-      navigate(`/folder/${base64URL}`);
+  const handleOnClick = (folderId: string) => {
+    if (!folderId == null || !folderId) {
+      return;
+    }
+    console.log(folderId);
+
+    // const base64URL = Base64?.encodeURI(data?.folderId?._id);
+    // if ((data.folderId?.folder_type && isTablet) || isMobile) {
+    // const userData =
+    //   data?.fromAccount?._id +
+    //   "/" +
+    //   data?.fromAccount?.newName +
+    //   "/" +
+    //   data?.permission +
+    //   "/" +
+    //   data?.folderId?.url;
+    // const base64URL = Base64.encodeURI(userData);
+    // navigate(`/folder/${base64URL}`);
+    // }
+    // const base64URL = Base64.encodeURI(data?.folderId?._id);
+    // navigate(`/folder/share/${base64URL}`);
+  };
+
+  const handleClick = (params: { row: any }) => {
+    console.log("mobile onclick");
+
+    if (isMobile) {
+      const { folderId } = params?.row;
+      if (!folderId && folderId == null) {
+        props.handleEvent("preview", params?.row);
+      } else {
+        handleOnClick(params?.row);
+      }
     }
   };
 
-  const onPreViewClick = (data) => {
-    if (isTablet || isMobile) {
-      props.handleEvent("preview", data);
+  // use for desktop
+  const handleDouble = (params: any) => {
+    console.log("desktpp onclick");
+
+    const { folderId } = params?.row;
+    console.log("desktop open folder", folderId?._id);
+    if (folderId?._id) {
+      handleOnClick(folderId?._id);
+    } else {
+      props.handleEvent("preview", params?.row);
     }
   };
 
@@ -88,22 +110,43 @@ function ShareWithMeDataGrid(props) {
       headerName: "",
       editable: false,
       sortable: false,
-      width: 60,
+      maxWidth: isMobile ? 40 : 70,
       renderCell: (params) => {
         const { _id } = params?.row || {};
-
+        const isChecked =
+          !!props?.dataSelector?.selectionFileAndFolderData?.find(
+            (el: any) => el?.id === _id,
+          );
         return (
-          <Checkbox
-            checked={
-              props?.dataSelector?.selectionFileAndFolderData?.find(
-                (el) => el?.id === _id,
-              )
-                ? true
-                : false
-            }
-            aria-label={"checkbox" + _id}
-            onClick={() => handleSelection(_id)}
-          />
+          <div>
+            {isMobile ? (
+              <Box>
+                <Checkbox
+                  checked={isChecked}
+                  icon={<CheckBoxOutlineBlankIcon />}
+                  checkedIcon={
+                    <CheckBoxIcon
+                      sx={{
+                        color: "#17766B",
+                      }}
+                    />
+                  }
+                  onClick={() => props?.handleSelection(_id)}
+                  sx={{ padding: "0" }}
+                />
+              </Box>
+            ) : (
+              <Checkbox
+                checked={
+                  !!props?.dataSelector?.selectionFileAndFolderData?.find(
+                    (el: any) => el?.id === _id,
+                  ) && true
+                }
+                aria-label={"checkbox" + _id}
+                onClick={() => props?.handleSelection(_id)}
+              />
+            )}
+          </div>
         );
       },
     },
@@ -111,6 +154,7 @@ function ShareWithMeDataGrid(props) {
       field: "folder_name||filename",
       headerName: "Name",
       flex: 1,
+      minWidth: 120,
       renderCell: (params) => (
         <div
           style={{
@@ -120,11 +164,11 @@ function ShareWithMeDataGrid(props) {
           }}
         >
           {params?.row?.folderId?.folder_name ? (
-            <FolderIconContainer onClick={() => handleOnClick(params.row)}>
+            <FolderIconContainer>
               <FolderNotEmpty />
             </FolderIconContainer>
           ) : (
-            <FileIconContainer onClick={() => onPreViewClick(params.row)}>
+            <FileIconContainer>
               <FileIcon
                 extension={getFileType(params?.row?.fileId?.filename)}
                 {...{
@@ -225,12 +269,38 @@ function ShareWithMeDataGrid(props) {
       {!showLoader && (
         <>
           <FileDataGrid
-            dataGrid={{ columns, hideFooter: true }}
+            dataGrid={{
+              columns,
+              hideFooter: true,
+              checked: true,
+              disableColumnFilter: true,
+              disableColumnMenu: true,
+              onCellDoubleClick: !isMobile
+                ? (params: { field: string; row: any }) => {
+                    if (
+                      params.field !== "checkboxAction" &&
+                      params.field !== "action"
+                    ) {
+                      handleDouble(params);
+                    }
+                  }
+                : undefined,
+              
+              onCellClick: isMobile
+                ? (params: { field: string; row: any }) => {
+                    if (
+                      params.field !== "checkboxAction" &&
+                      params.field !== "action"
+                    ) {
+                      handleClick(params);
+                    }
+                  }
+                : undefined,
+            }}
             data={rows}
             hover={hover}
             setHover={setHover}
             open={open}
-            hanleOpenFile={hanleOpenFile}
             handleSelection={handleSelection}
             dataSelector={dataSelector}
           />

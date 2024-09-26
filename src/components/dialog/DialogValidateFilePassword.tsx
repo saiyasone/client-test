@@ -33,7 +33,6 @@ function DialogValidateFilePassword(props) {
 
   function handleSubmit(evt) {
     evt.preventDefault();
-
     if (textPassword) {
       const hashPassword = CryptoJS.MD5(textPassword).toString();
       if (hashPassword === filePassword) {

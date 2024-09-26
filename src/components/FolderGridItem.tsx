@@ -14,21 +14,33 @@ import useHover from "hooks/useHover";
 import { useEffect, useRef, useState } from "react";
 import { BsPinAngleFill } from "react-icons/bs";
 import * as MUI from "styles/clientPage.style";
+import lockIcon from "assets/images/lock-icon.png";
 
 import CheckBoxOutlineBlankRoundedIcon from "@mui/icons-material/CheckBoxOutlineBlankRounded";
 import MenuDropdown from "components/MenuDropdown";
 import useOuterClick from "hooks/useOuterClick";
 import { useSelector } from "react-redux";
 import * as checkboxAction from "stores/features/checkBoxFolderAndFileSlice";
-import { cutStringWithEllipsis } from "utils/string.util";
 import { RootState } from "stores/store";
-import { display } from "html2canvas/dist/types/css/property-descriptors/display";
+import { cutStringWithEllipsis } from "utils/string.util";
 
 const CustomCheckbox: any = styled(Checkbox)({
   "& .MuiSvgIcon-root": {
     fontSize: 25,
     fontWeight: "300",
   },
+});
+
+const BoxImage = styled("div")({
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+});
+
+const ImageIcon = styled("img")({
+  width: "70px",
+  height: "70px",
+  objectFit: "cover",
 });
 
 const Item = styled(Paper)(({ theme, ...props }: any) => ({
@@ -164,7 +176,7 @@ export default function FolderGridItem({
                   ? isFolderSelected
                     ? "block"
                     : "none" // On mobile, show if folder is selected
-                  : !!dataSelector?.selectionFileAndFolderData?.find(
+                  : dataSelector?.selectionFileAndFolderData?.find(
                       (el: any) =>
                         el?.id === props?.id &&
                         el.checkType === props?.selectType,
@@ -184,13 +196,19 @@ export default function FolderGridItem({
           </MUI.SelectionContainer>
 
           <MUI.Folder>
-            <IconFolderContainer>
-              {props?.isContainFiles || props?.file_id ? (
-                <FolderNotEmptyIcon />
-              ) : (
-                <FolderEmptyIcon />
-              )}
-            </IconFolderContainer>
+            {props?.password ? (
+              <BoxImage>
+                <ImageIcon src={lockIcon} alt="lock-icon" />
+              </BoxImage>
+            ) : (
+              <IconFolderContainer>
+                {props?.isContainFiles ? (
+                  <FolderNotEmptyIcon />
+                ) : (
+                  <FolderEmptyIcon />
+                )}
+              </IconFolderContainer>
+            )}
 
             <Box sx={{ display: "flex", justifyContent: "center" }}>
               {props.folder_name.length > 10 ? (

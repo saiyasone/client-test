@@ -359,7 +359,7 @@ const FileCardItem: React.FC<any> = ({
           </SelectionContainer>
         )}
 
-        {(isMobile || (props?.menuItems && isOpenMenu)) && (
+        {(!isNormalCard&& isMobile || (props?.menuItems && isOpenMenu)) && (
           <MenuButtonContainer>
             <MenuDropdown
               customButton={props.customButton}

@@ -30,6 +30,7 @@ const useManageChat = (props) => {
           },
           limit,
           orderBy: "_id_DESC",
+          request: "client",
         },
       });
       if (res.data?.tickets?.data) {

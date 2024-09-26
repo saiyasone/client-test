@@ -899,7 +899,8 @@ function FileDrop() {
                             // if(!result){
                             //   setIsShared(!isShared)
                             // }
-                            await handleShareQR(e, qrCodeRef, headerData);
+                            const result = await handleShareQR(e, qrCodeRef, headerData);
+                            console.log({result});
                             setIsShared(!isShared);
                           }
                         }}

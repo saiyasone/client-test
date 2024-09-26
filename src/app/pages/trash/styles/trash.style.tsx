@@ -42,7 +42,7 @@ export const TitleAndSwitch = styled("div")(({ theme }) => ({
   [theme.breakpoints.down("lg")]: {
     margin: "0px",
     top: "55px",
-    padding: "0 10px",
+    padding: "0",
   },
 }));
 
