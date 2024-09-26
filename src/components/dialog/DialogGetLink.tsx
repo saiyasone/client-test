@@ -108,6 +108,10 @@ const DialogOneTimeLink = (props) => {
 
   const handleSelectItemChange = (e) => {
     if (!e || !e?.target?.value) {
+      if(e.target.value == 0){
+        setExpiredAt('');
+        setExpireDays(0);
+      }
       return;
     }
 
@@ -488,8 +492,8 @@ const DialogOneTimeLink = (props) => {
                       },
                     }}
                   >
-                    <MenuItem value={0}>1 Never</MenuItem>
-                    <MenuItem value={-1}>1 days</MenuItem>
+                    <MenuItem value={0}>Never</MenuItem>
+                    <MenuItem value={1}>1 days</MenuItem>
                     <MenuItem value={3}>3 days</MenuItem>
                     <MenuItem value={5}>5 days</MenuItem>
                     <MenuItem value={7}>7 days</MenuItem>
