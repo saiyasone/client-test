@@ -193,7 +193,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
           );
 
-          console.log({ decoded });
+          // console.log({ decoded });
           const dataDecode = JSON.parse(decryptId(userStaff) as string);
 
           if (dataDecode?.role?._id) {
