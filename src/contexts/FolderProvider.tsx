@@ -9,16 +9,16 @@ export const FolderContext = createContext({});
 const reducer = (_state, action) => {
   const folderEncrypted = encryptId(
     JSON.stringify(action.payload),
-    ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+    ENV_KEYS.VITE_APP_LOCAL_STORAGE,
   );
-  localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY, folderEncrypted);
+  localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL, folderEncrypted);
   return action.payload;
 };
 
 const FolderProvider = ({ children }) => {
   // const folderIdStorage = localStorage.getItem("folderId");
   const folderIdStorage = localStorage.getItem(
-    ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
+    ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL,
   );
   const folderDecrypted = decryptId(folderIdStorage);
 
@@ -55,12 +55,9 @@ const FolderProvider = ({ children }) => {
       // localStorage.setItem("folderId", 0);
       const folderEncrypted = encryptId(
         JSON.stringify("0"),
-        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+        ENV_KEYS.VITE_APP_LOCAL_STORAGE,
       );
-      localStorage.setItem(
-        ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
-        folderEncrypted,
-      );
+      localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL, folderEncrypted);
       setFolderId(0);
     }
   }, [location]);
@@ -69,14 +66,11 @@ const FolderProvider = ({ children }) => {
     const handleStorageChange = (e) => {
       if (
         // e.key === "folderId"
-        e.key === ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY
+        e.key === ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL
       ) {
         if (!e.newValue) {
           // localStorage.setItem("folderId", e.oldValue);
-          localStorage.setItem(
-            ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
-            e.oldValue,
-          );
+          localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL, e.oldValue);
         }
       }
     };

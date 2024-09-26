@@ -235,13 +235,13 @@ function MenuMultipleSelectionFolderAndFile(props) {
     }
   };
 
-  const copyTextToClipboard = async (text) => {
-    if ("clipboard" in navigator) {
-      return await navigator.clipboard.writeText(text);
-    } else {
-      return document.execCommand("copy", true, text);
-    }
-  };
+  // const copyTextToClipboard = async (text) => {
+  //   if ("clipboard" in navigator) {
+  //     return await navigator.clipboard.writeText(text);
+  //   } else {
+  //     return document.execCommand("copy", true, text);
+  //   }
+  // };
 
   const handleCheckData = () => {
     if (dataSelector?.selectionFileAndFolderData?.length) {
@@ -713,7 +713,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                 return (
                   <Fragment key={index}>
                     <SelectWrapper>
-                      <Tooltip title={item?.title}>
+                      <Tooltip title={item?.title || ""}>
                         <IconButton
                           size="small"
                           onClick={() => {
@@ -743,7 +743,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                               <CircularProgress size={18} />
                             </IconButton>
                           ) : (
-                            <Tooltip title={item?.title}>
+                            <Tooltip title={item?.title || ""}>
                               <IconButton
                                 size="small"
                                 onClick={() => {
@@ -783,7 +783,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                   <CircularProgress size={18} />
                                 </IconButton>
                               ) : (
-                                <Tooltip title={item?.title}>
+                                <Tooltip title={item?.title || ""}>
                                   <IconButton
                                     onClick={() => {
                                       handleMenuAction(item.action);
@@ -822,7 +822,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                         <CircularProgress size={18} />
                                       </IconButton>
                                     ) : (
-                                      <Tooltip title={item?.title}>
+                                      <Tooltip title={item?.title || ""}>
                                         <IconButton
                                           onClick={() => {
                                             handleMenuAction(item.action);
@@ -872,7 +872,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                       <CircularProgress size={18} />
                                     </IconButton>
                                   ) : (
-                                    <Tooltip title={item?.title}>
+                                    <Tooltip title={item?.title || ""}>
                                       <IconButton
                                         size="small"
                                         onClick={() => {
@@ -938,7 +938,7 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                           }}
                                           disabled={
                                             (item.action === "get link" ||
-                                            item.action === "one-time-link" ||
+                                              item.action === "one-time-link" ||
                                               item.action ===
                                                 "multiple-download" ||
                                               item.action === "password" ||

@@ -176,70 +176,71 @@ function RecentFile() {
     handleClearFileAndFolderData();
   };
 
-  const handleOneTimeLinkMultiFiles = () =>{
+  const handleOneTimeLinkMultiFiles = () => {
     setDataForEvent({
       data: {},
       action: "",
     });
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0)
-    {
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
       setEventClick("one-time-link");
-      
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item.totalSize! > 0;
-        });
 
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
 
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
 
         return {
           ...prev,
-          data: data
-        }
-      })
-      
+          data: data,
+        };
+      });
+
       setOpenOneTimeLink(true);
     }
-  }
+  };
 
   const handleGetLinkMultipe = () => {
     setDataForEvent({
       data: {},
       action: "",
     });
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0){
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item.totalSize! > 0;
-        });
-  
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
-  
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
-  
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
         return {
           ...prev,
-          data: data
-        }
+          data: data,
+        };
       });
 
       setOpenGetLink(true);
     }
-  }
+  };
 
   //share
   useEffect(() => {
@@ -343,7 +344,6 @@ function RecentFile() {
         setTotal(queryTotal);
         setDataRecentFiles(() => {
           const result = manageFile.splitDataByDate(queryData, "actionDate");
-
           setTotalItems(handleTotalItems(result));
           return result.map((recentFiles: any) => {
             return {
@@ -403,7 +403,7 @@ function RecentFile() {
         action: "",
       };
     });
-  }
+  };
 
   const handleGenerateGetLink = () => {
     setDataGetUrl(null);
@@ -415,28 +415,28 @@ function RecentFile() {
     });
 
     setOpenGetLink(false);
-  }
+  };
 
   const handleOneTimeLinkClose = () => {
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
-    })
+        action: "",
+      };
+    });
     setOpenOneTimeLink(false);
-  }
+  };
 
   const handleOneTimeLinkSubmit = () => {
     setOpenOneTimeLink(false);
     setDataGetUrl(null);
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
+        action: "",
+      };
     });
-  }
+  };
 
   useEffect(() => {
     handleClearFileAndFolderData();
@@ -1060,26 +1060,23 @@ function RecentFile() {
         }
       />
 
-      {
-        openGetLink && dataForEvent.data &&
+      {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
           onClose={handleGetLinkClose}
           onCreate={handleGenerateGetLink}
           data={dataForEvent.data}
         />
-      }
+      )}
 
-      {
-        openOneTimeLink && dataForEvent?.data &&
+      {openOneTimeLink && dataForEvent?.data && (
         <DialogOneTimeLink
           isOpen={openOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
-          data={dataForEvent?.data }
+          data={dataForEvent?.data}
         />
-
-      }
+      )}
 
       <MUI.TitleAndSwitch sx={{ my: 2 }}>
         {dataSelector?.selectionFileAndFolderData?.length ? (

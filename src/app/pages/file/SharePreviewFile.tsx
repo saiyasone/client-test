@@ -78,7 +78,7 @@ export default function SharePrevieFile({
   const [isVisibleAccount, setIsVisibleAccount] =
     React.useState<boolean>(false);
   const totalHandleUrl = useGetUrl(data);
-  const encodeKey = ENV_KEYS.VITE_APP_ENCODE_KEY;
+  const encodeKey = ENV_KEYS.VITE_APP_ENCODE;
 
   const [accessStatusShare, setAccessStatusShare] =
     React.useState<string>("public");

@@ -68,7 +68,15 @@ interface apiProps {
   password: string;
 }
 
-const DialogOneTimeLink = (props) => {
+type Props = {
+  data: any;
+  isOpen: boolean;
+  dataShare?: boolean;
+  onCreate?: () => void;
+  onClose?: () => void;
+};
+
+const DialogOneTimeLink = (props: Props) => {
   const { user }: any = useAuth();
   const { onClose, onCreate, data } = props;
   const qrCodeRef = useRef<SVGSVGElement | any>(null);
@@ -83,6 +91,8 @@ const DialogOneTimeLink = (props) => {
     longLink:''
   });
   const [isShared, setIsShared] = useState(false);
+
+  const [previewFile, setPreviewFile] = useState("");
 
   const [createManageLink] = useMutation(CREATE_MANAGE_LINK);
 
@@ -103,7 +113,7 @@ const DialogOneTimeLink = (props) => {
     resetGenerateLink();
     setIsShared(false);
     ////close the modal anyway.
-    onClose();
+    onClose?.();
   };
 
   const handleSelectItemChange = (e) => {
@@ -179,7 +189,7 @@ const DialogOneTimeLink = (props) => {
     setExpiredAt("");
     setExpireDays(7);
     setStep(1);
-    onCreate();
+    onCreate?.();
   };
 
   async function copyTextToClipboard(link: string) {
@@ -254,6 +264,14 @@ const DialogOneTimeLink = (props) => {
     }
   }, [expireDays, expiredAt]);
 
+  useEffect(() => {
+    if (data && props.dataShare) {
+      setPreviewFile(`${data?.ownerId?.newName}-${data?.ownerId?._id}`);
+    } else {
+      setPreviewFile(`${user?.newName}-${user?._id}`);
+    }
+  }, [data, props.dataShare, user]);
+
   return (
     <React.Fragment>
       <BaseDialogV1
@@ -278,7 +296,7 @@ const DialogOneTimeLink = (props) => {
         onClose={resetAll}
       >
         <IconButton
-          onClick={() => onClose()}
+          onClick={() => onClose?.()}
           sx={{ position: "absolute", right: 0, top: 0 }}
         >
           <IoMdClose />
@@ -401,9 +419,7 @@ const DialogOneTimeLink = (props) => {
                                 >
                                   <ImageComponent
                                     imagePath={
-                                      user?.newName +
-                                      "-" +
-                                      user?._id +
+                                      previewFile +
                                       "/" +
                                       (item?.newPath
                                         ? removeFileNameOutOfPath(item?.newPath)

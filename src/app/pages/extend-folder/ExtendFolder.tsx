@@ -373,12 +373,9 @@ function ExtendFolder() {
     if (parentFolder?._id) {
       const folderEncrypted = encryptId(
         JSON.stringify(parentFolder?._id),
-        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+        ENV_KEYS.VITE_APP_LOCAL_STORAGE,
       );
-      localStorage.setItem(
-        ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
-        folderEncrypted,
-      );
+      localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL, folderEncrypted);
     }
   }, [parentFolder]);
 

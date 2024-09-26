@@ -190,16 +190,16 @@ function FileDrop() {
     setShowValid(true);
   };
 
-  const handleCopy = (url:string, id:string) => {
+  const handleCopy = (url: string, id: string) => {
     successMessage("Link is copied!", 3000);
-    setIsCopied((prev:any) => ({ ...prev, [id]: true }));
+    setIsCopied((prev: any) => ({ ...prev, [id]: true }));
     navigator.clipboard.writeText(url);
     setTimeout(() => {
-      setIsCopied((prev:any) => ({ ...prev, [id]: false }));
+      setIsCopied((prev: any) => ({ ...prev, [id]: false }));
     }, 60000);
   };
 
-  const calculateExpirationDate = (days:any) => {
+  const calculateExpirationDate = (days: any) => {
     const today = new Date();
     const expirationDate = new Date(today);
     expirationDate.setDate(today.getDate() + days);
@@ -209,7 +209,7 @@ function FileDrop() {
     return expirationDate.toISOString();
   };
 
-  const handleExpiredDateChange = (event:any) => {
+  const handleExpiredDateChange = (event: any) => {
     const selectedDays = event.target.value;
     setSelectDay(selectedDays);
 
@@ -230,8 +230,8 @@ function FileDrop() {
     }
   };
 
-  const handleTitleChange = (event:any) => {
-    setHeaderData((prevHeaderData:any) => ({
+  const handleTitleChange = (event: any) => {
+    setHeaderData((prevHeaderData: any) => ({
       ...prevHeaderData,
       title: event.target.value,
     }));
@@ -317,7 +317,7 @@ function FileDrop() {
     }
   };
 
-  const menuOnClick = async (action:string) => {
+  const menuOnClick = async (action: string) => {
     switch (action) {
       case "edit_expiry":
         setOpenEditExpiry(true);
@@ -533,15 +533,12 @@ function FileDrop() {
   ];
 
   useEffect(() => {
-    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
-      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
+    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA]
+      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA)
       : null;
 
     if (data) {
-      const plainData = decryptId(
-        data,
-        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
-      );
+      const plainData = decryptId(data, ENV_KEYS.VITE_APP_LOCAL_STORAGE);
 
       if (plainData) {
         const jsonPlain = JSON.parse(plainData);
@@ -887,8 +884,12 @@ function FileDrop() {
                             // if(!result){
                             //   setIsShared(!isShared)
                             // }
-                            const result = await handleShareQR(e, qrCodeRef, headerData);
-                            console.log({result});
+                            const result = await handleShareQR(
+                              e,
+                              qrCodeRef,
+                              headerData,
+                            );
+                            console.log({ result });
                             setIsShared(!isShared);
                           }
                         }}

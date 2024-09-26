@@ -22,7 +22,7 @@ const TextEditorInput = (props) => {
     >
       <InputTextFieldLabel>{props?.label}</InputTextFieldLabel>
       <Editor
-        apiKey={ENV_KEYS.VITE_APP_TINYMCE_API}
+        apiKey={ENV_KEYS.VITE_APP_TINYMCE}
         initialValue={props?.value}
         onChange={(_evt, editor) => {
           dispatch(setDesc(editor.getContent()));

@@ -23,10 +23,9 @@ import {
 import { QUERY_USER } from "api/graphql/user.graphql";
 import { ENV_KEYS } from "constants/env.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
-import useResizeImage from "hooks/useResizeImage";
+
 import _ from "lodash";
 import { useMemo } from "react";
-import Loader from "../../components/Loader";
 
 const IconButton = styled(MuiIconButton)`
   svg {
@@ -50,14 +49,6 @@ function NavbarUserDropdown() {
   const [userAccount, setUserAccount] = useState<any>({});
   const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
   const sourcePath = `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`;
-  const resizeImage = useResizeImage({
-    imagePath: `${userAccount.newName}-${userAccount._id}/${ENV_KEYS.VITE_APP_ZONE_PROFILE}/${userAccount.profile}`,
-    fileType: "image",
-    user,
-    height: 200,
-    isPublic: false,
-    width: 200,
-  });
 
   const handleGetUser = async () => {
     if (user?._id) {
@@ -121,19 +112,11 @@ function NavbarUserDropdown() {
               color="inherit"
               size="large"
             >
-              {resizeImage.imageFound === null && <Loader />}
-              {resizeImage.imageFound === true && (
-                <Avatar
-                  src={newUrl + sourcePath}
-                  alt={"user profile"}
-                  className="file-card-image"
-                />
-              )}
-              {resizeImage.imageFound === false && (
-                <Avatar alt={"user profile"} className="file-card-image">
-                  {`${fullName}`[0]}
-                </Avatar>
-              )}
+              <Avatar
+                src={newUrl + sourcePath}
+                alt={`${fullName}`[0] || "user-profile"}
+                className="file-card-image"
+              />
             </IconButton>
           </Tooltip>
         </Grid>
@@ -146,19 +129,11 @@ function NavbarUserDropdown() {
       >
         <MUI.BoxShowDropDown>
           <MUI.BoxShowCurrentUser>
-            {resizeImage.imageFound === null && <Loader />}
-            {resizeImage.imageFound === true && (
-              <Avatar
-                src={newUrl + sourcePath}
-                alt={"user profile"}
-                className="file-card-image"
-              />
-            )}
-            {resizeImage.imageFound === false && (
-              <Avatar alt={"user profile"} className="file-card-image">
-                {`${fullName}`[0]}
-              </Avatar>
-            )}
+            <Avatar
+              src={newUrl + sourcePath}
+              alt={`${fullName}`[0] || "user-profile"}
+              className="file-card-image"
+            />
             <MUI.BoxShowCurrentUserDetail>
               <Typography variant="h6">
                 {userAccount?.firstName + " " + userAccount?.lastName}

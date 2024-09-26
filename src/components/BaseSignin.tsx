@@ -37,8 +37,14 @@ const TitleContainer = styled("div")({
 function BaseSignin(props) {
   const theme = createTheme();
   const { signInCaptcha, handleLoginFailure } = props;
-  const { signIn, authentication2FA }: any = useAuth();
-  const [open, setOpen] = React.useState(false);
+  const {
+    signIn,
+    authentication2FA,
+    open2Factor,
+    handleOpen2Factor,
+    user: userSocial,
+    token: dataToken,
+  }: any = useAuth();
   const [captchaKey, setCaptchaKey] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const [verifyCode, setVerifyCode] = React.useState("");
@@ -50,28 +56,37 @@ function BaseSignin(props) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleClose = () => {
-    setOpen(false);
+    handleOpen2Factor(false);
   };
 
   const verifyAuthentication = async () => {
     try {
       const codeVerify = await verify2FA({
         variables: {
-          id: parseInt(data?._id),
+          id: parseInt(data?._id) || "",
           input: {
             code: verifyCode,
           },
+          token: token || dataToken,
         },
       });
+
       if (codeVerify?.data?.validate2FA?._id) {
-        await authentication2FA(data, token);
+        const userData = data?._id ? data : userSocial;
+        const tokenData = token ? token : dataToken;
+
+        await authentication2FA(userData, tokenData);
       }
     } catch (error: any) {
       if (error) {
-        const message = error.message;
-        const verificationFailed = message.split(":")[1].trim();
+        const message = error?.message;
+        const verificationFailed = message?.split(":")[1]?.trim();
         if (verificationFailed === "Verification failed") {
           errorMessage("Your verify code not correct!", 2000);
+        } else if (error?.message === "VERIFICATION_FAILED") {
+          errorMessage("Your two factor code is not correct", 3000);
+        } else {
+          errorMessage(error?.message || "Something went wrong", 3000);
         }
       } else {
         errorMessage("Something went wrong! Please try again!", 2000);
@@ -119,13 +134,13 @@ function BaseSignin(props) {
               setIsLoading(false);
 
               /* reset captcha and button */
-              if(window.grecaptcha) {
+              if (window.grecaptcha) {
                 window.grecaptcha?.reset();
                 setCaptchaKey(true);
               }
 
               if (enabled2FA) {
-                setOpen(enabled2FA.authen);
+                handleOpen2Factor(enabled2FA.authen);
                 setData(enabled2FA.user);
                 setToken(enabled2FA.checkRole);
               }
@@ -218,7 +233,7 @@ function BaseSignin(props) {
             {showCaptcha && (
               <Box sx={{ margin: "auto", mt: 4, mb: 3, display: "table" }}>
                 <ReCAPTCHA
-                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA_KEY}
+                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA}
                   onChange={handleData}
                   onExpired={() => {
                     setCaptchaKey(false);
@@ -248,7 +263,7 @@ function BaseSignin(props) {
       </Formik>
 
       <Dialog
-        open={open}
+        open={open2Factor || false}
         sx={{
           border: 0,
           backdropFilter: "blur(5px) sepia(5%)",

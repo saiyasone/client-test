@@ -24,17 +24,19 @@ export const QUERY_USER = gql`
           packageId
           name
           category
+          annualPrice
+          monthlyPrice
           discount
           description
-          storage
-          captcha
+          totalImageUpload
           multipleUpload
           numberOfFileUpload
           uploadPerDay
           fileUploadPerDay
+          numberOfQueueUpload
           maxUploadSize
           multipleDownload
-          downLoadOption        
+          downLoadOption
           status
           createdAt
           updatedAt
