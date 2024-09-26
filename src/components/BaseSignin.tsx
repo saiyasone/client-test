@@ -42,6 +42,7 @@ function BaseSignin(props) {
     authentication2FA,
     open2Factor,
     handleOpen2Factor,
+    user: userSocial,
     token: dataToken,
   }: any = useAuth();
   const [captchaKey, setCaptchaKey] = useState(false);
@@ -71,7 +72,10 @@ function BaseSignin(props) {
       });
 
       if (codeVerify?.data?.validate2FA?._id) {
-        await authentication2FA(data, token || dataToken);
+        const userData = data?._id ? data : userSocial;
+        const tokenData = token ? token : dataToken;
+
+        await authentication2FA(userData, tokenData);
       }
     } catch (error: any) {
       if (error) {

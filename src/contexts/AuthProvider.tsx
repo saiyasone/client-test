@@ -382,6 +382,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           ENV_KEYS.VITE_APP_LOCAL_STORAGE,
         );
         checkAccessToken(decoded);
+        console.log({ noFactor: decoded });
         localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
 
         dispatch({
@@ -391,15 +392,21 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         });
         successMessage("Login Success!!", 3000);
-        navigate("/dashboard");
+        // navigate("/dashboard");
       } else if (enable2FA === 1) {
-        handleOpen2Factor(true);
         dispatch({
           type: ENABLE_TOKEN,
           payload: {
             token: decoded,
           },
         });
+        dispatch({
+          type: SIGN_IN,
+          payload: {
+            user,
+          },
+        });
+        handleOpen2Factor(true);
       } else {
         return { authen, user, checkRole, refreshId: tokenData.refreshID };
       }
