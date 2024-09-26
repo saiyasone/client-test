@@ -21,7 +21,6 @@ import { BrowserRouter } from "react-router-dom";
 import store from "stores/store.ts";
 import App from "./App.tsx";
 
-
 /*This function hide and show message to console*/
 // (function () {
 //   const originalConsoleLog = console.log;
@@ -62,9 +61,7 @@ import App from "./App.tsx";
 // })();
 
 const authLink = setContext((_, { headers }) => {
-  const token = localStorage.getItem(
-    ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY as string,
-  );
+  const token = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN as string);
 
   return {
     headers: {

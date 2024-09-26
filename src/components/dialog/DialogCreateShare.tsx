@@ -153,7 +153,6 @@ const DialogCreateShare = (props) => {
   const manageGraphqlError = useManageGraphqlError();
   const { open, data, onClose, share: propShare } = props;
 
-
   const share = useMemo(() => {
     return propShare || {};
   }, [propShare]);
@@ -175,7 +174,7 @@ const DialogCreateShare = (props) => {
   const [sendLoading, setSendLoading] = useState(false);
   const [showShared, setShowShared] = useState(false);
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
-  const encodeKey = ENV_KEYS.VITE_APP_ENCODE_KEY;
+  const encodeKey = ENV_KEYS.VITE_APP_ENCODE;
   const newUrl = ENV_KEYS.VITE_APP_LOAD_URL + "preview?path=";
   const totalHandleUrl = useGetUrl(props?.data);
 

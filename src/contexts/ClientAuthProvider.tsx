@@ -29,12 +29,12 @@ function TokenValidation({ children, tokenCheck }) {
         });
         if (data?.tokenValidation?.status !== 200) {
           // localStorage.removeItem("accessToken");
-          localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+          localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
           navigate("/auth/sign-in");
         }
       } catch (error) {
         // localStorage.removeItem("accessToken");
-        localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+        localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
         navigate("/auth/sign-in");
       }
     })();
@@ -44,19 +44,18 @@ function TokenValidation({ children, tokenCheck }) {
 
 function ClientAuthGuard({ children }) {
   // const token = localStorage.getItem("accessToken");
-  const token = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+  const token = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
 
   const { isAuthenticated, isInitialized } = useAuth();
 
-
   if (isInitialized && !isAuthenticated) {
     // localStorage.removeItem("accessToken");
-    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
     return <Navigate to="/auth/sign-in" />;
   }
   if (!token) {
     // localStorage.removeItem("accessToken");
-    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
     return <Navigate to="/auth/sign-in" />;
   }
 

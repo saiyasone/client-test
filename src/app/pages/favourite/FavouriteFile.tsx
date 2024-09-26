@@ -141,7 +141,8 @@ function FavouriteFile() {
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
   const [eventClick, setEventClick] = useState<any>(false);
   const [isPasswordLink, setIsPasswordLink] = useState<any>(false);
-  const [isMultiplePasswordLink, setIsMultiplePasswordLink] = useState<any>(false);
+  const [isMultiplePasswordLink, setIsMultiplePasswordLink] =
+    useState<any>(false);
   const [openGetLink, setOpenGetLink] = useState(false);
   const [openOneTimeLink, setOpenOneTimeLink] = useState(false);
 
@@ -216,7 +217,7 @@ function FavouriteFile() {
 
   useEffect(() => {
     if (folderId) {
-      localStorage.removeItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY);
+      localStorage.removeItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL);
     }
   }, [navigate]);
 
@@ -576,10 +577,9 @@ function FavouriteFile() {
         break;
       case "get link":
         setEventClick("get-link");
-        if(checkPassword) {
+        if (checkPassword) {
           setShowEncryptPassword(true);
-        } 
-        else {
+        } else {
           setOpenGetLink(true);
         }
         break;
@@ -1049,65 +1049,66 @@ function FavouriteFile() {
       data: {},
       action: "",
     });
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0){
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item.totalSize! > 0;
-        });
-  
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
-  
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
-  
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
+
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
+
         return {
           ...prev,
-          data: data
-        }
+          data: data,
+        };
       });
 
       setOpenGetLink(true);
     }
-  }
+  };
 
-  const handleOneTimeLinkMultiFiles = () =>{
+  const handleOneTimeLinkMultiFiles = () => {
     setDataForEvent({
       data: {},
       action: "",
     });
-    
-    if(dataSelector.selectionFileAndFolderData?.length > 0)
-    {
+
+    if (dataSelector.selectionFileAndFolderData?.length > 0) {
       setEventClick("one-time-link");
-      
-      setDataForEvent((prev)=>{
-        const validFolders = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType === 'folder' && item.totalSize! > 0;
-        });
 
-        const validFiles = dataSelector.selectionFileAndFolderData?.filter((item) => {
-          return item?.checkType ==='file';
-        });
+      setDataForEvent((prev) => {
+        const validFolders = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "folder" && item.totalSize! > 0;
+          },
+        );
 
-        const data = [
-          ...validFolders,
-          ...validFiles
-        ];
+        const validFiles = dataSelector.selectionFileAndFolderData?.filter(
+          (item) => {
+            return item?.checkType === "file";
+          },
+        );
+
+        const data = [...validFolders, ...validFiles];
 
         return {
           ...prev,
-          data: data
-        }
-      })
-      
+          data: data,
+        };
+      });
+
       setOpenOneTimeLink(true);
     }
-  }
+  };
   const handleGetLinkClose = () => {
     setOpenGetLink(false);
     setDataForEvent((prev: any) => {
@@ -1116,7 +1117,7 @@ function FavouriteFile() {
         action: "",
       };
     });
-  }
+  };
 
   const handleGenerateGetLink = () => {
     setDataForEvent((prev: any) => {
@@ -1127,27 +1128,27 @@ function FavouriteFile() {
     });
 
     setOpenGetLink(false);
-  }
+  };
 
   const handleOneTimeLinkClose = () => {
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
-    })
+        action: "",
+      };
+    });
     setOpenOneTimeLink(false);
-  }
+  };
 
   const handleOneTimeLinkSubmit = () => {
     setOpenOneTimeLink(false);
-    setDataForEvent((prev: any)=>{
+    setDataForEvent((prev: any) => {
       return {
         ...prev,
-        action: ""
-      }
+        action: "",
+      };
     });
-  }
+  };
 
   return (
     <Fragment>
@@ -1611,24 +1612,22 @@ function FavouriteFile() {
         onConfirm={handleSubmitDecryptedPassword}
         onClose={handleCloseDecryptedPassword}
       />
-      {
-        openGetLink && dataForEvent.data &&
+      {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
           onClose={handleGetLinkClose}
           onCreate={handleGenerateGetLink}
           data={dataForEvent.data}
         />
-      }
-      {
-        openOneTimeLink && dataForEvent?.data &&
+      )}
+      {openOneTimeLink && dataForEvent?.data && (
         <DialogOneTimeLink
           isOpen={openOneTimeLink}
           onClose={handleOneTimeLinkClose}
           onCreate={handleOneTimeLinkSubmit}
-          data={dataForEvent?.data }
+          data={dataForEvent?.data}
         />
-      }
+      )}
     </Fragment>
   );
 }

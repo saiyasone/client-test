@@ -57,10 +57,7 @@ function PricingCheckout() {
   const id = searchParams.get("id");
   const status = searchParams.get("status");
 
-  const packageId = decryptId(
-    params.packageId,
-    ENV_KEYS.VITE_APP_ENCRYPTION_KEY,
-  );
+  const packageId = decryptId(params.packageId, ENV_KEYS.VITE_APP_ENCRYPTION);
 
   const dispatch = useDispatch();
   const { activeStep, paymentSteps, packageType, ...paymentSelector } =
@@ -81,12 +78,10 @@ function PricingCheckout() {
       ? memorizedPackages.current.filteredAnnualData || packages.annualData
       : memorizedPackages.current.filteredMonthlyData || packages.monthlyData;
 
-
   const settingKeys = {
     Strip: "SRIPETE",
     Bcel: "CELBENE",
   };
-
 
   useEffect(() => {
     memorizedPackages.current = packages;

@@ -282,7 +282,7 @@ function BaseSignUp(props) {
           {showCaptcha && (
             <Box sx={{ display: "table", margin: "auto", mt: 4, mb: 3 }}>
               <ReCAPTCHA
-                sitekey={ENV_KEYS.VITE_APP_RECAPTCHA_KEY}
+                sitekey={ENV_KEYS.VITE_APP_RECAPTCHA}
                 onChange={handleData}
                 style={captchaStyle}
               />

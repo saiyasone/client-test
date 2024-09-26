@@ -119,9 +119,7 @@ export default function FloatingButton() {
     setFolderOpen(true);
   };
 
-  const folderJson = localStorage.getItem(
-    ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
-  );
+  const folderJson = localStorage.getItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL);
 
   let globalFolderId = "";
   try {

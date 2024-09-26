@@ -15,7 +15,7 @@ export const decryptId = (encryptedParam: any, secretKey?: string) => {
   try {
     const decrypted = CryptoJS.AES.decrypt(
       decodeURIComponent(encryptedParam),
-      secretKey || ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+      secretKey || ENV_KEYS.VITE_APP_LOCAL_STORAGE,
     ).toString(CryptoJS.enc.Utf8);
     return decrypted;
   } catch (error) {
@@ -24,7 +24,7 @@ export const decryptId = (encryptedParam: any, secretKey?: string) => {
 };
 
 export const encryptData = (model: any) => {
-  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+  const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
   const key = CryptoJS.enc.Utf8.parse(secretKey);
   const iv = CryptoJS.lib.WordArray.random(16);
   const encrypted = CryptoJS.AES.encrypt(JSON.stringify(model), key, {
@@ -39,7 +39,7 @@ export const encryptData = (model: any) => {
 };
 
 export const encryptDataLink = (data: any) => {
-  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+  const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
   const key = CryptoJS.enc.Utf8.parse(secretKey);
   const iv = CryptoJS.lib.WordArray.random(16);
   const encrypted = CryptoJS.AES.encrypt(JSON.stringify(data), key, {
@@ -63,7 +63,7 @@ export const encryptDataLink = (data: any) => {
 };
 
 export const decryptDataLink = (data: any) => {
-  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+  const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
 
   const [cipherText, ivText] = data.split(":");
   const cipherTextBase64 = cipherText.replace(/-/g, "+").replace(/_/g, "/");
@@ -155,10 +155,7 @@ export const isValidToken = (accessToken: string) => {
       return false;
     }
     const decoded = accessToken;
-    const userPayload = decryptToken(
-      decoded,
-      ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
-    );
+    const userPayload = decryptToken(decoded, ENV_KEYS.VITE_APP_TOKEN);
     const currentTime = Date.now() / 1000;
     return (userPayload || decoded).exp > currentTime;
   } catch (e) {
@@ -168,10 +165,10 @@ export const isValidToken = (accessToken: string) => {
 
 export const checkAccessToken = (accessToken: string) => {
   if (accessToken) {
-    localStorage.setItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN, accessToken);
     axios.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
-    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
     delete axios.defaults.headers.common.Authorization;
   }
 };

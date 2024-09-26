@@ -119,7 +119,7 @@ function BaseSignin(props) {
               setIsLoading(false);
 
               /* reset captcha and button */
-              if(window.grecaptcha) {
+              if (window.grecaptcha) {
                 window.grecaptcha?.reset();
                 setCaptchaKey(true);
               }
@@ -218,7 +218,7 @@ function BaseSignin(props) {
             {showCaptcha && (
               <Box sx={{ margin: "auto", mt: 4, mb: 3, display: "table" }}>
                 <ReCAPTCHA
-                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA_KEY}
+                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA}
                   onChange={handleData}
                   onExpired={() => {
                     setCaptchaKey(false);
