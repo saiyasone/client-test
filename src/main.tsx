@@ -1,17 +1,16 @@
 import {
   ApolloClient,
   ApolloProvider,
-  HttpLink,
   InMemoryCache,
   createHttpLink,
   from,
-  split,
+  split
 } from "@apollo/client";
 import { setContext } from "@apollo/client/link/context";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { getMainDefinition } from "@apollo/client/utilities";
 import "animate.css/animate.min.css";
-import { ENV_KEYS } from "constants/env.constant.ts";
+import { ENV_KEYS, envFeedConfig } from "constants/env.constant.ts";
 import { ThemeProvider } from "contexts/ThemeProvider.tsx";
 import { createClient } from "graphql-ws";
 import React from "react";
@@ -21,6 +20,8 @@ import { BrowserRouter } from "react-router-dom";
 import store from "stores/store.ts";
 import App from "./App.tsx";
 
+
+type ApiEndpointsKeys = string;
 
 /*This function hide and show message to console*/
 // (function () {
@@ -94,9 +95,29 @@ const wsLink = new GraphQLWsLink(
   }),
 );
 
-const httpLink = new HttpLink({
-  uri: ENV_KEYS.VITE_APP_API_URL,
+// const httpLink = new HttpLink({
+//   uri: ENV_KEYS.VITE_APP_API_URL,
+// });
+// const httpFeedLink = new HttpLink({
+//   uri: envFeedConfig.endpoint,
+// });
+
+const apiEndpoints:Record<ApiEndpointsKeys, string> = {
+  feed: envFeedConfig.endpoint,
+};
+
+const defaultEndpoint = ENV_KEYS.VITE_APP_API_URL;
+
+const newHttpLink = createHttpLink({
+  uri: ({ getContext }) => {
+    const { api } = getContext();
+    if (api && api in apiEndpoints) {
+      return apiEndpoints[api];
+    }
+    return defaultEndpoint;
+  },
 });
+
 
 const splitLink = split(
   ({ query }) => {
@@ -106,8 +127,9 @@ const splitLink = split(
       definition.operation === "subscription"
     );
   },
+
   wsLink,
-  httpLink,
+  newHttpLink,
 );
 
 const client = new ApolloClient({

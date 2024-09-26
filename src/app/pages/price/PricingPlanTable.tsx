@@ -5,7 +5,14 @@ import TableBody from "@mui/material/TableBody";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 
-import { Box, Button, Paper, Typography, useMediaQuery } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import svgStar from "assets/images/star.svg";
 import NormalButton from "components/NormalButton";
 import { ENV_KEYS } from "constants/env.constant";
@@ -18,9 +25,11 @@ import { prettyNumberFormat } from "utils/number.util";
 import { safeGetProperty } from "utils/object.util";
 import { encryptId } from "utils/secure.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
-
+import { IoMdCheckmark } from "react-icons/io";
+import { IoMdClose } from "react-icons/io";
 const PricingPlanTable: React.FC<any> = (props) => {
   const { user }: any = useAuth();
+  const theme = useTheme();
   const { activePackageData, ...paymentSelector }: any =
     useSelector(paymentState);
   /* const price =
@@ -40,18 +49,94 @@ const PricingPlanTable: React.FC<any> = (props) => {
     {
       title: "Uploads per day",
     },
-    /* {
-      title: "Downloads",
-    }, */
+
     {
       title: "Max Upload Size",
     },
+    { title: "Download option" },
+    { title: "Support" },
+    { title: "Download" },
+    { title: "Download folder" },
+    { title: "Multiple download" },
+    { title: "Lock files" },
+    { title: "Lock folders" },
+
+    { title: "File drop" },
+    { title: "No chaptcha" },
+    { title: "No ads" },
   ];
 
+  const showButtonPlan = (packageOrigin: { storage: string }) => {
+    switch (userPackage.category) {
+      case "free":
+      case "pro":
+      case "premium":
+        if (parseInt(packageOrigin.storage) === parseInt(userPackage.storage)) {
+          return "Current Plan";
+        } else if (
+          parseInt(userPackage.storage) < parseInt(packageOrigin.storage)
+        ) {
+          return "Upgrade";
+        } else if (
+          parseInt(userPackage.storage) > parseInt(packageOrigin.storage)
+        ) {
+          return "Downgrade";
+        }
+        break;
+      default:
+        return null;
+    }
+  };
+
   const data = useMemo(() => {
-    return props.data?.map((packageData) => {
+    return props.data?.map((packageData: any) => {
       const price = packageData._price;
       const isCost = price > 0;
+      const packages = ["free", "pro", "premium"];
+      const fieldsToCheck = [
+        "storage",
+        "uploadPerDay",
+        "multipleUpload",
+        "maxUploadSize",
+        "downLoadOption",
+        "support",
+        "multipleDownload",
+        "unlimitedDownload",
+        "downloadFolder",
+        "lockFile",
+        "lockFolder",
+        "fileDrop",
+        "chaptcha",
+        "ads",
+      ];
+      let storageStatus = packageData.storage;
+
+      if (packageData.category === "free") {
+        const allFieldsNull = fieldsToCheck.every(
+          (field) => packageData[field] === null,
+        );
+
+        const isProNotNull = props.data.some((pkg: any) => {
+          const result =
+            pkg.category === "pro" &&
+            fieldsToCheck.every((field) => {
+              const fields = pkg[field] !== null;
+              return fields;
+            });
+          return result;
+        });
+        const isPremiumNotNull = props.data.some(
+          (pkg: any) =>
+            pkg.category === "premium" &&
+            fieldsToCheck.every((field) => pkg[field] !== null),
+        );
+
+        if (allFieldsNull && isProNotNull && isPremiumNotNull) {
+          storageStatus = "Coming Soon";
+        }
+      }
+      console.log(storageStatus);
+      const allFieldsNull = fieldsToCheck.every((field) => packageData[field] === null || packageData[field] === undefined || packageData[field] === "");
       const features = [
         {
           title: "Storage",
@@ -65,15 +150,47 @@ const PricingPlanTable: React.FC<any> = (props) => {
           title: "Uploads per day",
           context: `${packageData.multipleUpload} uploads per day`,
         },
-        /* {
-          title: "Downloads",
-          context: `${packageData.downLoadPerDay} downloads per day`,
-        }, */
+
         {
           title: "Max Upload Size",
           context: `${prettyNumberFormat(
             convertBytetoMBandGB(packageData.maxUploadSize),
           )}`,
+        },
+        { title: "Download option", context: packageData.downLoadOption },
+        { title: "Support", context: packageData.support ?? "Normal" },
+        {
+          title: "Multiple download",
+          context: packageData.multipleDownload ?? 0,
+        },
+        {
+          title: "Download",
+          context: packageData.unlimitedDownload ?? 0,
+        },
+        {
+          title: "Download folder",
+          context: packageData.downloadFolder,
+        },
+        {
+          title: "Lock files",
+          context: packageData.lockFile == "on" ? 1 : 0,
+        },
+        {
+          title: "Lock folder",
+          context: packageData.lockFolder == "on" ? 1 : 0,
+        },
+
+        {
+          title: "File drop",
+          context: packageData.fileDrop,
+        },
+        {
+          title: "Captcha",
+          context: packageData.chaptcha ?? 0,
+        },
+        {
+          title: "No Ads",
+          context: packageData.ads ?? 0,
         },
       ];
       return {
@@ -83,6 +200,8 @@ const PricingPlanTable: React.FC<any> = (props) => {
       };
     });
   }, [props.data]);
+
+
   return (
     <>
       <MUI.BoxShowSection3>
@@ -127,7 +246,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                     <Typography variant="h5">features</Typography>
                     <Typography variant="h6">Native Front Features</Typography>
                   </MUI.CellTableCell>
-                  {data?.map((packageData) => {
+                  {data?.map((packageData: any) => {
                     const { _type, isCost, _price, name, _id } = packageData;
                     return (
                       <MUI.CellTableCell
@@ -148,15 +267,13 @@ const PricingPlanTable: React.FC<any> = (props) => {
                         </Typography>
                         <Typography component="div">
                           {isCost && paymentSelector.currencySymbol}
-                          {
-                            isCost
-                              ? `${_price?.toLocaleString()}${
+                          {isCost
+                            ? `${_price?.toLocaleString()}${
                                 _type === PACKAGE_TYPE.annual
                                   ? "/year"
                                   : "/month"
-                                }`
-                              : "Free"
-                          }
+                              }`
+                            : "Free"}
                         </Typography>
                       </MUI.CellTableCell>
                     );
@@ -171,8 +288,9 @@ const PricingPlanTable: React.FC<any> = (props) => {
                         <MUI.CellTableCell component="td">
                           {feature.title}
                         </MUI.CellTableCell>
-                        {data?.map((packageData) => {
+                        {data?.map((packageData: any) => {
                           const { _id } = packageData;
+
                           return (
                             <MUI.CellTableCell
                               key={`id-${_id}`}
@@ -182,7 +300,25 @@ const PricingPlanTable: React.FC<any> = (props) => {
                               }}
                             >
                               <Typography component="span">
-                                {packageData.features[index].context}
+                                {typeof packageData.features[index].context ===
+                                  "string" &&
+                                packageData.features[index].context.length >
+                                  0 ? (
+                                  `${packageData.features[index].context
+                                    .charAt(0)
+                                    .toUpperCase()}${packageData.features[
+                                    index
+                                  ].context.slice(1)}`
+                                ) : typeof packageData.features[index]
+                                    .context === "number" &&
+                                  packageData.features[index].context > 0 ? (
+                                  <IoMdCheckmark
+                                    size={18}
+                                    color={theme.palette.primaryTheme?.main}
+                                  />
+                                ) : (
+                                  <IoMdClose size={18} color="red" />
+                                )}
                               </Typography>
                             </MUI.CellTableCell>
                           );
@@ -193,7 +329,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                 </>
                 <MUI.RowTableRow>
                   <MUI.CellTableCell component="td"></MUI.CellTableCell>
-                  {data?.map((packageData, index) => {
+                  {data?.map((packageData: any, index: number) => {
                     const { _type, isCost, _price, _id } = packageData;
                     return (
                       <MUI.CellTableCell
@@ -268,15 +404,26 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                 marginTop: 3,
                                 height: "35px",
                                 borderRadius: 1,
-                                backgroundColor: "#DAE9E7",
+                                backgroundColor: `${
+                                  packageData.category == "pro"
+                                    ? theme.palette.primaryTheme?.main
+                                    : "#DAE9E7"
+                                }`,
                                 textAlign: "center",
                                 display: "block",
-                                color: "#17766B",
+                                color: `${
+                                  packageData.category == "pro"
+                                    ? "white !important"
+                                    : "#17766B"
+                                }`,
                                 ...(isCost
                                   ? {
                                       "&:hover": {
-                                        backgroundColor: (theme) =>
-                                          theme.palette.primaryTheme.main,
+                                        backgroundColor: (theme: {
+                                          palette: {
+                                            primaryTheme: { main: any };
+                                          };
+                                        }) => theme.palette.primaryTheme.main,
                                         color: "white !important",
                                       },
                                     }
@@ -286,11 +433,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                               }}
                               fullWidth
                             >
-                              {_price > props.activePayment?.amount
-                                ? "Upgrade"
-                                : isCost
-                                ? "Choose Plan"
-                                : "Free"}
+                              {showButtonPlan(packageData)}
                             </NormalButton>
                           )}
                       </MUI.CellTableCell>

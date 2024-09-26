@@ -91,7 +91,7 @@ const AppSearch = styled("div")({
   width: "100%",
 
   [theme.breakpoints.down(400)]: {
-    width: "80%",
+    width: "100%",
   },
 });
 const SearchBar = styled("div")({

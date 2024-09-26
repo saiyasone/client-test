@@ -63,7 +63,7 @@ const AntSwitch = styled(Switch)(({ theme }) => ({
   },
 }));
 
-const PricingPlan = (props) => {
+const PricingPlan = (props:any) => {
   const dispatch = useDispatch();
   const isMobile = useMediaQuery("(max-width:600px)");
   const { packageType }: any = useSelector(paymentState);
@@ -152,7 +152,7 @@ const PricingPlan = (props) => {
       </MUI.BoxShowSection1>
       <MUI.BoxShowSection2>
         <Grid container spacing={isMobile ? 2 : 8}>
-          {props.data?.map((packageData, index) => {
+          {props.data?.map((packageData:any, index:number) => {
             return (
               <Grid item xs={12} sm={6} md={6} lg={4} key={index}>
                 <PricingCardClient

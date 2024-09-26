@@ -274,7 +274,7 @@ const SidebarNavListItem = (props) => {
           "&.active": {
             svg: {
               color: "white !important",
-              fill: "white !important",
+              fill: `${title !== "For you" ? "" : "white"}!important`,
               stroke: "white !important",
               "*": {
                 stroke: `${title !== "For you" ? "white" : "gray"}!important`,

@@ -20,11 +20,9 @@ export const QUERY_PACKAGE = gql`
         packageId
         name
         category
-        annualPrice
+        type
         monthlyPrice
-        currencyId {
-          _id
-        }
+        annualPrice
         discount
         description
         storage
@@ -50,13 +48,21 @@ export const QUERY_PACKAGE = gql`
         totalUsed
         textColor
         bgColor
+        lockFile
+        lockFolder
         status
         createdAt
         updatedAt
-        createdBy {
-          firstName
-          lastName
+        currencyId {
+          _id
+          code
         }
+        createdBy {
+          _id
+          email
+        }
+        numberOfQueueDownload
+        numberOfQueueUpload
       }
       total
     }

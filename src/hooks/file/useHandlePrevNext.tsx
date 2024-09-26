@@ -6,6 +6,7 @@ type PrevAndNextProps = {
 };
 const useHandlePreNext = () => {
   const handleNext = ({ currentFile, mainFile }: PrevAndNextProps) => {
+
     if (!mainFile || mainFile.length === 0) {
       return null;
     }
@@ -18,9 +19,11 @@ const useHandlePreNext = () => {
   };
 
   const handlePrev = ({ currentFile, mainFile }: PrevAndNextProps) => {
+
     if (!mainFile || mainFile.length === 0) {
       return null;
     }
+    
     const currentIndex = mainFile.findIndex(
       (fileId) => fileId._id === currentFile._id,
     );

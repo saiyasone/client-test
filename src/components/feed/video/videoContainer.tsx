@@ -1,43 +1,54 @@
 import {
   Avatar,
   Box,
-  Button,
   CardMedia,
-  Chip,
-  IconButton,
   Paper,
   styled,
   Typography,
   useTheme,
 } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
 import { FaCirclePlus } from "react-icons/fa6";
+import { IDataItemsTypes } from "types/feed/vdoType";
+import MainLike from "./mainLike";
 
-const VideoCardContainer = styled("div")(({ theme }) => ({
-  padding: "1px",
-  width: "70%",
+const VideoCardContainer = styled("div")(() => ({
   position: "relative",
+  minHeight: "200px",
+  maxHeight: "580px",
+  overflow: "hidden",
+  width: "400px",
+  padding: "2rem 0 8rem",
+  margin: "2px",
+  borderRadius: "8px",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  background: "white",
+  marginBottom: "5rem",
 }));
 
-const ChannelContainer = styled(Paper)(({ theme }) => ({
-  padding: "2px 5px",
+const ChannelContainer = styled(Box)(() => ({
   position: "absolute",
-  bottom: "10%",
-  left: "5%",
-  width: "90%",
+  bottom: 10, // Adjust as needed
+  left: 0, // Adjust as needed
+  padding: "8px",
+  borderRadius: "8px",
+  color: "white",
 }));
 
-const ChannelCard = styled(Paper)(({ theme }) => ({
+const ChannelCard = styled(Box)(() => ({
   padding: "2px 5px",
   display: "flex",
   alignItems: "center",
   gap: 8,
 }));
 
-const ChannelAvatar = styled(Paper)(({ theme }) => ({
+const ChannelAvatar = styled(Box)(() => ({
   position: "relative",
   cursor: "pointer",
 }));
-const ChannelFollowIcon = styled("div")(({ theme }) => ({
+const ChannelFollowIcon = styled("div")(() => ({
   position: "absolute",
   bottom: -8,
   left: 16,
@@ -45,104 +56,203 @@ const ChannelFollowIcon = styled("div")(({ theme }) => ({
 }));
 const DescriptionTitle = styled("div")(({ theme }) => ({
   padding: theme.spacing(2),
-  backgroundColor: theme.palette.background.paper,
   borderRadius: theme.shape.borderRadius,
   boxShadow: theme.shadows[1],
+  color: "white",
 }));
 const MusicContainer = styled("div")(({ theme }) => ({
   padding: theme.spacing(1),
-  backgroundColor: "rgba(0, 0, 0, 0.38)",
+  backgroundColor: "rgba(0, 0, 0, 0.28)",
   width: "50%",
   marginLeft: "6px",
   borderRadius: "10px",
 }));
-export default function VideoContainer() {
+
+interface IVdeoTypeProps {
+  data: IDataItemsTypes[];
+}
+export default function VideoContainer({ data }: IVdeoTypeProps) {
   const theme = useTheme();
+
+  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isOverflowing, setIsOverflowing] = React.useState(false);
+  const textRef = React.useRef(null);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const videoRef = useRef<any>(null);
+  const [isPlaying, setIsPlaying] = React.useState(false);
+  const [progress, setProgress] = React.useState(0);
+
+  const togglePlay = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+  };
+
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = true; // Start muted
+      videoRef.current.play(); // Auto-play
+    }
+  }, []);
+
+  const handleProgressChange = (event: any, newValue: any) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = newValue;
+    }
+  };
+
+  React.useEffect(() => {
+    const updateProgress = () => {
+      if (videoRef.current) {
+        const current = videoRef.current.currentTime;
+        const duration = videoRef.current.duration;
+        setProgress((current / duration) * 100);
+      }
+    };
+
+    const videoElement = videoRef.current;
+    videoElement?.addEventListener("timeupdate", updateProgress);
+
+    return () => {
+      videoElement?.removeEventListener("timeupdate", updateProgress);
+    };
+  }, []);
+
   return (
     <>
       <Box sx={{ py: 2 }}>
-        <Paper sx={{ width: 600, bgcolor: "gray" }}>
-          <VideoCardContainer>
-            <CardMedia
-              component="video"
-              sx={{ m: 2, borderRadius: "8px", width: 400, height: 600 }}
-              src="/static/videos/sample-video.mp4"
-              controls
-              autoPlay
-              muted
-              loop
-            />
-            <ChannelContainer>
-              <ChannelCard>
-                <Box>
-                  <ChannelAvatar>
-                    <Avatar
-                      sx={{ width: 50, height: 50 }}
-                      alt="Remy Sharp"
-                      src="/static/images/avatar/1.jpg"
-                    />
-                    <ChannelFollowIcon>
-                      <FaCirclePlus size={20} color="white" fill="#17766B" />
-                    </ChannelFollowIcon>
-                  </ChannelAvatar>
-                </Box>
-                <Box>
-                  <Typography component="p" sx={{ fontSize: "20px" }}>
-                    John song
-                  </Typography>
-                  <Typography
-                    component="p"
-                    sx={{ fontSize: "16px", color: theme.palette.grey[600] }}
-                  >
-                    @John song
-                  </Typography>
-                </Box>
-              </ChannelCard>
-              <DescriptionTitle>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    position: "relative",
-                  }}
-                >
-                  <Typography
-                    component="p"
+        <Paper>
+          {data?.map((data, index: number) => {
+            return (
+              <Box sx={{display:"flex",gap:5}}>
+                <VideoCardContainer key={index}>
+                  <CardMedia
+                    ref={videoRef}
+                    component="video"
+                    onClick={togglePlay}
+                    onMouseEnter={() => setIsHovered(true)} // Set hover state to true
+                    onMouseLeave={() => setIsHovered(false)}
                     sx={{
-                      fontSize: "16px",
-                      color: theme.palette.grey[600],
-                      display: "-webkit-box",
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                      // WebkitLineClamp: 2,
-                      WebkitLineClamp: false ? "none" : 2,
+                      borderRadius: "8px",
+                      objectFit: "fill",
                     }}
-                  >
-                    Lorem ipsum dolor sit amet consectetur.Lorem ipsum dolor sit
-                    amet consectetur.t amet consectetur.Lorem ipsum dolor sit
-                    amet consectetur.
-                  </Typography>
-                  <Typography
-                    component="p"
-                    sx={{
-                      border: "none",
-                      cursor: "pointer",
-                      mt: 1,
-                      position: "absolute",
-                      bottom: 1,
-                      right: 20,
-                    }}
-                  >
-                    Less
-                  </Typography>
-                </Box>
-              </DescriptionTitle>
-              <MusicContainer>
-                <Typography component="p">Less</Typography>
-              </MusicContainer>
-            </ChannelContainer>
-          </VideoCardContainer>
+                    src={data.option.video.source.preview_url}
+                    controls
+                    autoPlay
+                    muted
+                    loop
+                  />
+
+                  <ChannelContainer>
+                    <ChannelCard>
+                      <Box>
+                        <ChannelAvatar>
+                          <Avatar
+                            sx={{ width: 50, height: 50 }}
+                            alt={data?.chanel?.name}
+                            src="/static/images/avatar/1.jpg"
+                          />
+                          <ChannelFollowIcon>
+                            <FaCirclePlus
+                              size={20}
+                              color="white"
+                              fill="#17766B"
+                            />
+                          </ChannelFollowIcon>
+                        </ChannelAvatar>
+                      </Box>
+                      <Box>
+                        <Typography component="p" sx={{ fontSize: "20px" }}>
+                          {data?.chanel.name}
+                        </Typography>
+                        <Typography
+                          component="p"
+                          sx={{
+                            fontSize: "16px",
+                            color: theme.palette.grey[100],
+                          }}
+                        >
+                          {data?.option.tag}
+                        </Typography>
+                      </Box>
+                    </ChannelCard>
+                    <DescriptionTitle>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          position: "relative",
+                        }}
+                      >
+                        <Typography
+                          id={data?.option.title}
+                          ref={textRef}
+                          component="p"
+                          sx={{
+                            fontSize: "16px",
+                            color: "white",
+                            display: "-webkit-box",
+                            WebkitBoxOrient: "vertical",
+                            overflow: "hidden",
+                            WebkitLineClamp: isExpanded ? "none" : 2,
+                            textOverflow: "ellipsis",
+                            lineHeight: "1.2em",
+                            maxHeight: isExpanded ? "none" : "2.4em",
+                          }}
+                        >
+                          {data?.option.title}
+                        </Typography>
+                        {isOverflowing && !isExpanded && (
+                          <Typography
+                            component="p"
+                            sx={{
+                              border: "none",
+                              cursor: "pointer",
+                              mt: 1,
+                              position: "absolute",
+                              bottom: 1,
+                              right: 20,
+                              color: "lightblue",
+                            }}
+                          >
+                            Show More
+                          </Typography>
+                        )}
+                        {isExpanded && (
+                          <Typography
+                            component="p"
+                            sx={{
+                              border: "none",
+                              cursor: "pointer",
+                              mt: 1,
+                              position: "absolute",
+                              bottom: 1,
+                              right: 20,
+                            }}
+                          >
+                            Less
+                          </Typography>
+                        )}
+                      </Box>
+                    </DescriptionTitle>
+                    <MusicContainer>
+                      <Typography component="p" sx={{ px: 2 }}>
+                        Less
+                      </Typography>
+                    </MusicContainer>
+                  </ChannelContainer>
+                </VideoCardContainer>
+                <MainLike />
+              </Box>
+            );
+          })}
         </Paper>
       </Box>
     </>
