@@ -165,7 +165,7 @@ function ForgotPasswordUsage() {
           {showCaptcha && (
             <Box sx={{ margin: "auto", display: "table", mt: 2, mb: 5 }}>
               <ReCAPTCHA
-                sitekey={ENV_KEYS.VITE_APP_RECAPTCHA_KEY}
+                sitekey={ENV_KEYS.VITE_APP_RECAPTCHA}
                 onChange={handleData}
                 style={captchaStyle}
               />

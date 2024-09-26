@@ -178,20 +178,17 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
   // const accessToken = window.localStorage.getItem("accessToken");
   const accessToken = window.localStorage.getItem(
-    ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY,
+    ENV_KEYS.VITE_APP_ACCESS_TOKEN,
   );
 
   useEffect(() => {
     const initialize = async () => {
       setIsLoading(true);
-      const userStaff = localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY);
+      const userStaff = localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA);
       try {
         if (accessToken && isValidToken(accessToken)) {
           const decoded = accessToken;
-          const userPayload = decryptToken(
-            decoded,
-            ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
-          );
+          const userPayload = decryptToken(decoded, ENV_KEYS.VITE_APP_TOKEN);
 
           // console.log({ decoded });
           const dataDecode = JSON.parse(decryptId(userStaff) as string);
@@ -207,10 +204,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
                 const user = data?.queryStaffs?.data[0];
                 const userEncrypted = encryptId(
                   JSON.stringify(user),
-                  ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+                  ENV_KEYS.VITE_APP_LOCAL_STORAGE,
                 );
                 localStorage.setItem(
-                  ENV_KEYS.VITE_APP_USER_DATA_KEY,
+                  ENV_KEYS.VITE_APP_USER_DATA,
                   userEncrypted,
                 );
                 dispatch({
@@ -234,10 +231,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 const userEncrypted = encryptId(
                   JSON.stringify(user),
-                  ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+                  ENV_KEYS.VITE_APP_LOCAL_STORAGE,
                 );
                 localStorage.setItem(
-                  ENV_KEYS.VITE_APP_USER_DATA_KEY,
+                  ENV_KEYS.VITE_APP_USER_DATA,
                   userEncrypted,
                 );
                 // localStorage.setItem("userData", JSON.stringify(user));
@@ -278,9 +275,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const [localPermission, setLocalPermission] = useState(null);
   useEffect(() => {
     // const storeValue = localStorage.getItem("permission");
-    const storeValue = localStorage.getItem(
-      ENV_KEYS.VITE_APP_PERMISSION_LOCAL_KEY,
-    );
+    const storeValue = localStorage.getItem(ENV_KEYS.VITE_APP_PERMISSION_LOCAL);
 
     if (storeValue) {
       const storeParseJson = JSON.parse(decryptId(storeValue) as string);
@@ -291,9 +286,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // const dateJson = localStorage.getItem("dateForgetPassword");
-    const dateJson = localStorage.getItem(
-      ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL_KEY,
-    );
+    const dateJson = localStorage.getItem(ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL);
     if (dateJson) {
       dispatch({
         type: FORGET_PASSWORD,
@@ -318,10 +311,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             // );
             const permissionEncrypted = encryptId(
               JSON.stringify(data?.role_staffs?.data[0]?.permision),
-              ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+              ENV_KEYS.VITE_APP_LOCAL_STORAGE,
             );
             localStorage.setItem(
-              ENV_KEYS.VITE_APP_USER_DATA_KEY,
+              ENV_KEYS.VITE_APP_USER_DATA,
               permissionEncrypted,
             );
           }
@@ -331,7 +324,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const generateNewToken = async () => {
-    const existToken = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+    const existToken = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
     const newToken = (
       await refreshToken({
         variables: {
@@ -343,10 +336,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     const accessToken = newToken?.accessToken;
     if (accessToken) {
       const decoded = accessToken;
-      const userPayload = decryptToken(
-        decoded,
-        ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
-      );
+      const userPayload = decryptToken(decoded, ENV_KEYS.VITE_APP_TOKEN);
       await getUsers({
         variables: {
           where: {
@@ -358,7 +348,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
           checkAccessToken(accessToken);
           // localStorage.setItem("userData", JSON.stringify(user));
           localStorage.setItem(
-            ENV_KEYS.VITE_APP_USER_DATA_KEY,
+            ENV_KEYS.VITE_APP_USER_DATA,
             JSON.stringify(user),
           );
           dispatch({
@@ -385,14 +375,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const authen = true;
       const decoded = checkRole;
-      const tokenData = decryptToken(
-        decoded,
-        ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
-      );
+      const tokenData = decryptToken(decoded, ENV_KEYS.VITE_APP_TOKEN);
       if (enable2FA === 0) {
         const userDataEncrypt = encryptId(
           JSON.stringify(data),
-          ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+          ENV_KEYS.VITE_APP_LOCAL_STORAGE,
         );
         checkAccessToken(decoded);
         localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
@@ -436,12 +423,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
           const userDataEncrypted = encryptId(
             JSON.stringify(user),
-            ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+            ENV_KEYS.VITE_APP_LOCAL_STORAGE,
           );
-          localStorage.setItem(
-            ENV_KEYS.VITE_APP_USER_DATA_KEY,
-            userDataEncrypted,
-          );
+          localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA, userDataEncrypted);
 
           const tokenData = data?.staffLogin?.token;
           checkAccessToken(tokenData);
@@ -470,7 +454,11 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (username, password) => {
     setAuthLoading(!authLoading);
     try {
-      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       const signInUser = await userLogin({
         variables: {
           where: {
@@ -487,10 +475,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       const enable2FA = user?.twoFactorIsEnabled;
       const authen = true;
 
-      const tokenData = decryptToken(
-        checkRole,
-        ENV_KEYS.VITE_APP_TOKEN_SECRET_KEY,
-      );
+      const tokenData = decryptToken(checkRole, ENV_KEYS.VITE_APP_TOKEN);
 
       await handleCreateLog(
         user?._id,
@@ -502,10 +487,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       if (enable2FA === 0) {
         const userDataEncrypt = encryptId(
           JSON.stringify(signInUser?.data?.userLogin?.data[0]),
-          ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+          ENV_KEYS.VITE_APP_LOCAL_STORAGE,
         );
         checkAccessToken(checkRole);
-        localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, userDataEncrypt);
+        localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA, userDataEncrypt);
 
         successMessage("Login Success!!", 3000);
         dispatch({
@@ -538,7 +523,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const authentication2FA = async (user, token) => {
     // localStorage.setItem("userData", JSON.stringify(user));
-    localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA_KEY, JSON.stringify(user));
+    localStorage.setItem(ENV_KEYS.VITE_APP_USER_DATA, JSON.stringify(user));
     checkAccessToken(token);
     dispatch({
       type: SIGN_IN,
@@ -577,9 +562,9 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     // localStorage.removeItem("accessToken");
     // localStorage.removeItem("userData");
     // localStorage.removeItem("permission");
-    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
-    localStorage.removeItem(ENV_KEYS.VITE_APP_USER_DATA_KEY);
-    localStorage.removeItem(ENV_KEYS.VITE_APP_PERMISSION_LOCAL_KEY);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_USER_DATA);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_PERMISSION_LOCAL);
     oAuthLogOut();
     dispatch({ type: LOG_OUT });
   };
@@ -588,16 +573,20 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
     // localStorage.removeItem("accessToken");
     // localStorage.removeItem("permission");
     // localStorage.removeItem("userData");
-    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
-    localStorage.removeItem(ENV_KEYS.VITE_APP_USER_DATA_KEY);
-    localStorage.removeItem(ENV_KEYS.VITE_APP_PERMISSION_LOCAL_KEY);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_USER_DATA);
+    localStorage.removeItem(ENV_KEYS.VITE_APP_PERMISSION_LOCAL);
     oAuthLogOut();
     dispatch({ type: SIGN_OUT });
   };
 
   const signUp = async (firstName, lastName, username, email, password) => {
     setAuthLoading(true);
-    const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+    const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+      headers: {
+        "Cache-Control": "no-cache",
+      },
+    });
     try {
       const signUpUser = await register({
         variables: {
@@ -650,10 +639,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const resetForgetPassword = () => {
-    const data = localStorage.getItem(ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL_KEY);
+    const data = localStorage.getItem(ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL);
 
     if (data) {
-      localStorage.removeItem(ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL_KEY);
+      localStorage.removeItem(ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL);
       dispatch({
         type: RESET_FORGET_PASSWORD,
       });
@@ -709,7 +698,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
             const dateFormat = decodeToken?.expiredAt;
 
             localStorage.setItem(
-              ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL_KEY,
+              ENV_KEYS.VITE_APP_DATE_FORGET_LOCAL,
               moment(dateFormat).format("HH:mm"),
             );
 

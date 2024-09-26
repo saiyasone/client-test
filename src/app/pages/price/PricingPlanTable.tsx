@@ -148,15 +148,13 @@ const PricingPlanTable: React.FC<any> = (props) => {
                         </Typography>
                         <Typography component="div">
                           {isCost && paymentSelector.currencySymbol}
-                          {
-                            isCost
-                              ? `${_price?.toLocaleString()}${
+                          {isCost
+                            ? `${_price?.toLocaleString()}${
                                 _type === PACKAGE_TYPE.annual
                                   ? "/year"
                                   : "/month"
-                                }`
-                              : "Free"
-                          }
+                              }`
+                            : "Free"}
                         </Typography>
                       </MUI.CellTableCell>
                     );
@@ -208,7 +206,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                 props.onDialogTermsAndConditionsOpen(
                                   encryptId(
                                     packageData._id,
-                                    ENV_KEYS.VITE_APP_ENCRYPTION_KEY,
+                                    ENV_KEYS.VITE_APP_ENCRYPTION,
                                   ),
                                   packageData,
                                 )
@@ -255,7 +253,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                         props.onDialogTermsAndConditionsOpen(
                                           encryptId(
                                             packageData._id,
-                                            ENV_KEYS.VITE_APP_ENCRYPTION_KEY,
+                                            ENV_KEYS.VITE_APP_ENCRYPTION,
                                           ),
                                           packageData,
                                         ),

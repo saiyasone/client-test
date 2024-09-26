@@ -22,7 +22,7 @@ function TokenValidation({ children, tokenCheck }) {
           return navigate("/dashboard");
         }
       } catch (error) {
-        localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+        localStorage.removeItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
         return navigate("/auth/sign-in");
       }
     })();
@@ -33,7 +33,7 @@ function TokenValidation({ children, tokenCheck }) {
 
 function IsLoggedClientAuthGuard({ children }) {
   // const token = localStorage.getItem("accessToken");
-  const token = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN_KEY);
+  const token = localStorage.getItem(ENV_KEYS.VITE_APP_ACCESS_TOKEN);
 
   return <TokenValidation tokenCheck={token}>{children}</TokenValidation>;
 }

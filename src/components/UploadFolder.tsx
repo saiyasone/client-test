@@ -267,7 +267,7 @@ function UploadFolderManual(props) {
                   const resultPath = path.newPath?.substring(0, lastIndex);
                   const resultFileName = path?.newPath?.substring(lastIndex);
 
-                  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+                  const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
                   const headers = {
                     PATH:
                       userData.newName + "-" + userData._id + "/" + resultPath,
@@ -462,7 +462,7 @@ function UploadFolderManual(props) {
                     lastIndex + 1,
                   );
 
-                  const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+                  const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
                   const headers = {
                     PATH: `${userData.newName}-${userData._id}/${resultPath}`,
                     FILENAME: resultFileName,

@@ -212,15 +212,12 @@ const DialogCreateFileDrop = (props) => {
   }, [showValid]);
 
   useEffect(() => {
-    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA_KEY]
-      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA_KEY)
+    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA]
+      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA)
       : null;
 
     if (data) {
-      const plainData = decryptId(
-        data,
-        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
-      );
+      const plainData = decryptId(data, ENV_KEYS.VITE_APP_LOCAL_STORAGE);
 
       if (plainData) {
         const jsonPlain = JSON.parse(plainData);

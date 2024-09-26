@@ -67,7 +67,7 @@ const PricingPlan = (props) => {
   const dispatch = useDispatch();
   const isMobile = useMediaQuery("(max-width:600px)");
   const { packageType }: any = useSelector(paymentState);
-  
+
   return (
     <>
       <MUI.BoxShowSection1>
@@ -163,7 +163,7 @@ const PricingPlan = (props) => {
                       props.onDialogTermsAndConditionsOpen(
                         encryptId(
                           packageData._id,
-                          ENV_KEYS.VITE_APP_ENCRYPTION_KEY,
+                          ENV_KEYS.VITE_APP_ENCRYPTION,
                         ),
                         packageData,
                       );

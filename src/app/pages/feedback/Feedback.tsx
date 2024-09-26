@@ -193,7 +193,7 @@ function Feedback() {
           <Grid container spacing={4}>
             <Grid item xs={12}>
               <Editor
-                apiKey={ENV_KEYS.VITE_APP_TINYMCE_API}
+                apiKey={ENV_KEYS.VITE_APP_TINYMCE}
                 onInit={(_evt, editor) => (editorRef.current = editor)}
                 init={{
                   height: isMobile ? 200 : 300,

@@ -40,7 +40,7 @@ const useManageFile = ({ user }) => {
   //move to file to trash
 
   const dataEncrypted = ({ headers }) => {
-    const secretKey = ENV_KEYS.VITE_APP_UPLOAD_SECRET_KEY;
+    const secretKey = ENV_KEYS.VITE_APP_UPLOAD;
     const key = CryptoJS.enc.Utf8.parse(secretKey);
     const iv = CryptoJS.lib.WordArray.random(16);
     const encrypted = CryptoJS.AES.encrypt(JSON.stringify(headers), key, {
@@ -640,7 +640,11 @@ const useManageFile = ({ user }) => {
     { onSuccess, onFailed },
   ) => {
     try {
-      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL);
+      const responseIp = await axios.get(ENV_KEYS.VITE_APP_LOAD_GETIP_URL, {
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
 
       multipleData.map(async (file) => {
         const randomName = uuidv4();

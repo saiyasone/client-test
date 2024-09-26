@@ -229,7 +229,7 @@ function BaseSignin(props) {
             {showCaptcha && (
               <Box sx={{ margin: "auto", mt: 4, mb: 3, display: "table" }}>
                 <ReCAPTCHA
-                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA_KEY}
+                  sitekey={ENV_KEYS.VITE_APP_RECAPTCHA}
                   onChange={handleData}
                   onExpired={() => {
                     setCaptchaKey(false);

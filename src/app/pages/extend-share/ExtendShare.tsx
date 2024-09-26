@@ -171,10 +171,9 @@ function ExtendShare() {
     if (!_.isEmpty(dataForEvent.data) && dataForEvent.action === "get link") {
       setIsAutoClose(true);
       // handleGetFolderURL?.(dataForEvent.data);
-      if(isCheckPassword()) {
+      if (isCheckPassword()) {
         setShowEncryptPassword(true);
-      } 
-      else {
+      } else {
         setOpenGetLink(true);
       }
       handleCloseDecryptedPassword();
@@ -266,12 +265,9 @@ function ExtendShare() {
     if (parentFolder?._id) {
       const folderEncrypted = encryptId(
         JSON.stringify(parentFolder?._id),
-        ENV_KEYS.VITE_APP_LOCAL_STORAGE_SECRET_KEY,
+        ENV_KEYS.VITE_APP_LOCAL_STORAGE,
       );
-      localStorage.setItem(
-        ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL_KEY,
-        folderEncrypted,
-      );
+      localStorage.setItem(ENV_KEYS.VITE_APP_FOLDER_ID_LOCAL, folderEncrypted);
     }
   }, [parentFolder]);
 
@@ -952,7 +948,7 @@ function ExtendShare() {
         action: "",
       };
     });
-  }
+  };
 
   const handleGenerateGetLink = () => {
     setDataForEvent((prev: any) => {
@@ -963,7 +959,7 @@ function ExtendShare() {
     });
 
     setOpenGetLink(false);
-  }
+  };
 
   const handleDoubleClick = (data) => {
     const base64URL = Base64.encodeURI(data._id);
@@ -1458,15 +1454,14 @@ function ExtendShare() {
         onConfirm={handleSubmitDecryptedPassword}
         onClose={handleCloseDecryptedPassword}
       />
-      {
-        openGetLink && dataForEvent.data &&
+      {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
           onClose={handleGetLinkClose}
           onCreate={handleGenerateGetLink}
           data={dataForEvent.data}
         />
-      }
+      )}
     </Fragment>
   );
 }
