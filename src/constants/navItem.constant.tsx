@@ -5,11 +5,11 @@ import { FiFile } from "react-icons/fi";
 import { HiOutlineShare } from "react-icons/hi";
 import { MdOutlineFavoriteBorder } from "react-icons/md";
 import { TbDashboard } from "react-icons/tb";
-// import { RiHome5Fill } from "react-icons/ri";
-// import { MdOutlineExplore } from "react-icons/md";
-// import { RiUserAddLine } from "react-icons/ri";
-// import { PiUserCircle } from "react-icons/pi";
-// import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+import { RiHome5Fill } from "react-icons/ri";
+import { MdOutlineExplore } from "react-icons/md";
+import { RiUserAddLine } from "react-icons/ri";
+import { PiUserCircle } from "react-icons/pi";
+import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
 
 const dashboard = [
   {
@@ -75,7 +75,7 @@ const trash = [
   },
 ];
 
-///Feed
+// //Feed
 // const feedForyou = [
 //   {
 //     href: "/feed-for-you",

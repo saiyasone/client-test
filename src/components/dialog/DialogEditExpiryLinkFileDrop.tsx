@@ -3,6 +3,9 @@ import {
   Checkbox,
   FormControl,
   FormControlLabel,
+  InputLabel,
+  MenuItem,
+  Select,
   styled,
   TextField,
   Typography,
@@ -19,14 +22,16 @@ import { useMutation } from "@apollo/client";
 import { errorMessage, successMessage, warningMessage } from "utils/alert.util";
 import { convertObjectEmptyStringToNull } from "utils/object.util";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { ENV_KEYS } from "constants/env.constant";
+import { decryptId } from "utils/secure.util";
 
 const DialogPreviewFileV1Boby = muiStyled("div")(({ theme }) => ({
   width: "100%",
   display: "flex",
   flexDirection: "column",
   rowGap: theme.spacing(3),
-  padding: "1.5rem",
+  padding: "2rem",
   "& .MuiDialogActions-root": {
     display: "none",
   },
@@ -67,6 +72,10 @@ const DialogEditExpiryLinkFileDrop = (props) => {
     allowUpload: data?.allowUpload,
     allowMultiples: data?.allowMultiples,
   });
+  const [selectDay, setSelectDay] = useState<any>(1);
+  const [expiredDate, setExpiredDate] = useState<any>(null);
+  const [packageType, setPackageType] = useState("Free");
+  const [selectDate, setSelectDate] = useState<moment.Moment | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -74,6 +83,37 @@ const DialogEditExpiryLinkFileDrop = (props) => {
       ...prevData,
       [name]: checked,
     }));
+  };
+
+  const calculateExpirationDate = (days: any) => {
+    const today = new Date();
+    const expirationDate = new Date(today);
+    expirationDate.setDate(today.getDate() + days);
+
+    // Set a specific time (e.g., 12:00 PM)
+    expirationDate.setHours(12, 0, 0, 0);
+    return expirationDate.toISOString();
+  };
+
+  const handleExpiredDateChange = (event: any) => {
+    const selectedDays = event.target.value;
+    setSelectDay(selectedDays);
+
+    const expirationDateTime = calculateExpirationDate(selectedDays);
+    setExpiredDate(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
+  };
+
+  const handleDateChange = (date: moment.Moment | null) => {
+    if (date) {
+      const currentDate = moment().startOf("day").utc();
+      const totalDays = date.startOf("day").utc().diff(currentDate, "days");
+      setSelectDate(currentDate);
+
+      if (totalDays > 0) {
+        const expirationDateTime = calculateExpirationDate(totalDays);
+        setExpiredDate(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
+      }
+    }
   };
 
   const handleSubmitChange = async () => {
@@ -115,6 +155,30 @@ const DialogEditExpiryLinkFileDrop = (props) => {
     }
   };
 
+  useEffect(() => {
+    const data: any = localStorage[ENV_KEYS.VITE_APP_USER_DATA]
+      ? localStorage.getItem(ENV_KEYS.VITE_APP_USER_DATA)
+      : null;
+
+    if (data) {
+      const plainData = decryptId(data, ENV_KEYS.VITE_APP_LOCAL_STORAGE);
+
+      if (plainData) {
+        const jsonPlain = JSON.parse(plainData);
+        if (
+          jsonPlain &&
+          jsonPlain?.packageId &&
+          jsonPlain?.packageId?.category
+        ) {
+          const category = jsonPlain?.packageId?.category;
+          if (category) {
+            setPackageType(category);
+          }
+        }
+      }
+    }
+  }, [packageType]);
+
   return (
     <BaseDialogV1
       {...props}
@@ -125,7 +189,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
             maxWidth: {
               xs: "100%",
               md: "50%",
-              lg: "450px",
+              lg: "650px",
             },
           },
         },
@@ -146,10 +210,10 @@ const DialogEditExpiryLinkFileDrop = (props) => {
           borderBottom: 1,
           borderColor: "#ddd !important",
           color: "rgb(0,0,0,0.8)",
-          padding: ".7rem 1.5rem",
+          padding: "1.5rem",
         }}
       >
-        Modify Information
+        Modify drop link
       </Typography>
       <DialogPreviewFileV1Boby>
         <Formik
@@ -191,7 +255,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
               />
             </DatePickerV1Container>
             <DatePickerV1Container sx={{ mt: 7 }}>
-              <DatePickerV1Lable>Expired Date</DatePickerV1Lable>
+              {/* <DatePickerV1Lable>Expired Date</DatePickerV1Lable>
               <DatePickerV1Content
                 sx={{
                   "& .MuiTextField-root": {
@@ -217,13 +281,66 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     data.expiredAt = moment(date).utc(true);
                   }}
                 />
-              </DatePickerV1Content>
+              </DatePickerV1Content> */}
+              <Box>
+                  {packageType ? (
+                    packageType.toLowerCase().indexOf("free") === 0 ||
+                    packageType?.toLowerCase().indexOf("anonymous") === 0 ? (
+                      <FormControl sx={{ width: "100%" }} size="small">
+                        <InputLabel id="demo-simple-select-label">
+                          Expired date
+                        </InputLabel>
+                        <Select
+                          labelId="demo-simple-select-label"
+                          id="demo-simple-select"
+                          value={selectDay}
+                          label="Expired date"
+                          onChange={handleExpiredDateChange}
+                          sx={{ textAlign: "start" }}
+                        >
+                          <MenuItem value={1}>1 day after created</MenuItem>
+                          <MenuItem value={2}>2 days after created</MenuItem>
+                          <MenuItem value={3}>3 days after created</MenuItem>
+                        </Select>
+                      </FormControl>
+                    ) : (
+                      <DatePickerV1Container>
+                        <DatePickerV1Lable>Expired date</DatePickerV1Lable>
+                        <DatePickerV1Content
+                          sx={{
+                            "& .MuiTextField-root": {
+                              width: "100% !important",
+                            },
+                            "& .MuiInputBase-root": {},
+                            "input::placeholder": {
+                              opacity: "1 !important",
+                              color: "#9F9F9F",
+                            },
+                          }}
+                        >
+                          <DatePicker
+                            format="DD/MM/YYYY"
+                            name="demo-simple-select"
+                            value={selectDate}
+                            sx={{
+                              ".MuiInputBase-root": {
+                                height: "35px",
+                              },
+                            }}
+                            onChange={(date) => handleDateChange(date)}
+                          />
+                        </DatePickerV1Content>
+                      </DatePickerV1Container>
+                    )
+                  ) : null}
+                </Box>
             </DatePickerV1Container>
             <FormControl
               sx={{
                 display: "flex",
                 flexDirection: { xs: "column", md: "row" },
                 justifyContent: "center !important",
+                gap:5,
                 mt: 4,
               }}
             >
@@ -236,18 +353,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Allow Download"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    id="allow-upload"
-                    name="allowUpload"
-                    checked={permission.allowUpload}
-                    onChange={handleChange}
-                  />
-                }
-                label="Allow Upload"
+                label="Enable Single Download"
               />
               <FormControlLabel
                 control={
@@ -258,7 +364,18 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Allow Multiples"
+                label="Enable Multi-Download"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="allow-upload"
+                    name="allowUpload"
+                    checked={permission.allowUpload}
+                    onChange={handleChange}
+                  />
+                }
+                label="Enable Upload"
               />
             </FormControl>
             <NormalButton

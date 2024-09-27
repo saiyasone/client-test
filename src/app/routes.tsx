@@ -189,26 +189,26 @@ const routes: RouteObject[] = [
         element: <PaymentDetail />,
       },
       ///Feed
-      {
-       path: "feed-for-you",
-       element: <ForyouView />,
-     },
-     {
-       path: "feed-explore",
-       element: <>Expore Page</>,
-     },
-     {
-       path: "feed-following",
-       element: <>Following page</>,
-     },
-     {
-       path: "feed-friend",
-       element: <>Feed friend page</>,
-     },
-     {
-       path: "feed-profile",
-       element: <>Feed Profile</>,
-     },
+    //   {
+    //    path: "feed-for-you",
+    //    element: <ForyouView />,
+    //  },
+    //  {
+    //    path: "feed-explore",
+    //    element: <>Expore Page</>,
+    //  },
+    //  {
+    //    path: "feed-following",
+    //    element: <>Following page</>,
+    //  },
+    //  {
+    //    path: "feed-friend",
+    //    element: <>Feed friend page</>,
+    //  },
+    //  {
+    //    path: "feed-profile",
+    //    element: <>Feed Profile</>,
+    //  },
     ],
   },
   // {

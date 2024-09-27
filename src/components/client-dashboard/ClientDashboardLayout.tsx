@@ -244,7 +244,7 @@ const ClientDashboardLayout = () => {
         </Box>
         <Box sx={{ display: { xs: "none", md: "block" } }}>
           <Sidebar
-            PaperProps={{ style: { width: drawerWidth } }}
+            PaperProps={{ style: { width: drawerWidth, }}}
             items={navItems}
           />
         </Box>

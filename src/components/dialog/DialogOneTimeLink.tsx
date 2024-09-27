@@ -5,8 +5,6 @@ import {
   Typography,
   TextField,
   Grid,
-  Select,
-  MenuItem,
   styled,
   createTheme,
   Divider,
@@ -21,7 +19,6 @@ import { convertBytetoMBandGB } from "utils/storage.util";
 import ImageComponent from "components/getImage";
 import { removeFileNameOutOfPath } from "utils/file.util";
 import { errorMessage, successMessage } from "utils/alert.util";
-import moment from "moment";
 import QRCode from "react-qr-code";
 import {
   handleDownloadQRCode,
@@ -34,9 +31,9 @@ import {
   GET_MANAGE_LINKS,
 } from "api/graphql/onetimelink.graphql";
 import { useLazyQuery, useMutation } from "@apollo/client";
-import { calculateExpirationDate } from "utils/date.util";
 import DialogBackendVerifyPassword from "./DialogBackendVerifyPassword";
 import DialogShare from "./DialogShare.SocialMedia";
+import { LuCopy } from "react-icons/lu";
 const theme = createTheme();
 
 export const ButtonLoadingContainer = styled(LoadingButton)({
@@ -48,6 +45,7 @@ export const ButtonLoadingContainer = styled(LoadingButton)({
   width: "70%",
   [theme.breakpoints.down("sm")]: {
     padding: "0.2rem",
+    width: '100%',
   },
 });
 export const ButtonContainer = styled(Button)({
@@ -68,7 +66,6 @@ interface apiProps {
   type: string;
   folderId?: string | number;
   fileId?: string | number;
-  expiredAt: string;
   password: string;
 }
 
@@ -76,59 +73,42 @@ const DialogOneTimeLink = (props) => {
   const { user }: any = useAuth();
   const { onClose, onCreate, data } = props;
   const qrCodeRef = useRef<SVGSVGElement | any>(null);
-  const [expireDays, setExpireDays] = useState(7);
-  const [expiredAt, setExpiredAt] = useState("");
   const [burnLinkId, setBurnLinkId] = useState("");
   const [password, setPassword] = useState("");
   const [openConfirmPWD, setOpenConfirmPWD] = useState(false);
   const [folders, setFolders] = useState<any[]>([]);
   const [files, setFiles] = useState<any[]>([]);
   const [step, setStep] = useState(1);
-  const [generatedLink, setGeneratedLink] = useState("");
+  const [generatedLink, setGeneratedLink] = useState({
+    shortLink:'',
+    longLink:''
+  });
   const [isShared, setIsShared] = useState(false);
 
   const [createOneTimeLink] = useMutation(CREATE_ONE_TIME_LINK);
   const [getManageLinks] = useLazyQuery(GET_MANAGE_LINKS);
   const [burnOneTimeLink] = useLazyQuery(BURN_ONE_TIME_LINK);
 
+  const resetGenerateLink = () => {
+    setGeneratedLink({
+      shortLink:'',
+      longLink:''
+    });
+  }
   const resetAll = () => {
-    setExpireDays(7);
-    setExpiredAt("");
     setBurnLinkId("");
     setPassword("");
     setOpenConfirmPWD(false);
     setFolders([]);
     setFiles([]);
     setStep(1);
-    setGeneratedLink("");
+    resetGenerateLink();
     setIsShared(false);
     ////close the modal anyway.
     onClose();
   };
 
-  const handleSelectItemChange = (e) => {
-    if (!e || !e?.target?.value) {
-      return;
-    }
-
-    const days = Number(e?.target?.value);
-
-    const expirationDateTime = calculateExpirationDate(days);
-
-    setExpiredAt(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
-    setExpireDays(days);
-  };
-
   const handleGenerate = async () => {
-    if (!expireDays) {
-      errorMessage("Please, select expire date", 3000);
-      return false;
-    }
-
-    if (!expiredAt) {
-      errorMessage("Please, select expire date", 3000);
-      return false;
-    }
 
     const data: apiProps[] = [];
 
@@ -137,7 +117,6 @@ const DialogOneTimeLink = (props) => {
         data.push({
           type: "folder",
           folderId: folder?._id || folder?.id,
-          expiredAt,
           password: password,
         }),
       );
@@ -148,7 +127,6 @@ const DialogOneTimeLink = (props) => {
         data.push({
           type: "file",
           fileId: file?._id || file?.id,
-          expiredAt,
           password: password,
         }),
       );
@@ -162,14 +140,16 @@ const DialogOneTimeLink = (props) => {
     return await createOneTimeLink({
       variables: {
         input: {
-          expiredAt,
           password,
           data,
         },
       },
       onCompleted: (result) => {
-        if (result && result?.createOneTimeLink?.shortLink) {
-          setGeneratedLink(result?.createOneTimeLink?.shortLink);
+        if (result && result?.createOneTimeLink?.longLink) {
+          setGeneratedLink({
+            shortLink: result?.createOneTimeLink?.shortLink,
+            longLink: result?.createOneTimeLink?.longLink
+          });
           setBurnLinkId(result?.createOneTimeLink?._id);
           setStep(2);
         }
@@ -269,11 +249,9 @@ const DialogOneTimeLink = (props) => {
   };
 
   const handleSubmit = () => {
-    handleCopy(generatedLink);
-    setGeneratedLink("");
+    handleCopy(generatedLink.shortLink);
+    resetGenerateLink();
     setBurnLinkId("");
-    setExpiredAt("");
-    setExpireDays(7);
     setStep(1);
     onCreate();
   };
@@ -316,13 +294,6 @@ const DialogOneTimeLink = (props) => {
       }
     }
   }, [data]);
-
-  useEffect(() => {
-    if (expireDays) {
-      const expirationDateTime = calculateExpirationDate(expireDays);
-      setExpiredAt(moment(expirationDateTime).format("YYYY-MM-DD h:mm:ss"));
-    }
-  }, [expireDays, expiredAt]);
 
   return (
     <React.Fragment>
@@ -509,148 +480,110 @@ const DialogOneTimeLink = (props) => {
                     )}
                 </Box>
               )}
-              <Grid container>
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ paddingRight: { md: 5, lg: 7 } }}
-                >
-                  <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
-                    Password
-                  </Typography>
-                  <TextField
-                    type="password"
-                    name="password"
-                    label="password"
-                    fullWidth
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    InputLabelProps={{
-                      style: {
-                        color: "gray",
-                        height: "35px",
-                        minHeight: "35px",
-                      },
-                    }}
-                    size={"small"}
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        height: "35px",
-                      },
-                    }}
-                  />
-                </Grid>
-                <Grid
-                  item
-                  xs={12}
-                  md={6}
-                  sx={{ paddingLeft: { md: 5, lg: 7 } }}
-                >
-                  <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
-                    Expire date
-                  </Typography>
-                  <Select
-                    labelId="expiredAt"
-                    id="expiredAt"
-                    value={expireDays}
-                    onChange={handleSelectItemChange}
-                    fullWidth
-                    style={{
-                      height: "35px",
-                      minHeight: "35px",
-                      marginRight: "0.5rem",
-                      width: "100%",
-                    }}
-                    defaultValue={7}
-                    sx={{
-                      "& .MuiInputBase-root": {
-                        height: "35px",
-                      },
-                    }}
+                <Grid container>
+                  <Grid
+                    item
+                    xs={12}
+                    md={7}
+                    sx={{ paddingRight: { md: 5, lg: 7 } }}
                   >
-                    <MenuItem value={1}>1 days</MenuItem>
-                    <MenuItem value={3}>3 days</MenuItem>
-                    <MenuItem value={5}>5 days</MenuItem>
-                    <MenuItem value={7}>7 days</MenuItem>
-                    <MenuItem value={15}>15 days</MenuItem>
-                    <MenuItem value={30}>30 days</MenuItem>
-                  </Select>
+                    <Typography variant="h4" sx={{ mt: 2, mb: 2 }}>
+                      Password
+                    </Typography>
+                    <TextField
+                      type="password"
+                      name="password"
+                      label="password"
+                      fullWidth
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      InputLabelProps={{
+                        style: {
+                          color: "gray",
+                          height: "35px",
+                          minHeight: "35px",
+                        },
+                      }}
+                      size={"small"}
+                      sx={{
+                        "& .MuiInputBase-root": {
+                          height: "35px",
+                        },
+                      }}
+                    />
+                  </Grid>
+                  <Grid
+                    item
+                    xs={12}
+                    md={5}
+                    sx={{ paddingLeft: { md: 5, lg: 7 } }}
+                  >
+                    <ButtonContainer
+                    type="button"
+                    variant="contained"
+                    size="small"
+                    fullWidth
+                    onClick={() => handleGenerate()}
+                    style={{marginTop: '38px', width:'100%'}}
+                    disabled={
+                      !(
+                        (folders && folders?.length > 0) ||
+                        (files && files?.length > 0)
+                      )
+                    }
+                  >
+                    Generate secret link Url
+                  </ButtonContainer>
+                  </Grid>
                 </Grid>
-              </Grid>
-              <Box
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: 10,
-                }}
-              >
-                <ButtonLoadingContainer
-                  type="button"
-                  variant="contained"
-                  color="success"
-                  size="small"
-                  fullWidth
-                  onClick={() => handleGenerate()}
-                  disabled={
-                    !(
-                      (folders && folders?.length > 0) ||
-                      (files && files?.length > 0)
-                    )
-                  }
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginTop: 10,
+                  }}
                 >
-                  Generate secret link Url
-                </ButtonLoadingContainer>
-                <Typography>* Please, keep your URL in secure!</Typography>
-              </Box>
+                  <Typography>* Please, keep your URL in secure!</Typography>
+                </Box>
             </Typography>
           ) : (
-            <Box sx={{ paddingY: 3 }}>
+            <Box>
               <Typography
                 variant="h6"
                 sx={{ width: "100%", mb: 4, textAlign: "center" }}
               >
                 Your Onetime Secret URL
               </Typography>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: 3,
-                  my: 2,
-                }}
-              >
-                <Typography
+              <Typography component={'div'}
                   sx={{
-                    padding: "0.1rem .7rem",
+                    display:'flex',
+                    alignContent:'center',
+                    justifyContent:'space-between',
+                    padding: "0.4rem 1rem",
                     fontWeight: 600,
-                    backgroundColor: "rgba(174, 247, 40, 0.3)",
+                    backgroundColor: "#E9E9E9",
+                    borderRadius:'3px',
+                    mt: 5
                   }}
                 >
-                  {generatedLink}
+                  {generatedLink.shortLink}
+                  <Box sx={{display:'inline-block', position:'relative', "&:hover":{cursor: "pointer", color: "#17766B"}}} onClick={() => handleCopy(generatedLink.shortLink)}>
+                    <LuCopy fontSize={18} style={{position:'absolute', top:1, right: 0}}/>
+                  </Box>
                 </Typography>
-                <Button
-                  variant="contained"
-                  onClick={() => handleCopy(generatedLink)}
-                  color="primary"
-                  sx={{ width: "auto", alignSelf: "end" }}
-                >
-                  Copy
-                </Button>
-              </Box>
-              <Divider sx={{ marginY: 2 }} />
+              {/* <Divider sx={{ marginY: 2 }} /> */}
               <Box
                 sx={{
                   display: "flex",
+                  flexDirection: {xs: 'column', md: 'row'},
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 5,
-                  border: "1px solid #d6d6d6",
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
-                  padding: 7,
+                  paddingY: 7,
                 }}
               >
                 <div
@@ -659,32 +592,27 @@ const DialogOneTimeLink = (props) => {
                     display: "flex",
                     justifyContent: "center",
                     alignItems: "center",
-                    padding: "7px",
+                    // padding: "7px",
                     border: "1px solid gray",
                     borderRadius: "7px",
                   }}
                 >
                   <QRCode
                     style={{ width: "100px", height: "100px" }}
-                    value={generatedLink}
+                    value={generatedLink.longLink}
                     viewBox={`0 0 256 256`}
                   />
                 </div>
-                <Box sx={{ padding: 2 }}>
-                  <Typography sx={{ mb: 4 }}>
+                <Box sx={{ display:'flex',flexDirection:'column',justifyContent: {xs:'center', md: 'space-between'},width:'100%', padding: 2, ml:{sm: 0, md: 15}}}>
+                <Typography sx={{ mb: 4, alignSelf: {xs: 'center', md: 'start'} }}>
                     This link
                     <span style={{ color: "#2e7d32", margin: "0 4px" }}>
-                      {generatedLink}
-                    </span>
-                    will be expired on
-                    <span style={{ color: "#2e7d32", margin: "0 5px" }}>
-                      {expiredAt}
+                      {generatedLink.shortLink}
                     </span>
                   </Typography>
-                  <Box sx={{ display: "flex", gap: 5, position: "relative" }}>
+                  <Box sx={{ display: "flex", justifyContent: {xs:'center', md: 'start'}, gap: 5, mt:4, position: "relative"}}>
                     <ButtonContainer
-                      variant="outlined"
-                      color="success"
+                      variant="contained"
                       onClick={(e) =>
                         handleDownloadQRCode(e, qrCodeRef, {
                           title: "Secret Url",
@@ -696,7 +624,7 @@ const DialogOneTimeLink = (props) => {
                       Download
                     </ButtonContainer>
                     <ButtonContainer
-                      variant="outlined"
+                      variant="contained"
                       onClick={async (e) => {
                         if (isShared) {
                           setIsShared(false);
@@ -712,7 +640,7 @@ const DialogOneTimeLink = (props) => {
                     >
                       Share
                     </ButtonContainer>
-                    {isShared && generatedLink && (
+                    {isShared && generatedLink.shortLink && (
                       <Typography
                         component={"div"}
                         sx={{
@@ -736,7 +664,7 @@ const DialogOneTimeLink = (props) => {
                         <DialogShare
                           onClose={() => setIsShared(!isShared)}
                           isOpen={isShared}
-                          url={generatedLink}
+                          url={generatedLink.shortLink}
                         />
                       </Typography>
                     )}
@@ -746,9 +674,9 @@ const DialogOneTimeLink = (props) => {
               <Box
                 sx={{
                   mt: 5,
-                  px: 7,
-                  py: 4,
-                  border: "1px solid #d6d6d6",
+                  // px: 7,
+                  pt: 4,
+                  // border: "1px solid #d6d6d6",
                   borderRadius: "7px",
                 }}
               >
@@ -759,7 +687,7 @@ const DialogOneTimeLink = (props) => {
                 >
                   Finish
                 </ButtonContainer>
-                <Divider sx={{ color: "#aaa" }}>Or</Divider>
+                <Divider sx={{ color: "#aaa", my: 2}}>Or</Divider>
                 <ButtonContainer
                   variant="outlined"
                   color="error"
@@ -768,8 +696,11 @@ const DialogOneTimeLink = (props) => {
                 >
                   Burn this Secret URL
                 </ButtonContainer>
-                * Burning this secret will delete it before it has been read
-                (click to cofnirm).
+                
+                <Box sx={{mt: 4, textAlign:'center'}}>
+                  * Burning this secret will delete it before it has been read
+                  (click to cofnirm).
+                </Box>
               </Box>
             </Box>
           )}
@@ -778,7 +709,7 @@ const DialogOneTimeLink = (props) => {
               isOpen={openConfirmPWD}
               onClose={() => setOpenConfirmPWD(false)}
               onConfirm={handleConfirmPassword}
-              OneTimeUrl={generatedLink}
+              OneTimeUrl={generatedLink.shortLink}
             />
           )}
         </Box>

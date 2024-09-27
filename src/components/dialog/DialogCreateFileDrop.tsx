@@ -43,12 +43,13 @@ import {
 } from "utils/image.share.download";
 import { decryptId } from "utils/secure.util";
 import { DatePicker } from "@mui/x-date-pickers";
-import { ShareSocial } from "components/social-media";
+import DialogShare from "./DialogShare.SocialMedia";
 
 const DialogPreviewFileV1Boby = muiStyled("div")(({ theme }) => ({
   width: "100%",
   display: "flex",
   flexDirection: "column",
+  padding:'1rem',
   rowGap: theme.spacing(3),
   "& .MuiDialogActions-root": {
     display: "none",
@@ -148,10 +149,6 @@ const DialogCreateFileDrop = (props) => {
     setValue(genLink);
     setIsShow(true);
     props.handleChange(genLink, expiredDate, values, activePrivateFileDrop);
-  };
-
-  const handleSocialNetworkClicked = (str: string) => {
-    console.log(`${str} is clicked`);
   };
 
   const handleDateChange = (date: moment.Moment | null) => {
@@ -279,7 +276,7 @@ const DialogCreateFileDrop = (props) => {
             onSubmit={handleGenerateLink}
           >
             {({ /* errors, touched */ values, handleChange }) => (
-              <Form>
+              <Form style={{paddingBottom: '20px'}}>
                 <Mui.ShowHeaderDetail>
                   <Typography variant="h3">
                     Select expired date to this link! Default: 24 hours
@@ -458,7 +455,18 @@ const DialogCreateFileDrop = (props) => {
                                 onChange={handleChange}
                               />
                             }
-                            label="Allow Download"
+                            label="Enable Single Download"
+                          />
+                          <FormControlLabel
+                          control={
+                            <Checkbox
+                              id="allowMultiples"
+                              name="allowMultiples"
+                              checked={values.allowMultiples}
+                              onChange={handleChange}
+                            />
+                          }
+                          label="Enable Multi-Download"
                           />
                           <FormControlLabel
                             control={
@@ -469,18 +477,7 @@ const DialogCreateFileDrop = (props) => {
                                 onChange={handleChange}
                               />
                             }
-                            label="Allow Upload"
-                          />
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                id="allowMultiples"
-                                name="allowMultiples"
-                                checked={values.allowMultiples}
-                                onChange={handleChange}
-                              />
-                            }
-                            label="Allow Multiples"
+                            label="Enable Upload"
                           />
                         </FormControl>
                       </Box>
@@ -531,7 +528,7 @@ const DialogCreateFileDrop = (props) => {
                           style={{
                             display: "flex",
                             padding: "7px",
-                            border: "1px solid gray",
+                            // border: "1px solid gray",
                             borderRadius: "7px",
                           }}
                         >
@@ -706,32 +703,10 @@ const DialogCreateFileDrop = (props) => {
                                     setIsShared(!isShared);
                                   }}
                                 >
-                                  <ShareSocial
-                                    socialTypes={[
-                                      "copy",
-                                      "facebook",
-                                      "twitter",
-                                      "line",
-                                      "linkedin",
-                                      "whatsapp",
-                                      "viber",
-                                      "telegram",
-                                      "reddit",
-                                      "instapaper",
-                                      "livejournal",
-                                      "mailru",
-                                      "ok",
-                                      "hatena",
-                                      "email",
-                                      "workspace",
-                                    ]}
+                                  <DialogShare
+                                    onClose={() => setIsShared(!isShared)}
+                                    isOpen={isShared}
                                     url={value}
-                                    onSocialButtonClicked={(
-                                      buttonName: string,
-                                    ) => {
-                                      handleSocialNetworkClicked(buttonName);
-                                    }}
-                                    title="Social Media"
                                   />
                                 </Typography>
                               )}

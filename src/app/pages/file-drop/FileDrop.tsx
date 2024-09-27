@@ -68,6 +68,7 @@ import DialogPreviewQRcode from "components/dialog/DialogPreviewQRCode";
 import QrIcon from "@mui/icons-material/QrCode";
 import { ShareSocial } from "components/social-media";
 import { DateTimeFormate } from "utils/date.util";
+import DialogShare from "components/dialog/DialogShare.SocialMedia";
 
 const DatePickerV1Container = styled(Box)({
   width: "100%",
@@ -704,18 +705,7 @@ function FileDrop() {
                           onChange={handleAllowDownloadChange}
                         />
                       }
-                      label="Allow Download"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          id="allow-upload"
-                          name="allow-upload"
-                          checked={headerData.allowUpload}
-                          onChange={handleAllowUploadChange}
-                        />
-                      }
-                      label="Allow Upload"
+                      label="Enable Single Download"
                     />
                     <FormControlLabel
                       control={
@@ -726,9 +716,20 @@ function FileDrop() {
                           onChange={handleAllowMultiplesChange}
                         />
                       }
-                      label="Allow Multiples"
+                      label="Enable Multi-Download"
                     />
                   </FormControl>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-upload"
+                          name="allow-upload"
+                          checked={headerData.allowUpload}
+                          onChange={handleAllowUploadChange}
+                        />
+                      }
+                      label="Enable Upload"
+                    />
                 </Grid>
                 <Grid item xs={12} md={4}>
                   <Button
@@ -745,6 +746,7 @@ function FileDrop() {
                       width: "100%",
                       fontSize: "18px !important",
                       color: "grey !important",
+                      // backgroundColor: "#E9E9E9"
                     }}
                     size="small"
                     InputLabelProps={{
@@ -811,20 +813,6 @@ function FileDrop() {
                     justifyContent: { xs: "center", md: "flex-start" },
                   }}
                 >
-                  {/* <div ref={qrRef}> */}
-                  {/* <QRCode
-                      style={{
-                        width: "100px",
-                        height: "100px",
-                        border: "1px solid gray",
-                        padding: "7px",
-                        borderRadius: "7px",
-                      }}
-                      value={value}
-                      ref={qrCodeRef}
-                      viewBox={`0 0 256 256`}
-                    /> */}
-                  {/* </div> */}
                   <div
                     ref={qrCodeRef}
                     style={{
@@ -832,7 +820,7 @@ function FileDrop() {
                       justifyContent: "center",
                       alignItems: "center",
                       padding: "7px",
-                      border: "1px solid gray",
+                      // border: "1px solid gray",
                       borderRadius: "7px",
                     }}
                   >
@@ -937,30 +925,13 @@ function FileDrop() {
                             setIsShared(!isShared);
                           }}
                         >
-                          <ShareSocial
-                            socialTypes={[
-                              "copy",
-                              "facebook",
-                              "twitter",
-                              "line",
-                              "linkedin",
-                              "whatsapp",
-                              "viber",
-                              "telegram",
-                              "reddit",
-                              "instapaper",
-                              "livejournal",
-                              "mailru",
-                              "ok",
-                              "hatena",
-                              "email",
-                              "workspace",
-                            ]}
-                            url={value}
-                            onSocialButtonClicked={(buttonName: string) => {
-                              console.log(`${buttonName} clicked`);
+                          <DialogShare
+                            onClose={(e) => {
+                              e.stopPropagation();
+                              setIsShared(!isShared);
                             }}
-                            title="Social Media"
+                            isOpen={isShared}
+                            url={value}
                           />
                         </Typography>
                       )}
