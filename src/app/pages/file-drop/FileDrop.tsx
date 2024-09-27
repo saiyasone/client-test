@@ -324,6 +324,7 @@ function FileDrop() {
         break;
 
       case "preview-qrcode":
+        console.log(dataForEvents?.data?.url);
         setShowQrCode(true);
         break;
       default:
@@ -470,7 +471,7 @@ function FileDrop() {
               minWidth: "auto",
             }}
           >
-            <Tooltip title="Copy file drop link" placement="top">
+            <Tooltip title="Copy link file drop " placement="top">
               {isCopied[params?.row?._id] ? (
                 <IconButton disabled>
                   <FileDownloadDoneIcon sx={{ color: "#17766B" }} />
@@ -483,7 +484,7 @@ function FileDrop() {
                 </IconButton>
               )}
             </Tooltip>
-            <Tooltip title="View details" placement="top">
+            <Tooltip title="Scan QR code" placement="top">
               <IconButton
                 onClick={() => {
                   setDataForEvents({
@@ -705,18 +706,7 @@ function FileDrop() {
                           onChange={handleAllowDownloadChange}
                         />
                       }
-                      label="Enable Single Download"
-                    />
-                    <FormControlLabel
-                      control={
-                        <Checkbox
-                          id="allow-multiple"
-                          name="allow-multiple"
-                          checked={headerData.allowMultiples}
-                          onChange={handleAllowMultiplesChange}
-                        />
-                      }
-                      label="Enable Multi-Download"
+                      label="Enable Download"
                     />
                   </FormControl>
                     <FormControlLabel
@@ -729,6 +719,17 @@ function FileDrop() {
                         />
                       }
                       label="Enable Upload"
+                    />
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          id="allow-multiple"
+                          name="allow-multiple"
+                          checked={headerData.allowMultiples}
+                          onChange={handleAllowMultiplesChange}
+                        />
+                      }
+                      label="Enable Multi-Upload"
                     />
                 </Grid>
                 <Grid item xs={12} md={4}>
