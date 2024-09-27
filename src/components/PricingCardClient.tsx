@@ -2,7 +2,7 @@ import * as MUI from "styles/pricingPlan.style";
 
 // material ui components and icons
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import { Box, Chip, Link, Typography, useTheme } from "@mui/material";
+import { Box, Button, Chip, Link, Typography, useTheme } from "@mui/material";
 import svgDollarCoinsFlyingPinkPiggy3D from "assets/images/3d/dollar-coins-flying-pink-piggy.svg";
 import svgSafeBoxWithGoldenDollarCoins from "assets/images/3d/safe-box-with-golden-dollar-coins.svg";
 import svgSpaceRocketWithSmoke from "assets/images/3d/space-rocket-wih-smoke.svg";
@@ -229,9 +229,13 @@ function PricingCardClient(props: any) {
             fontSize: "1rem",
             cursor: "pointer",
             color: `${
-              props.category === "pro" ? theme.palette.primary.main : ""
+              props.category === userPackage.category
+                ? theme.palette.primary.main
+                : ""
             }`,
-            textDecoration: `${props.category === "pro" ? "underline" : ""}`,
+            textDecoration: `${
+              props.category === userPackage.category ? "underline" : ""
+            }`,
           }}
           variant="h6"
           component="p"
@@ -290,7 +294,50 @@ function PricingCardClient(props: any) {
         )}
       {activePackageData._id !== props._id &&
         props.activePayment?.amount !== props._price && (
-          <NormalButton
+          // <NormalButton
+          //   {...{
+          //     ...(isCost
+          //       ? {
+          //           onClick: buttonPropsOnClick,
+          //           ...buttonProps,
+          //         }
+          //       : {
+          //           ...buttonProps,
+          //           disabled: true,
+          //         }),
+          //   }}
+          //   sx={{
+          //     marginTop: 3,
+          //     height: "35px",
+          //     borderRadius: 1,
+          //     backgroundColor:
+          //       props?.category == userPackage?.category
+          //         ? theme.palette.primaryTheme?.main
+          //         : "#DAE9E7",
+          //     textAlign: "center",
+          //     display: "block",
+          //     color:
+          //       props?.category == userPackage?.category
+          //         ? "white !important"
+          //         : "#17766B",
+          //     ...(isCost
+          //       ? {
+          //           "&:hover": {
+          //             backgroundColor: (theme: {
+          //               palette: { primaryTheme: { main: any } };
+          //             }) => theme.palette.primaryTheme.main,
+          //             color: "white !important",
+          //           },
+          //         }
+          //       : {
+          //           cursor: "default",
+          //         }),
+          //   }}
+          //   fullWidth
+          // >
+          //   {showButtonPlan()}
+          // </NormalButton>
+          <Button
             {...{
               ...(isCost
                 ? {
@@ -302,6 +349,7 @@ function PricingCardClient(props: any) {
                     disabled: true,
                   }),
             }}
+            fullWidth
             sx={{
               marginTop: 3,
               height: "35px",
@@ -311,6 +359,7 @@ function PricingCardClient(props: any) {
                   ? theme.palette.primaryTheme?.main
                   : "#DAE9E7"
               }`,
+
               textAlign: "center",
               display: "block",
               color: `${
@@ -322,7 +371,9 @@ function PricingCardClient(props: any) {
                 ? {
                     "&:hover": {
                       backgroundColor: (theme: {
-                        palette: { primaryTheme: { main: any } };
+                        palette: {
+                          primaryTheme: { main: any };
+                        };
                       }) => theme.palette.primaryTheme.main,
                       color: "white !important",
                     },
@@ -331,10 +382,9 @@ function PricingCardClient(props: any) {
                     cursor: "default",
                   }),
             }}
-            fullWidth
           >
             {showButtonPlan()}
-          </NormalButton>
+          </Button>
         )}
     </MUI.BoxShowPriceCard>
   );

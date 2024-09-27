@@ -229,6 +229,12 @@ const PricingPlanTable: React.FC<any> = (props) => {
     });
   }, [props.data]);
 
+  const packageCategories =
+    props.data?.map((packageData: any) => {
+      return packageData.category;
+    }) || [];
+  const packagges = ["free", "prop", "premium"];
+
   return (
     <>
       <MUI.BoxShowSection3>
@@ -410,7 +416,60 @@ const PricingPlanTable: React.FC<any> = (props) => {
                           )}
                         {activePackageData._id !== _id &&
                           props.activePayment?.amount !== _price && (
-                            <NormalButton
+                            // <NormalButton
+                            //   {...{
+                            //     ...(isCost
+                            //       ? {
+                            //           onClick: () =>
+                            //             props.onDialogTermsAndConditionsOpen(
+                            //               encryptId(
+                            //                 packageData._id,
+                            //                 ENV_KEYS.VITE_APP_ENCRYPTION_KEY,
+                            //               ),
+                            //               packageData,
+                            //             ),
+                            //         }
+                            //       : {
+                            //           disabled: true,
+                            //         }),
+                            //   }}
+                            //   sx={{
+                            //     marginTop: 3,
+                            //     height: "35px",
+                            //     borderRadius: 1,
+                            //     backgroundColor: `${
+                            //       packageData.category == userPackage.category
+                            //         ? theme.palette.primaryTheme?.main
+                            //         : "#DAE9E7"
+                            //     }`,
+
+                            //     textAlign: "center",
+                            //     display: "block",
+                            //     color: `${
+                            //       packageData.category == userPackage.category
+                            //         ? "white !important"
+                            //         : "#17766B"
+                            //     }`,
+                            //     ...(isCost
+                            //       ? {
+                            //           "&:hover": {
+                            //             backgroundColor: (theme: {
+                            //               palette: {
+                            //                 primaryTheme: { main: any };
+                            //               };
+                            //             }) => theme.palette.primaryTheme.main,
+                            //             color: "white !important",
+                            //           },
+                            //         }
+                            //       : {
+                            //           cursor: "default",
+                            //         }),
+                            //   }}
+                            //   fullWidth
+                            // >
+                            //   {showButtonPlan(packageData)}
+                            // </NormalButton>
+                            <Button
                               {...{
                                 ...(isCost
                                   ? {
@@ -427,19 +486,21 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                       disabled: true,
                                     }),
                               }}
+                              fullWidth
                               sx={{
                                 marginTop: 3,
                                 height: "35px",
                                 borderRadius: 1,
                                 backgroundColor: `${
-                                  packageData.category == "pro"
+                                  packageData.category == userPackage.category
                                     ? theme.palette.primaryTheme?.main
                                     : "#DAE9E7"
                                 }`,
+
                                 textAlign: "center",
                                 display: "block",
                                 color: `${
-                                  packageData.category == "pro"
+                                  packageData.category == userPackage.category
                                     ? "white !important"
                                     : "#17766B"
                                 }`,
@@ -458,10 +519,9 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                       cursor: "default",
                                     }),
                               }}
-                              fullWidth
                             >
                               {showButtonPlan(packageData)}
-                            </NormalButton>
+                            </Button>
                           )}
                       </MUI.CellTableCell>
                     );
