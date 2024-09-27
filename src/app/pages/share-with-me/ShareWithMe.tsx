@@ -29,7 +29,11 @@ import {
   MUTATION_UPDATE_FOLDER,
   QUERY_FOLDER,
 } from "api/graphql/folder.graphql";
-import { MUTATION_DELETE_SHARE, QUERY_SHARE } from "api/graphql/share.graphql";
+import {
+  MUTATION_DELETE_SHARE,
+  MUTATION_UPDATE_SHARE_DATA,
+  QUERY_SHARE,
+} from "api/graphql/share.graphql";
 import Empty from "components/Empty";
 import FileCardContainer from "components/FileCardContainer";
 import FileCardItem from "components/FileCardItem";
@@ -106,6 +110,8 @@ function ShareWithMe() {
   const [updateFolder] = useMutation(MUTATION_UPDATE_FOLDER, {
     refetchQueries: [QUERY_FOLDER],
   });
+
+  const [removeShareData] = useMutation(MUTATION_UPDATE_SHARE_DATA, {});
 
   const [listShareMe, setListShareMe] = useState<any>(null);
   const [fileshare, setFileshare] = useState<any>(null);
@@ -850,55 +856,51 @@ function ShareWithMe() {
 
   const handleDeleteShare = async () => {
     try {
-      // await deleteShareFileAndFolder({
-      //   variables: {
-      //     id: dataForEvent.data?._id,
-      //     email: dataForEvent.data?.toAccount?.email,
-      //   },
+      await removeShareData({
+        variables: {
+          where: {
+            _id: parseInt(dataForEvent.data._id),
+          },
+        },
 
-      //   onCompleted: async () => {
-      //     if (dataForEvent.data?.folderId?._id) {
+        onCompleted: () => {
+          queryGetShare();
+          successMessage("Delete data successful !", 2000);
+        },
+      });
+      // if (dataForEvent.data?.folderId?._id) {
+      //   // folder
+      //   await updateFolder({
+      //     variables: {
+      //       where: {
+      //         _id: parseInt(dataForEvent.data.folderId._id),
+      //       },
+      //       data: {
+      //         status: "deleted",
+      //       },
+      //     },
+      //     onCompleted: () => {
+      //       queryGetShare();
       //       successMessage("Delete folder successful !", 2000);
-      //     } else {
-      //       successMessage("Delete file successful !", 2000);
-      //     }
-      //     queryGetShare();
-      //   },
-      // });
-      if (dataForEvent.data?.folderId?._id) {
-        // folder
-        await updateFolder({
-          variables: {
-            where: {
-              _id: parseInt(dataForEvent.data.folderId._id),
-            },
-            data: {
-              status: "deleted",
-            },
-          },
-          onCompleted: () => {
-            queryGetShare();
-            successMessage("Delete folder successful !", 2000);
-          },
-        });
-      } else {
-        // file
-        await updateFile({
-          variables: {
-            where: {
-              _id: parseInt(dataForEvent.data.fileId._id),
-            },
-            data: {
-              status: "deleted",
-            },
-          },
+      //     },
+      //   });
+      // } else {
+      //   await updateFile({
+      //     variables: {
+      //       where: {
+      //         _id: parseInt(dataForEvent.data.fileId._id),
+      //       },
+      //       data: {
+      //         status: "deleted",
+      //       },
+      //     },
 
-          onCompleted: () => {
-            queryGetShare();
-            successMessage("Delete file successful !", 2000);
-          },
-        });
-      }
+      //     onCompleted: () => {
+      //       queryGetShare();
+      //       successMessage("Delete file successful !", 2000);
+      //     },
+      //   });
+      // }
     } catch (error: any) {
       errorMessage(error.message, 3000);
     }

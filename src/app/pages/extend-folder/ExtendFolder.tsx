@@ -616,10 +616,7 @@ function ExtendFolder() {
         {
           const row = dataForEvent.data;
           if (row.type === "folder") {
-            if (
-              userPackage?.lockFolder === "on" &&
-              userPackage?.category !== "free"
-            ) {
+            if (userPackage?.lockFolder === "on") {
               if (row.access_password) {
                 setIsUpdate(true);
               } else {
@@ -634,10 +631,7 @@ function ExtendFolder() {
               );
             }
           } else {
-            if (
-              userPackage?.lockFile === "on" &&
-              userPackage?.category !== "free"
-            ) {
+            if (userPackage?.lockFile === "on") {
               if (row.filePassword) {
                 setIsUpdate(true);
               } else {

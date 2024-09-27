@@ -535,7 +535,7 @@ function FavouriteFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile !== "on") {
+        if (userPackage?.lockFile === "on") {
           handleOpenPasswordLink();
         } else {
           errorMessage(

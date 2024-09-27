@@ -1137,10 +1137,7 @@ export function MyCloud() {
 
       case "password": {
         if (dataForEvent.data?.folder_type) {
-          if (
-            userPackage?.lockFolder === "on" &&
-            userPackage?.category !== "free"
-          ) {
+          if (userPackage?.lockFolder === "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
@@ -1150,10 +1147,7 @@ export function MyCloud() {
             );
           }
         } else {
-          if (
-            userPackage?.lockFile === "on" &&
-            userPackage?.category !== "free"
-          ) {
+          if (userPackage?.lockFile === "on") {
             handleOpenPassword();
           } else {
             resetDataForEvent();
