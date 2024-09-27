@@ -43,24 +43,24 @@ type ApiEndpointsKeys = string;
 //   };
 // })();
 /* The below function block devtools if browser open devtools function will be detected, affter return debugger */
-// (function () {
-//   if (process.env.NODE_ENV == "production") {
-//     (function a() {
-//       try {
-//         (function b(i) {
-//           if (("" + i / i).length !== 1 || i % 20 === 0) {
-//             (function () {}).constructor("debugger")();
-//           } else {
-//             debugger;
-//           }
-//           b(++i);
-//         })(0);
-//       } catch (e) {
-//         setTimeout(a, 1000);
-//       }
-//     })();
-//   }
-// })();
+(function () {
+  if (process.env.NODE_ENV == "production") {
+    (function a() {
+      try {
+        (function b(i) {
+          if (("" + i / i).length !== 1 || i % 20 === 0) {
+            (function () {}).constructor("debugger")();
+          } else {
+            debugger;
+          }
+          b(++i);
+        })(0);
+      } catch (e) {
+        setTimeout(a, 1000);
+      }
+    })();
+  }
+})();
 
 const authLink = setContext((_, { headers }) => {
   const token = localStorage.getItem(
