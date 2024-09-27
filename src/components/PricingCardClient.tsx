@@ -307,14 +307,16 @@ function PricingCardClient(props: any) {
               height: "35px",
               borderRadius: 1,
               backgroundColor: `${
-                props.category == "pro"
+                props.category == userPackage.category
                   ? theme.palette.primaryTheme?.main
                   : "#DAE9E7"
               }`,
               textAlign: "center",
               display: "block",
               color: `${
-                props.category == "pro" ? "white !important" : "#17766B"
+                props.category == userPackage.category
+                  ? "white !important"
+                  : "#17766B"
               }`,
               ...(isCost
                 ? {
