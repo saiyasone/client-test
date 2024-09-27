@@ -455,18 +455,7 @@ const DialogCreateFileDrop = (props) => {
                                 onChange={handleChange}
                               />
                             }
-                            label="Enable Single Download"
-                          />
-                          <FormControlLabel
-                          control={
-                            <Checkbox
-                              id="allowMultiples"
-                              name="allowMultiples"
-                              checked={values.allowMultiples}
-                              onChange={handleChange}
-                            />
-                          }
-                          label="Enable Multi-Download"
+                            label="Enable Download"
                           />
                           <FormControlLabel
                             control={
@@ -478,6 +467,17 @@ const DialogCreateFileDrop = (props) => {
                               />
                             }
                             label="Enable Upload"
+                          />
+                          <FormControlLabel
+                          control={
+                            <Checkbox
+                              id="allowMultiples"
+                              name="allowMultiples"
+                              checked={values.allowMultiples}
+                              onChange={handleChange}
+                            />
+                          }
+                          label="Enable Multi-Upload"
                           />
                         </FormControl>
                       </Box>
