@@ -138,10 +138,6 @@ const navItems: any = [
   },
   // { title: "SHORT", pages: Feed },
   // {
-  //   title: "SHORT",
-  //   pages: null,
-  // },
-  // {
   //   title: "",
   //   pages: feedForyou,
   // },

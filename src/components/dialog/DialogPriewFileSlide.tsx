@@ -519,10 +519,7 @@ function DialogPreviewFileSlide(props: DialogProps) {
         handleFavorite();
         break;
       case "password":
-        if (
-          user.packageId.lockFile === "on" &&
-          user?.packageId.category !== "free"
-        ) {
+        if (user.packageId.lockFile === "on") {
           setDataForEvent(event);
         } else {
           setDataForEvent("");

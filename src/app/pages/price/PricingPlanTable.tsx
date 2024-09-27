@@ -88,109 +88,137 @@ const PricingPlanTable: React.FC<any> = (props) => {
     }
   };
 
+  const findNullOrUndefinedFields = (dataArray: any) => {
+    return dataArray?.map((item: any, index: number) => {
+      const nullFields = Object.keys(item).filter((key) => {
+        const value = item[key];
+
+        return value === null || value === undefined || value === 0;
+      });
+
+      return {
+        index,
+        nullFields,
+      };
+    });
+  };
+
+  const findCommonNullFields = (dataArray: any) => {
+    if (!dataArray?.length) return [];
+    let commonFields = dataArray[0].nullFields;
+
+    for (let i = 1; i < dataArray?.length; i++) {
+      commonFields = commonFields.filter((field: string) =>
+        dataArray[i].nullFields.includes(field),
+      );
+    }
+
+    return commonFields;
+  };
+
+  const result = findNullOrUndefinedFields(props.data);
+  const commonNullFields = findCommonNullFields(result);
+
   const data = useMemo(() => {
     return props.data?.map((packageData: any) => {
       const price = packageData._price;
       const isCost = price > 0;
-      const packages = ["free", "pro", "premium"];
-      const fieldsToCheck = [
-        "storage",
-        "uploadPerDay",
-        "multipleUpload",
-        "maxUploadSize",
-        "downLoadOption",
-        "support",
-        "multipleDownload",
-        "unlimitedDownload",
-        "downloadFolder",
-        "lockFile",
-        "lockFolder",
-        "fileDrop",
-        "chaptcha",
-        "ads",
-      ];
-      let storageStatus = packageData.storage;
 
-      if (packageData.category === "free") {
-        const allFieldsNull = fieldsToCheck.every(
-          (field) => packageData[field] === null,
-        );
-
-        const isProNotNull = props.data.some((pkg: any) => {
-          const result =
-            pkg.category === "pro" &&
-            fieldsToCheck.every((field) => {
-              const fields = pkg[field] !== null;
-              return fields;
-            });
-          return result;
-        });
-        const isPremiumNotNull = props.data.some(
-          (pkg: any) =>
-            pkg.category === "premium" &&
-            fieldsToCheck.every((field) => pkg[field] !== null),
-        );
-
-        if (allFieldsNull && isProNotNull && isPremiumNotNull) {
-          storageStatus = "Coming Soon";
-        }
-      }
-      console.log(storageStatus);
-      const allFieldsNull = fieldsToCheck.every((field) => packageData[field] === null || packageData[field] === undefined || packageData[field] === "");
+      const existingFields = commonNullFields?.filter((field: string) => {
+        return field in packageData;
+      });
       const features = [
         {
           title: "Storage",
-          context: `${convertBytetoMBandGB(packageData.storage)}`,
+          context: existingFields.includes("storage")
+            ? "Coming soon"
+            : `${convertBytetoMBandGB(packageData.storage)}`,
         },
         {
           title: "Uploads",
-          context: `${packageData.uploadPerDay} uploads`,
+          context: existingFields.includes("uploadPerDay")
+            ? "Coming soon"
+            : `${packageData.uploadPerDay} uploads`,
         },
         {
           title: "Uploads per day",
-          context: `${packageData.multipleUpload} uploads per day`,
+          context: existingFields.includes("multipleUpload")
+            ? "Coming soon"
+            : `${packageData.multipleUpload} uploads per day`,
         },
 
         {
           title: "Max Upload Size",
-          context: `${prettyNumberFormat(
-            convertBytetoMBandGB(packageData.maxUploadSize),
-          )}`,
+          context: existingFields.includes("maxUploadSize")
+            ? "Coming soon"
+            : `${prettyNumberFormat(
+                convertBytetoMBandGB(packageData.maxUploadSize),
+              )}`,
         },
-        { title: "Download option", context: packageData.downLoadOption },
-        { title: "Support", context: packageData.support ?? "Normal" },
+        {
+          title: "Download option",
+          context: existingFields.includes("downLoadOption")
+            ? "Coming soon"
+            : packageData.downLoadOption,
+        },
+        {
+          title: "Support",
+          context: existingFields.includes("support")
+            ? "Coming soon"
+            : packageData.support ?? "Normal",
+        },
         {
           title: "Multiple download",
-          context: packageData.multipleDownload ?? 0,
+          context: existingFields.includes("multipleDownload")
+            ? "Coming soon"
+            : packageData.multipleDownload ?? 0,
         },
         {
           title: "Download",
-          context: packageData.unlimitedDownload ?? 0,
+          context: existingFields.includes("unlimitedDownload")
+            ? "Coming soon"
+            : packageData.unlimitedDownload ?? 0,
         },
         {
           title: "Download folder",
-          context: packageData.downloadFolder,
+          context: existingFields.includes("downloadFolder")
+            ? "Coming soon"
+            : packageData.downloadFolder,
         },
         {
           title: "Lock files",
-          context: packageData.lockFile == "on" ? 1 : 0,
+          context: existingFields.includes("lockFile")
+            ? "Coming soon"
+            : packageData.lockFile == "on"
+            ? 1
+            : 0,
         },
         {
           title: "Lock folder",
-          context: packageData.lockFolder == "on" ? 1 : 0,
+          context: existingFields.includes("lockFolder")
+            ? "Coming soon"
+            : packageData.lockFolder == "on"
+            ? 1
+            : 0,
         },
 
         {
           title: "File drop",
-          context: packageData.fileDrop,
+          context: existingFields.includes("fileDrop")
+            ? "Coming soon"
+            : packageData.fileDrop,
         },
         {
           title: "Captcha",
-          context: packageData.chaptcha ?? 0,
+          context: existingFields.includes("captcha")
+            ? "Coming soon"
+            : packageData.captcha ?? 0,
         },
         {
           title: "No Ads",
-          context: packageData.ads ?? 0,
+          context: existingFields.includes("ads")
+            ? "Coming soon"
+            : packageData.ads ?? 0,
         },
       ];
       return {
@@ -200,7 +228,6 @@ const PricingPlanTable: React.FC<any> = (props) => {
       };
     });
   }, [props.data]);
-
 
   return (
     <>
