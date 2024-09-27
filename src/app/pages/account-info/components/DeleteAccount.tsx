@@ -173,7 +173,7 @@ function DeleteAccount() {
           fullWidth={isMobile ? true : false}
           onClick={handleDeactive}
         >
-          Deactive Account
+          Delete Account
         </Button>
       </Box>
     </>

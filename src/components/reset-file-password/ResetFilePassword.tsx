@@ -33,6 +33,7 @@ const ButtonAction = styled("div")({
 function ResetFilePasswordComponent(props) {
   const { dataValue, onPressDone } = props;
   const manageGraphqlError = useManageGraphqlError();
+
   // graph ql
   const [resetPasswordAction] = useMutation(
     MUTATION_RESET_FOLDER_AND_FILE_PASSWORD,
@@ -61,12 +62,14 @@ function ResetFilePasswordComponent(props) {
         },
       });
 
-      if (result.data?.resetPasswordFolderAndFile?.status === 200) {
+      if (result?.data?.changePasswordFolderAndFile?.status === 200) {
         resetForm();
         onPressDone();
         successMessage("Your password has been successfully reset", 3000);
       }
     } catch (error: any) {
+      console.log(error);
+      
       const cutErr = error.message?.replace(/(ApolloError: )?Error: /, "");
       errorMessage(manageGraphqlError.handleErrorMessage(cutErr) || "", 3000);
     }

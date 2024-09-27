@@ -15,7 +15,6 @@ export const useDeleteFolder = () => {
   });
 
   const deleteSubFolderAndFile = async (data: any, user: IUserTypes) => {
-    console.log(data);
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -44,6 +43,7 @@ export const useDeleteFolder = () => {
       }
     }
   };
+
 
   return {
     deleteSubFolderAndFile,

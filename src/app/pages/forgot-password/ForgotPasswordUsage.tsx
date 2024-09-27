@@ -68,7 +68,7 @@ function ForgotPasswordUsage() {
 
       if (resData) {
         const forgetCaptcha = resData?.status;
-        if (forgetCaptcha === "on") {
+        if (forgetCaptcha == "on") {
           setCaptcha(true);
           setShowCaptcha(true);
         }

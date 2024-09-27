@@ -47,7 +47,8 @@ import CurrentPlan from "./components/currentPlan";
 import PaymentHistory from "./components/paymentHistory";
 import DeleteAccount from "./components/DeleteAccount";
 import { encryptData } from "utils/secure.util";
-
+import { MdRedeem } from "react-icons/md";
+import RedeemCoupon from "./components/redeem";
 function AccountInfo() {
   const { state } = useLocation();
   const { user }: any = useAuth();
@@ -484,6 +485,16 @@ function AccountInfo() {
               }}
             >
               Invoice
+            </MUI.ButtonTab>
+            <MUI.ButtonTab
+              startIcon={<MdRedeem />}
+              onClick={() => setActiveStatus(4)}
+              sx={{
+                background: activeStatus === 4 ? "#17766B" : "",
+                color: activeStatus === 4 ? "#ffffff" : "#A8AAAE",
+              }}
+            >
+              Redeem
             </MUI.ButtonTab>
           </MUI.BoxShowTabs>
           <MUI.BoxShowTabDetail>
@@ -984,6 +995,11 @@ function AccountInfo() {
                 <MUI.PaperGlobal sx={{ marginTop: "2rem" }}>
                   <PaymentHistory />
                 </MUI.PaperGlobal>
+              </>
+            )}
+            {activeStatus == 4 && (
+              <>
+                <RedeemCoupon />
               </>
             )}
           </MUI.BoxShowTabDetail>

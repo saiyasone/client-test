@@ -29,3 +29,16 @@ export const QUERY_COUPON = gql`
     }
   }
 `;
+
+export const USE_COUPON = gql`
+  mutation UseCouponEvent($input: IUseCouponEvent!) {
+    useCouponEvent(input: $input) {
+      info {
+        bill
+      }
+      message
+      result_code
+      status
+    }
+  }
+`;

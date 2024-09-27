@@ -99,6 +99,8 @@ export default function SearchExtend({
   const [showPreview, setShowPreview] = React.useState<boolean>(false);
   const [fileDetailsDialog, setFileDetailsDialog] =
     React.useState<boolean>(false);
+  const [deleteId, setDeleteId] = React.useState<any[]>([]);
+
   const [activeData, setActiveData] = React.useState<IFileTypes | null>(null);
   const [eventName, setEventName] = React.useState<string>("");
   const { setRefreshAuto, refreshAuto } = useRefreshState();
@@ -144,6 +146,12 @@ export default function SearchExtend({
   }, [eventName]);
 
   React.useEffect(() => {
+    if (refreshAuto?.isStatus == "searchExtend") {
+      fetchSubFoldersAndFiles.queryGridDataFileAndFolder();
+    }
+  }, [refreshAuto?.isAutoClose]);
+
+  React.useEffect(() => {
     if (!open) {
       setSearch("");
     }
@@ -163,6 +171,18 @@ export default function SearchExtend({
   setTimeout(() => {
     setIsSearch(false);
   }, 200);
+  React.useEffect(() => {
+    if (!open) {
+      setDeleteId([]);
+    }
+  }, [open]);
+
+  React.useEffect(() => {
+    if (refreshAuto?.isStatus == "extendsearch") {
+      setIsSearch(true);
+    }
+  }, [refreshAuto?.isAutoClose]);
+
   React.useEffect(() => {
     if (!search && search == "") {
       setIsSearch(true);
@@ -225,7 +245,7 @@ export default function SearchExtend({
       await manageFile.handleDeleteFile(activeData._id, {
         onSuccess: () => {
           successMessage(ReturnMessage.DeleteFile, 1000);
-
+          setDeleteId([...deleteId, activeData?._id]);
           setRefreshAuto({
             isAutoClose: true,
             isStatus: "extendfolder",
@@ -404,14 +424,6 @@ export default function SearchExtend({
               <ContainerFolderFiles>
                 {dataOfSearch?.length > 0 &&
                   dataOfSearch?.map((fileTerm: any, index: number) => {
-                    const isContainsFiles =
-                      fileTerm?.folder_type === "folder" &&
-                      fileTerm?.isContainsFiles
-                        ? Number(fileTerm.size) > 0
-                          ? true
-                          : false
-                        : false;
-
                     if (
                       fileTerm?.folder_type !== null &&
                       fileTerm?.folder_type !== undefined &&
@@ -419,125 +431,131 @@ export default function SearchExtend({
                     ) {
                       return (
                         <div>
-                          <SearchExtendFolder data={fileTerm} />
+                          <SearchExtendFolder data={fileTerm} open={open} />
                         </div>
                       );
                     } else {
-                      return (
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "space-between",
-                          }}
-                        >
+                      const shouldShow = !deleteId.includes(fileTerm?._id);
+                      if (shouldShow) {
+                        return (
                           <Box
-                            key={index}
                             sx={{
                               display: "flex",
                               alignItems: "center",
-                              justifyContent: "start",
-                              flexShrink: 0,
-                              columnGap: 1,
-                              gap: 2,
-                            }}
-                            onClick={() => {
-                              setShowPreview(true), setActiveData(fileTerm);
+                              justifyContent: "space-between",
                             }}
                           >
-                            <Box sx={{ width: "60px", height: "60px", mt: 2 }}>
-                              {fileTerm.filePassword ? (
-                                <img
-                                  className="lock-icon-preview"
-                                  src={lockIcon}
-                                  alt={fileTerm.filename}
-                                  style={{ width: "60px", height: "60px" }}
-                                />
-                              ) : (
-                                <FileCardItemIcon
-                                  name={fileTerm.filename}
-                                  password={fileTerm?.password}
-                                  fileType={getShortFileTypeFromFileType(
-                                    fileTerm.type,
-                                  )}
-                                  imagePath={
-                                    user?.newName +
-                                    "-" +
-                                    user?._id +
-                                    "/" +
-                                    (fileTerm.newPath
-                                      ? removeFileNameOutOfPath(
-                                          fileTerm.newPath,
-                                        )
-                                      : "") +
-                                    fileTerm.newName
-                                  }
-                                  user={user}
-                                />
-                              )}
-                            </Box>
-
-                            <Box>
-                              <Typography
-                                variant="h6"
-                                component="p"
-                                sx={{
-                                  fontSize: "0.8rem",
-                                }}
-                              >
-                                {cutStringWithEllipsis(fileTerm.filename, 25)}
-                              </Typography>
-                              <ListItemText
-                                sx={{ fontSize: "0.5rem" }}
-                                primary={moment(fileTerm.createdAt).format(
-                                  "MM-DD-YYYY",
-                                )}
-                              />
-                            </Box>
-                          </Box>
-                          <Box>
-                            <MenuDropdown
-                              customButton={{
-                                shadows: "0px 0px 5px rgba(0, 0, 0, 0.2)",
-                                element: (
-                                  <NormalButton>
-                                    <MoreVertIcon
-                                      style={{
-                                        color: theme.palette.primaryTheme!.main,
-                                      }}
-                                    />
-                                  </NormalButton>
-                                ),
+                            <Box
+                              key={index}
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "start",
+                                flexShrink: 0,
+                                columnGap: 1,
+                                gap: 2,
+                              }}
+                              onClick={() => {
+                                setShowPreview(true), setActiveData(fileTerm);
                               }}
                             >
-                              {fileTerm?.fileType !== null &&
-                                fileTerm?.fileType !== undefined && (
-                                  <div>
-                                    {menuItems.map((menuItem, index) => {
-                                      return (
-                                        <MenuDropdownItem
-                                          key={index}
-                                          isFavorite={
-                                            fileTerm.favorite ? true : false
-                                          }
-                                          isPassword={fileTerm?.password}
-                                          title={menuItem.title}
-                                          icon={menuItem.icon}
-                                          onClick={() => {
-                                            handleCheckPasswordBeforeEvent(
-                                              menuItem.action,
-                                              fileTerm,
-                                            );
-                                          }}
-                                        />
-                                      );
-                                    })}
-                                  </div>
+                              <Box
+                                sx={{ width: "60px", height: "60px", mt: 2 }}
+                              >
+                                {fileTerm.filePassword ? (
+                                  <img
+                                    className="lock-icon-preview"
+                                    src={lockIcon}
+                                    alt={fileTerm.filename}
+                                    style={{ width: "60px", height: "60px" }}
+                                  />
+                                ) : (
+                                  <FileCardItemIcon
+                                    name={fileTerm.filename}
+                                    password={fileTerm?.password}
+                                    fileType={getShortFileTypeFromFileType(
+                                      fileTerm.type,
+                                    )}
+                                    imagePath={
+                                      user?.newName +
+                                      "-" +
+                                      user?._id +
+                                      "/" +
+                                      (fileTerm.newPath
+                                        ? removeFileNameOutOfPath(
+                                            fileTerm.newPath,
+                                          )
+                                        : "") +
+                                      fileTerm.newName
+                                    }
+                                    user={user}
+                                  />
                                 )}
-                            </MenuDropdown>
+                              </Box>
+
+                              <Box>
+                                <Typography
+                                  variant="h6"
+                                  component="p"
+                                  sx={{
+                                    fontSize: "0.8rem",
+                                  }}
+                                >
+                                  {cutStringWithEllipsis(fileTerm.filename, 25)}
+                                </Typography>
+                                <ListItemText
+                                  sx={{ fontSize: "0.5rem" }}
+                                  primary={moment(fileTerm.createdAt).format(
+                                    "MM-DD-YYYY",
+                                  )}
+                                />
+                              </Box>
+                            </Box>
+                            <Box>
+                              <MenuDropdown
+                                customButton={{
+                                  shadows: "0px 0px 5px rgba(0, 0, 0, 0.2)",
+                                  element: (
+                                    <NormalButton>
+                                      <MoreVertIcon
+                                        style={{
+                                          color:
+                                            theme.palette.primaryTheme!.main,
+                                        }}
+                                      />
+                                    </NormalButton>
+                                  ),
+                                }}
+                              >
+                                {fileTerm?.fileType !== null &&
+                                  fileTerm?.fileType !== undefined && (
+                                    <div>
+                                      {menuItems.map((menuItem, index) => {
+                                        return (
+                                          <MenuDropdownItem
+                                            key={index}
+                                            isFavorite={
+                                              fileTerm.favorite ? true : false
+                                            }
+                                            isPassword={fileTerm?.password}
+                                            title={menuItem.title}
+                                            icon={menuItem.icon}
+                                            onClick={() => {
+                                              handleCheckPasswordBeforeEvent(
+                                                menuItem.action,
+                                                fileTerm,
+                                              );
+                                            }}
+                                          />
+                                        );
+                                      })}
+                                    </div>
+                                  )}
+                              </MenuDropdown>
+                            </Box>
                           </Box>
-                        </Box>
-                      );
+                        );
+                      }
                     }
                   })}
               </ContainerFolderFiles>

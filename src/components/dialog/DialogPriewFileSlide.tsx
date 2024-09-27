@@ -383,6 +383,8 @@ function DialogPreviewFileSlide(props: DialogProps) {
         currentFile: isCurrentImage ?? data,
         mainFile,
       });
+      console.log("isCurrentImage");
+
       if (prevImage && propsStatus !== "share") {
         setIsCurrentImage(prevImage ?? isCurrentImage);
         setType(getFolderName(prevImage.fileType)!);
@@ -517,7 +519,10 @@ function DialogPreviewFileSlide(props: DialogProps) {
         handleFavorite();
         break;
       case "password":
-        if (user.packageId.lockFile === "on") {
+        if (
+          user.packageId.lockFile === "on" &&
+          user?.packageId.category !== "free"
+        ) {
           setDataForEvent(event);
         } else {
           setDataForEvent("");

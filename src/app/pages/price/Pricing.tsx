@@ -39,6 +39,7 @@ function Pricing() {
     fetchPolicy: "no-cache",
   });
 
+
   useEffect(() => {
     if (user) {
       getPayment({
@@ -63,6 +64,7 @@ function Pricing() {
   useEffect(() => {
     memorizedPackages.current = packages;
   }, [packages]);
+
 
   return (
     <React.Fragment>

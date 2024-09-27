@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-import { Typography } from "@mui/material";
+import { Typography, useTheme } from "@mui/material";
 import SidebarNavList from "./SidebarNavList";
 
 const Title = styled(Typography)`
@@ -16,6 +16,7 @@ const Title = styled(Typography)`
 `;
 
 const SidebarNavSection = (props: any) => {
+  const theme = useTheme()
   const {
     title,
     pages,
@@ -31,7 +32,7 @@ const SidebarNavSection = (props: any) => {
     </Component>
     :
     <Component {...rest}>
-      {title && <Title variant="subtitle2">{title}</Title>}
+      {title && <Title variant="body2" sx={{color:theme.palette.grey[500]}}>{title}</Title>}
       <SidebarNavList pages={pages} depth={0} />
     </Component>
   );

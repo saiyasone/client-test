@@ -74,9 +74,10 @@ export default function FileSlideButton({
                   backgroundColor: "rgba(96, 96, 96, 0.7)",
                   borderRadius: "10px",
                 }}
+                onClick={handlePrevView}
               />
             </LeftMobileButton>
-            <RighMobiletButton onClick={handlePrevView}>
+            <RighMobiletButton onClick={handleNextView}>
               <GrFormNext
                 style={{
                   fontSize: 22,
@@ -90,7 +91,7 @@ export default function FileSlideButton({
           </Box>
         ) : (
           <Box>
-            <LeftButton>
+            <LeftButton onClick={handlePrevView}>
               <GrFormPrevious style={{ fontSize: 20, color: "#ffffff" }} />
             </LeftButton>
             <RightButton onClick={handleNextView}>

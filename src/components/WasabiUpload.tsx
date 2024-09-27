@@ -272,7 +272,7 @@ function WasabiUpload(props: Props) {
               },
               cancel: "no-cancel",
               failedToUpload:
-                "Failed to upload %{smart_count} file due to an error.",``
+                "Failed to upload %{smart_count} file due to an error.",
             },
           },
         });

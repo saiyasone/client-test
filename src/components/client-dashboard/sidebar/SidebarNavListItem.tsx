@@ -262,6 +262,7 @@ const SidebarNavListItem = (props) => {
       </React.Fragment>
     );
   }
+
   return (
     <React.Fragment>
       <Item
@@ -273,6 +274,11 @@ const SidebarNavListItem = (props) => {
           "&.active": {
             svg: {
               color: "white !important",
+              fill: `${title !== "For you" ? "" : "white"}!important`,
+              stroke: "white !important",
+              "*": {
+                stroke: `${title !== "For you" ? "white" : "gray"}!important`,
+              },
             },
           },
         }}

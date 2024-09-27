@@ -2,7 +2,7 @@ import * as MUI from "styles/pricingPlan.style";
 
 // material ui components and icons
 import CircleOutlinedIcon from "@mui/icons-material/CircleOutlined";
-import { Chip, Typography, useTheme } from "@mui/material";
+import { Box, Chip, Link, Typography, useTheme } from "@mui/material";
 import svgDollarCoinsFlyingPinkPiggy3D from "assets/images/3d/dollar-coins-flying-pink-piggy.svg";
 import svgSafeBoxWithGoldenDollarCoins from "assets/images/3d/safe-box-with-golden-dollar-coins.svg";
 import svgSpaceRocketWithSmoke from "assets/images/3d/space-rocket-wih-smoke.svg";
@@ -16,7 +16,7 @@ import { safeGetProperty } from "utils/object.util";
 import { convertBytetoMBandGB } from "utils/storage.util";
 import NormalButton from "./NormalButton";
 
-function PricingCardClient(props) {
+function PricingCardClient(props: any) {
   const theme = useTheme();
   const { user } = useAuth();
   const { activePackageData, ...paymentSelector }: any =
@@ -25,6 +25,7 @@ function PricingCardClient(props) {
   const userPackage = safeGetProperty(user, "packageId");
   const { onClick: buttonPropsOnClick, ...buttonProps } =
     props?.buttonProps || {};
+
   const features = useMemo(
     () => [
       {
@@ -39,20 +40,47 @@ function PricingCardClient(props) {
         title: "Uploads per day:",
         context: `${props.multipleUpload} uploads per day`,
       },
-      /* {
-        title: "Downloads:",
-        context: `${props.downLoadPerDay} downloads per day`,
-      }, */
+
       {
         title: "Max Download Size:",
         context: `${prettyNumberFormat(
           convertBytetoMBandGB(props.maxUploadSize),
         )}`,
       },
+
+      {
+        title: "Download option:",
+        context: props.downLoadOption,
+      },
+      {
+        title: "Support:",
+        context: props.support ?? "Normal",
+      },
     ],
     [props],
   );
-
+  const packageOrigin = props;
+  const showButtonPlan = () => {
+    switch (userPackage.category) {
+      case "free":
+      case "pro":
+      case "premium":
+        if (parseInt(packageOrigin.storage) === parseInt(userPackage.storage)) {
+          return "Current Plan";
+        } else if (
+          parseInt(userPackage.storage) < parseInt(packageOrigin.storage)
+        ) {
+          return "Upgrade";
+        } else if (
+          parseInt(userPackage.storage) > parseInt(packageOrigin.storage)
+        ) {
+          return "Downgrade";
+        }
+        break;
+      default:
+        return null;
+    }
+  };
   const pricingIcon = useMemo(() => {
     switch (_.toLower(props.name)) {
       case "free": {
@@ -194,6 +222,36 @@ function PricingCardClient(props) {
           );
         })}
       </MUI.BoxShowFeatureList>
+      <Box sx={{ py: 5 }}>
+        <Link
+          underline="always"
+          sx={{
+            fontSize: "1rem",
+            cursor: "pointer",
+            color: `${
+              props.category === "pro" ? theme.palette.primary.main : ""
+            }`,
+            textDecoration: `${props.category === "pro" ? "underline" : ""}`,
+          }}
+          variant="h6"
+          component="p"
+          onClick={() => {
+            if ("scrollBehavior" in document.documentElement.style) {
+              window.scrollTo({
+                top: (document.body.scrollHeight - window.innerHeight) / 1.6,
+                behavior: "smooth",
+              });
+            } else {
+              window.scrollTo(
+                0,
+                (document.body.scrollHeight - window.innerHeight) / 1.6,
+              );
+            }
+          }}
+        >
+          View all features
+        </Link>
+      </Box>
       {userPackage._id === props._id &&
         props.activePayment?.amount === props._price && (
           <NormalButton
@@ -248,15 +306,22 @@ function PricingCardClient(props) {
               marginTop: 3,
               height: "35px",
               borderRadius: 1,
-              backgroundColor: "#DAE9E7",
+              backgroundColor: `${
+                props.category == "pro"
+                  ? theme.palette.primaryTheme?.main
+                  : "#DAE9E7"
+              }`,
               textAlign: "center",
               display: "block",
-              color: "#17766B",
+              color: `${
+                props.category == "pro" ? "white !important" : "#17766B"
+              }`,
               ...(isCost
                 ? {
                     "&:hover": {
-                      backgroundColor: (theme) =>
-                        theme.palette.primaryTheme.main,
+                      backgroundColor: (theme: {
+                        palette: { primaryTheme: { main: any } };
+                      }) => theme.palette.primaryTheme.main,
                       color: "white !important",
                     },
                   }
@@ -266,11 +331,7 @@ function PricingCardClient(props) {
             }}
             fullWidth
           >
-            {props._price > props.activePayment?.amount
-              ? "Upgrade"
-              : isCost
-              ? "Choose Plan"
-              : "Free"}
+            {showButtonPlan()}
           </NormalButton>
         )}
     </MUI.BoxShowPriceCard>
