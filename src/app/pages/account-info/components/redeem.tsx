@@ -244,7 +244,12 @@ export default function RedeemCoupon() {
                 fullWidth
                 sx={{ p: 2.2, mb: 2, fontSize: "1.2rem" }}
                 variant="contained"
-                onClick={() => navigate("/pricing")}
+                onClick={() => {
+                  setTimeout(() => {
+                    navigate("/pricing");
+                    location.reload(); 
+                  }, 100);
+                }}
               >
                 View current plan
               </Button>
