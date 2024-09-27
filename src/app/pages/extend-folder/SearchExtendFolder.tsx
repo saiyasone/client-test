@@ -142,7 +142,7 @@ export default function SearchExtendFolder({
         }
         values.pin = values.pin ? 0 : 1;
       },
-      onFailed: (error: any) => {},
+      onFailed: (_: any) => {},
       onClosure: () => {},
     });
   };
