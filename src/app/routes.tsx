@@ -80,30 +80,30 @@ const routes: RouteObject[] = [
     path: "file/reset-password",
     element: <ResetFilePassword />,
   },
-  {
-    path: "",
-    element: (
-      <FolderProvider>
-        <EventUploadTriggerProvider>
-          <AuthProvider>
-            <ClientAuthGuard>
-              <PackageCheckerProvider>
-                <MenuDropdownProvider>
-                  <RefreshProvider>
-                    <ClientFeedLayout />
-                  </RefreshProvider>
-                </MenuDropdownProvider>
-              </PackageCheckerProvider>
-            </ClientAuthGuard>
-          </AuthProvider>
-        </EventUploadTriggerProvider>
-      </FolderProvider>
-    ),
-    children: [
-      { path: "feed/foryou", element: <ForYou /> },
-      { path: "feed/explore" },
-    ],
-  },
+  // {
+  //   path: "",
+  //   element: (
+  //     <FolderProvider>
+  //       <EventUploadTriggerProvider>
+  //         <AuthProvider>
+  //           <ClientAuthGuard>
+  //             <PackageCheckerProvider>
+  //               <MenuDropdownProvider>
+  //                 <RefreshProvider>
+  //                   <ClientFeedLayout />
+  //                 </RefreshProvider>
+  //               </MenuDropdownProvider>
+  //             </PackageCheckerProvider>
+  //           </ClientAuthGuard>
+  //         </AuthProvider>
+  //       </EventUploadTriggerProvider>
+  //     </FolderProvider>
+  //   ),
+  //   children: [
+  //     { path: "feed/foryou", element: <ForYou /> },
+  //     { path: "feed/explore" },
+  //   ],
+  // },
   {
     path: "",
     element: (

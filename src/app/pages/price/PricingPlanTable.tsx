@@ -92,51 +92,7 @@ const PricingPlanTable: React.FC<any> = (props) => {
     return props.data?.map((packageData: any) => {
       const price = packageData._price;
       const isCost = price > 0;
-      const packages = ["free", "pro", "premium"];
-      const fieldsToCheck = [
-        "storage",
-        "uploadPerDay",
-        "multipleUpload",
-        "maxUploadSize",
-        "downLoadOption",
-        "support",
-        "multipleDownload",
-        "unlimitedDownload",
-        "downloadFolder",
-        "lockFile",
-        "lockFolder",
-        "fileDrop",
-        "chaptcha",
-        "ads",
-      ];
-      let storageStatus = packageData.storage;
 
-      if (packageData.category === "free") {
-        const allFieldsNull = fieldsToCheck.every(
-          (field) => packageData[field] === null,
-        );
-
-        const isProNotNull = props.data.some((pkg: any) => {
-          const result =
-            pkg.category === "pro" &&
-            fieldsToCheck.every((field) => {
-              const fields = pkg[field] !== null;
-              return fields;
-            });
-          return result;
-        });
-        const isPremiumNotNull = props.data.some(
-          (pkg: any) =>
-            pkg.category === "premium" &&
-            fieldsToCheck.every((field) => pkg[field] !== null),
-        );
-
-        if (allFieldsNull && isProNotNull && isPremiumNotNull) {
-          storageStatus = "Coming Soon";
-        }
-      }
-      console.log(storageStatus);
-      const allFieldsNull = fieldsToCheck.every((field) => packageData[field] === null || packageData[field] === undefined || packageData[field] === "");
       const features = [
         {
           title: "Storage",
@@ -201,7 +157,21 @@ const PricingPlanTable: React.FC<any> = (props) => {
     });
   }, [props.data]);
 
+  // const findNullOrUndefinedFields = (dataArray: any) => {
+  //   return dataArray?.map((item: any, index: number) => {
+  //     const nullFields = Object.keys(item).filter((key) => {
+  //       const value = item[key];
+  //       return value === null || value === undefined;
+  //     });
 
+  //     return {
+  //       index,
+  //       nullFields,
+  //     };
+  //   });
+  // };
+
+  // const result = findNullOrUndefinedFields(props.data);
   return (
     <>
       <MUI.BoxShowSection3>

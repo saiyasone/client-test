@@ -130,7 +130,7 @@ const navItems: any = [
     title: "",
     pages: trash,
   },
-  { title: "SHORT", pages: Feed },
+  // { title: "SHORT", pages: Feed },
   // {
   //   title: "",
   //   pages: Uppy,
