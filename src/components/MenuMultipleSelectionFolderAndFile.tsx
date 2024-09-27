@@ -872,35 +872,38 @@ function MenuMultipleSelectionFolderAndFile(props) {
                                       <CircularProgress size={18} />
                                     </IconButton>
                                   ) : (
-                                    <Tooltip title={item?.title || ""}>
-                                      <IconButton
-                                        size="small"
-                                        onClick={() => {
-                                          handleMenuAction(item.action);
-                                        }}
-                                        disabled={
-                                          !(
-                                            item.action === "delete" &&
+                                    <Tooltip title={item.title! || ""}>
+                                      <span>
+                                        <IconButton
+                                          size="small"
+                                          onClick={() => {
+                                            handleMenuAction(item.action);
+                                          }}
+                                          disabled={
+                                            !(
+                                              item.action === "delete" &&
+                                              dataSelector?.selectionFileAndFolderData?.some(
+                                                (selector) =>
+                                                  selector?.totalSize === 0,
+                                              )
+                                            ) &&
+                                            (item.action === "get link" ||
+                                              item.action ===
+                                                "folder-download" ||
+                                              item.action === "password" ||
+                                              item.action === "delete" ||
+                                              item.action === "one-time-link" ||
+                                              item.action === "share") &&
                                             dataSelector?.selectionFileAndFolderData?.some(
                                               (selector) =>
-                                                selector?.totalSize === 0,
+                                                selector?.totalSize === 0 ||
+                                                selector?.dataPassword,
                                             )
-                                          ) &&
-                                          (item.action === "get link" ||
-                                            item.action === "folder-download" ||
-                                            item.action === "password" ||
-                                            item.action === "delete" ||
-                                            item.action === "one-time-link" ||
-                                            item.action === "share") &&
-                                          dataSelector?.selectionFileAndFolderData?.some(
-                                            (selector) =>
-                                              selector?.totalSize === 0 ||
-                                              selector?.dataPassword,
-                                          )
-                                        }
-                                      >
-                                        <Fragment>{item.icon}</Fragment>
-                                      </IconButton>
+                                          }
+                                        >
+                                          <Fragment>{item.icon}</Fragment>
+                                        </IconButton>
+                                      </span>
                                     </Tooltip>
                                   )}
                                 </Fragment>
