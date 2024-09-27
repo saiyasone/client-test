@@ -443,7 +443,7 @@ function RecentFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile !== "on") {
+        if (userPackage?.lockFile === "on" && userPackage.category !== "free") {
           handleOpenPasswordLink();
         } else {
           errorMessage(

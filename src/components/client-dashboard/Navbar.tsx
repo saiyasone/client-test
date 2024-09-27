@@ -12,7 +12,13 @@ import {
   Typography,
 } from "@mui/material";
 import { createTheme } from "@mui/material/styles";
-import { Fragment, useContext, useRef, useState } from "react";
+import React, {
+  Fragment,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { CSVLink } from "react-csv";
 
 import { useLazyQuery, useMutation } from "@apollo/client";
@@ -67,6 +73,8 @@ import {
 import { convertBytetoMBandGB } from "utils/storage.util";
 import NavbarUserDropdown from "./NavbarUserDropdown";
 import DialogPreviewFileSlide from "components/dialog/DialogPriewFileSlide";
+import { isUserPackage } from "utils/checkPackageUser";
+import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 
 const theme = createTheme({
   breakpoints: {
@@ -181,7 +189,7 @@ const Navbar = ({ onDrawerToggle }) => {
   const [showEncryptPassword, setShowEncryptPassword] = useState(false);
   const [name, setName] = useState("");
   const [eventName, setEventName] = useState("");
-
+  const [userPackage, setUserPackage] = useState<any>(null);
   // using export csv
   const [csvFolder, setCsvFolder] = useState({
     folderId: "",
@@ -200,12 +208,31 @@ const Navbar = ({ onDrawerToggle }) => {
   });
 
   const [isPasswordLink, setIsPasswordLink] = useState(false);
+  const [dataDownloadURL, setDataDownloadURL] = useState(null);
+  const handleDownloadUrl = useGetUrlDownload(dataDownloadURL);
 
+  React.useEffect(() => {
+    if (user) {
+      const packages = user?.packageId;
+      setUserPackage(packages);
+    }
+  }, [user]);
   const handleClosePreview = () => {
     setShowPreview(false);
   };
 
-  const handleEvent = (paramEventName: any, data: any) => {
+  useEffect(() => {
+    if (dataDownloadURL) {
+      handleDownloadUrl?.(dataDownloadURL);
+      setDataDownloadURL(null);
+    }
+  }, [dataDownloadURL]);
+
+  const handleGetDownloadLink = async (data: any) => {
+    setDataDownloadURL(data);
+  };
+
+  const handleEvent = async (paramEventName: any, data: any) => {
     const currentEventName = paramEventName || eventName;
     const currentActiveData = data || activeData;
     setShowEncryptPassword(false);
@@ -231,7 +258,15 @@ const Navbar = ({ onDrawerToggle }) => {
         }
         break;
       case "password":
-        handleSetPassword();
+        if (userPackage.lockFile === "on" && userPackage.category !== "free") {
+          handleSetPassword();
+        } else {
+          errorMessage(
+            "The package you've selected is not compatible. Please consider choosing a different one.",
+            3000,
+          );
+        }
+
         break;
       case "rename":
         handleRenameDialog(currentActiveData);
@@ -243,10 +278,15 @@ const Navbar = ({ onDrawerToggle }) => {
         handleAddPin(currentActiveData);
         break;
       case "download":
-        if (currentActiveData.checkTypeItem === "folder") {
-          handleDownloadFolders(currentActiveData);
+        const isUserType = await isUserPackage(user);
+        if (isUserType !== "free") {
+          if (currentActiveData.checkTypeItem === "folder") {
+            handleDownloadFolders(currentActiveData);
+          } else {
+            handleDownloadFile(currentActiveData);
+          }
         } else {
-          handleDownloadFile(currentActiveData);
+          handleGetDownloadLink(currentActiveData);
         }
         break;
       case "export-csv":

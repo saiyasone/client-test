@@ -547,7 +547,10 @@ function FavouriteFile() {
         break;
 
       case "password":
-        if (userPackage?.lockFile !== "on") {
+        if (
+          userPackage?.lockFile === "on" &&
+          userPackage?.category !== "free"
+        ) {
           handleOpenPasswordLink();
         } else {
           errorMessage(
@@ -983,7 +986,7 @@ function FavouriteFile() {
   ) => {
     await manageUserFromShare.handleDeletedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState:{data:IFavouriteTypes}) => ({
+        setDataForEvent((prevState: { data: IFavouriteTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,
@@ -999,7 +1002,7 @@ function FavouriteFile() {
   ) => {
     await manageUserFromShare.handleChangedUserFromShareOnSave(sharedData, {
       onSuccess: () => {
-        setDataForEvent((prevState:{data:IFavouriteTypes}) => ({
+        setDataForEvent((prevState: { data: IFavouriteTypes }) => ({
           ...prevState,
           data: {
             ...prevState.data,

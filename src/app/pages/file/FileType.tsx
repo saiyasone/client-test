@@ -407,7 +407,17 @@ function FileType() {
         }
         break;
       case "password":
-        handleOpenPasswordLink();
+        if (
+          userPackage?.lockFile === "on" &&
+          userPackage?.category !== "free"
+        ) {
+          handleOpenPasswordLink();
+        } else {
+          errorMessage(
+            "The package you've selected is not compatible. Please consider choosing a different one.",
+            3000,
+          );
+        }
         break;
       case "get link":
         setEventClick("get link");

@@ -20,10 +20,11 @@ const useGetUrlDownload = (data) => {
   if (data) {
     const handleGetFolderURL = async (data) => {
       const dataType =
-        data?.folder_type || data?.folderId?._id ? "folder" : "file";
+        data?.folder_type || data?.type || data?.folderId?._id
+          ? "folder"
+          : "file";
 
       const ownerData = data?.createdBy?._id || data?.ownerId?._id;
-
       const dataUrl = {
         _id: data?._id,
         type: dataType,
@@ -62,7 +63,10 @@ const useGetUrlDownload = (data) => {
                 });
                 setCoppied(false);
                 if (result.data?.updateFiles?._id) {
-                  window.open(data?.shortUrl || data?.fileId?.shortUrl, "_blank");
+                  window.open(
+                    data?.shortUrl || data?.fileId?.shortUrl,
+                    "_blank",
+                  );
                 }
               }
             }, 100);
