@@ -432,14 +432,14 @@ const PricingPlanTable: React.FC<any> = (props) => {
                                 height: "35px",
                                 borderRadius: 1,
                                 backgroundColor: `${
-                                  packageData.category == "pro"
+                                  packageData.category == userPackage.category
                                     ? theme.palette.primaryTheme?.main
                                     : "#DAE9E7"
                                 }`,
                                 textAlign: "center",
                                 display: "block",
                                 color: `${
-                                  packageData.category == "pro"
+                                  packageData.category == userPackage.category
                                     ? "white !important"
                                     : "#17766B"
                                 }`,

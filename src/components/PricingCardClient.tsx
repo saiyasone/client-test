@@ -229,9 +229,13 @@ function PricingCardClient(props: any) {
             fontSize: "1rem",
             cursor: "pointer",
             color: `${
-              props.category === "pro" ? theme.palette.primary.main : ""
+              props.category === userPackage.category
+                ? theme.palette.primary.main
+                : ""
             }`,
-            textDecoration: `${props.category === "pro" ? "underline" : ""}`,
+            textDecoration: `${
+              props.category === userPackage.category ? "underline" : ""
+            }`,
           }}
           variant="h6"
           component="p"
@@ -306,18 +310,16 @@ function PricingCardClient(props: any) {
               marginTop: 3,
               height: "35px",
               borderRadius: 1,
-              backgroundColor: `${
-                props.category == userPackage.category
+              backgroundColor:
+                props?.category == userPackage?.category
                   ? theme.palette.primaryTheme?.main
-                  : "#DAE9E7"
-              }`,
+                  : "#DAE9E7",
               textAlign: "center",
               display: "block",
-              color: `${
-                props.category == userPackage.category
+              color:
+                props?.category == userPackage?.category
                   ? "white !important"
-                  : "#17766B"
-              }`,
+                  : "#17766B",
               ...(isCost
                 ? {
                     "&:hover": {
