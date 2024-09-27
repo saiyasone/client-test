@@ -73,7 +73,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
     allowMultiples: data?.allowMultiples,
   });
   const [selectDay, setSelectDay] = useState<any>(1);
-  const [expiredDate, setExpiredDate] = useState<any>(null);
+  const [expiredDate, setExpiredDate] = useState<any>(moment(data?.expiredAt).format("YYYY-MM-DD h:mm:ss") || null);
   const [packageType, setPackageType] = useState("Free");
   const [selectDate, setSelectDate] = useState<moment.Moment | null>(null);
 
@@ -127,7 +127,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
         variables: {
           id: data?._id,
           input: convertObjectEmptyStringToNull({
-            expiredAt: moment(data?.expiredAt).format("YYYY-MM-DD h:mm:ss"),
+            expiredAt: expiredDate,
             allowDownload: permission?.allowDownload,
             allowUpload: permission?.allowUpload,
             allowMultiples: permission?.allowMultiples,
@@ -353,18 +353,7 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                     onChange={handleChange}
                   />
                 }
-                label="Enable Single Download"
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    id="allow-multiple"
-                    name="allowMultiples"
-                    checked={permission.allowMultiples}
-                    onChange={handleChange}
-                  />
-                }
-                label="Enable Multi-Download"
+                label="Enable Download"
               />
               <FormControlLabel
                 control={
@@ -376,6 +365,17 @@ const DialogEditExpiryLinkFileDrop = (props) => {
                   />
                 }
                 label="Enable Upload"
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    id="allow-multiple"
+                    name="allowMultiples"
+                    checked={permission.allowMultiples}
+                    onChange={handleChange}
+                  />
+                }
+                label="Enable Multi-Upload"
               />
             </FormControl>
             <NormalButton
