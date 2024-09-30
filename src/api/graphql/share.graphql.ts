@@ -20,6 +20,7 @@ export const QUERY_SHARE = gql`
         isShare
         size
         item
+        tag
         ownerId {
           _id
           email
@@ -120,6 +121,8 @@ export const QUERY_USER_SHARE = gql`
         _id
         email
         newName
+        firstName
+        lastName
         profile
         permission
         isPublic

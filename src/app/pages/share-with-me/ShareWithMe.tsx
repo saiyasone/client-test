@@ -111,7 +111,9 @@ function ShareWithMe() {
     refetchQueries: [QUERY_FOLDER],
   });
 
-  const [removeShareData] = useMutation(MUTATION_UPDATE_SHARE_DATA, {});
+  const [removeShareData] = useMutation(MUTATION_UPDATE_SHARE_DATA, {
+    refetchQueries: [QUERY_SHARE],
+  });
 
   const [listShareMe, setListShareMe] = useState<any>(null);
   const [fileshare, setFileshare] = useState<any>(null);
@@ -864,7 +866,6 @@ function ShareWithMe() {
         },
 
         onCompleted: () => {
-          queryGetShare();
           successMessage("Delete data successful !", 2000);
         },
       });
@@ -1528,6 +1529,7 @@ function ShareWithMe() {
               <DialogCreateShare
                 onDeletedUserFromShareSave={handleDeletedUserFromShareOnSave}
                 sharedUserList={manageUserFromShare.sharedUserList}
+                shareTag={true}
                 onClose={handleShareClose}
                 open={shareDialog}
                 data={{

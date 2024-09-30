@@ -3,7 +3,7 @@ import {
   MUTATION_DELETE_SHARE,
   MUTATION_UPDATE_SHARE,
   QUERY_SHARE,
-  // QUERY_USER_SHARE,
+  QUERY_USER_SHARE,
 } from "api/graphql/share.graphql";
 import { useEffect, useState } from "react";
 
@@ -13,7 +13,7 @@ const useManageUserFromShare = ({
   toAccount,
   user: _user,
 }: any) => {
-  const [getShares] = useLazyQuery(QUERY_SHARE, {
+  const [getShares] = useLazyQuery(QUERY_USER_SHARE, {
     fetchPolicy: "no-cache",
   });
   const [deleteShare] = useMutation(MUTATION_DELETE_SHARE, {
@@ -30,7 +30,6 @@ const useManageUserFromShare = ({
     const fetchActiveShare = async () => {
       if (Object.keys(inputFileOrFolder).length > 0) {
         const currentSharedUserList =
-          // .data?.getShareDetail?.data || [];
           (
             await getShares({
               variables: {
@@ -49,7 +48,8 @@ const useManageUserFromShare = ({
                 noLimit: true,
               },
             })
-          ).data?.getShare?.data || [];
+          ).data?.getShareDetail?.data || [];
+        // .data?.getShare?.data || [];
 
         setSharedUserList(currentSharedUserList);
       }

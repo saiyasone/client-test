@@ -15,10 +15,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
 import { createTheme } from "@mui/material/styles";
 import { Box } from "@mui/system";
-import {
-  MUTATION_CREATE_SHARE,
-  MUTATION_CREATE_SHARE_FROM_SHARING,
-} from "api/graphql/share.graphql";
+import { MUTATION_CREATE_SHARE } from "api/graphql/share.graphql";
 import Loader from "components/Loader";
 import NormalButton from "components/NormalButton";
 import ActionCreateShare from "components/share/ActionCreateShare";
@@ -159,9 +156,9 @@ const DialogCreateShare = (props) => {
 
   const { user }: any = useAuth();
   const [createShare] = useMutation(MUTATION_CREATE_SHARE);
-  const [createShareFromSharing] = useMutation(
-    MUTATION_CREATE_SHARE_FROM_SHARING,
-  );
+  // const [createShareFromSharing] = useMutation(
+  //   MUTATION_CREATE_SHARE_FROM_SHARING,
+  // );
   const [statusShare, setStatusShare] = useState("view");
   const [accessStatusShare, setAccessStatusShare] = useState<string>("public");
   const [copied, setCoppied] = useState(false);
@@ -182,26 +179,29 @@ const DialogCreateShare = (props) => {
 
   useEffect(() => {
     setSharedUserList(
-      props.sharedUserList?.map((data) => {
-        const user = data.toAccount;
-        return {
-          ...data,
-          toAccount: {
-            ...user,
-            title: `${user.firstName} ${user.lastName}`,
-            src:
-              user?.newName +
-              "-" +
-              user?._id +
-              "/" +
-              ENV_KEYS.VITE_APP_ZONE_PROFILE +
-              "/" +
-              user?.profile,
-          },
-          _isDeleted: false,
-          _permission: data.permission,
-        };
-      }) || [],
+      props.sharedUserList
+        ?.filter((userShare) => userShare?.email !== user?.email)
+        ?.map((data) => {
+          // const user = data.toAccount;
+          const user = data;
+          return {
+            ...data,
+            toAccount: {
+              ...user,
+              title: `${user.firstName} ${user.lastName}`,
+              src:
+                user?.newName +
+                "-" +
+                user?._id +
+                "/" +
+                ENV_KEYS.VITE_APP_ZONE_PROFILE +
+                "/" +
+                user?.profile,
+            },
+            _isDeleted: false,
+            _permission: data.permission,
+          };
+        }) || [],
     );
   }, [props.sharedUserList]);
 
@@ -277,6 +277,7 @@ const DialogCreateShare = (props) => {
                   isPublic: accessStatusShare,
                   permission: statusShare,
                   toAccount: sharedSelectedUserList[i],
+                  tag: props?.shareTag ? data?.tag : null,
                 },
               },
             });
@@ -321,6 +322,7 @@ const DialogCreateShare = (props) => {
                   isPublic: accessStatusShare,
                   permission: statusShare,
                   toAccount: sharedSelectedUserList[i],
+                  tag: props?.shareTag ? data?.tag : null,
                 },
               },
             });
@@ -801,20 +803,21 @@ const DialogCreateShare = (props) => {
                                 title: `${user.firstName} ${user.lastName}`,
                                 src:
                                   newUrl +
-                                  sharedUser?.toAccount?.newName +
+                                  sharedUser?.newName +
                                   "-" +
-                                  sharedUser?.toAccount?._id +
+                                  sharedUser?._id +
                                   "/" +
                                   ENV_KEYS.VITE_APP_ZONE_PROFILE +
                                   "/" +
-                                  sharedUser?.toAccount?.profile,
+                                  sharedUser?.profile,
                               }}
                             />
                           </MUI.ShareProfileImage>
 
                           <MUI.ShareProfileInfo>
                             <Typography variant="h3" sx={{ fontSize: "15px" }}>
-                              {_.startCase(sharedUser?.toAccount?.title)}
+                              {/* {_.startCase(sharedUser?.toAccount?.title)} */}
+                              {sharedUser?.firstName} {sharedUser?.lastName}
                             </Typography>
                             <Typography variant="h5">
                               {sharedUser?.toAccount?.email}
