@@ -112,7 +112,7 @@ function ShareWithMe() {
   });
 
   const [removeShareData] = useMutation(MUTATION_UPDATE_SHARE_DATA, {
-    refetchQueries: [QUERY_SHARE],
+    fetchPolicy: "no-cache",
   });
 
   const [listShareMe, setListShareMe] = useState<any>(null);
@@ -343,6 +343,7 @@ function ShareWithMe() {
           name: dataName,
           checkType: valueOption?.fileId?._id ? "file" : "folder",
           permission: valueOption?.permission,
+          tag: valueOption?.tag,
           newFilename,
           newPath,
           dataPassword:
@@ -470,7 +471,6 @@ function ShareWithMe() {
           setFilePassword(dataForEvent.data.fileId.filePassword);
         }
       }
-      menuOnClick(dataForEvent.action);
     }
   }, [dataForEvent.action]);
 
@@ -860,12 +860,11 @@ function ShareWithMe() {
     try {
       await removeShareData({
         variables: {
-          where: {
-            _id: parseInt(dataForEvent.data._id),
-          },
+          id: dataForEvent.data._id,
         },
 
         onCompleted: () => {
+          queryGetShare();
           successMessage("Delete data successful !", 2000);
         },
       });

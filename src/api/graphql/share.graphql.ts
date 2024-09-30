@@ -246,7 +246,7 @@ export const MUTATION_CREATE_SHARE_FROM_SHARING = gql`
 `;
 
 export const MUTATION_UPDATE_SHARE_DATA = gql`
-  mutation RemoveShareWithMe($id: ID!) {
-    RemoveShareWithMe(ID: $id)
+  mutation RemoveShareWithMe($id: String!) {
+    removeShareWithMe(ID: $id)
   }
 `;
