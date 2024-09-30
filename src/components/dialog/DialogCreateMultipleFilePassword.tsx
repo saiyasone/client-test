@@ -114,11 +114,12 @@ function DialogCreateMultipleFilePassword(props) {
         });
 
         dispatch(checkboxAction.setFileDataPassword(lockFileData));
+        dispatch(checkboxAction.setRemoveFileAndFolderData());
         setIsDone(true);
 
         successMessage("Update lock data successfully", 2000);
       } catch (error: any) {
-        const cutErr = error.message.replace(/(ApolloError: )?Error: /, "");
+        const cutErr = error?.message?.replace(/(ApolloError: )?Error: /, "");
         errorMessage(
           manageGraphqlError.handleErrorMessage(
             cutErr || "Something went wrong, Please try again",

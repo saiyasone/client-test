@@ -103,8 +103,8 @@
   background-color: #f0f8ff;
 }
 .uppy-Dashboard-dropFilesHereHint {
-  /* visibility: visible; */
   border: 3px dashed #4caf50;
+  background-clip: border-box;
   background-image: url("../assets/images/uppy-icon-upload.png") !important;
   background-size: 60px;
   background-position: center center;
@@ -278,7 +278,7 @@
 }
 
 .uppy-Dashboard-files::-webkit-scrollbar-thumb {
-  background-color: #17766B;
+  background-color: #17766b;
   border-radius: 3px;
   border: 3px solid #fff;
 }

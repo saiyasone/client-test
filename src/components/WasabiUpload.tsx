@@ -111,7 +111,7 @@ function WasabiUpload(props: Props) {
   async function handleUploadToStorage() {
     const dataFiles = uppyInstance.getFiles() as any[];
 
-    if (dataFiles.length < 0) {
+    if (!dataFiles.length) {
       return;
     }
 
@@ -545,7 +545,7 @@ function WasabiUpload(props: Props) {
                     Cancel
                   </MUI.ButtonCancelAction>
                   <MUI.ButtonUploadAction
-                    onClick={handleUploadToStorage}
+                    onClick={canClose ? () => {} : handleUploadToStorage}
                     disabled={canClose}
                   >
                     Upload now

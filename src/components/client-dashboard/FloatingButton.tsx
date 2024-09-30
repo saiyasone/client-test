@@ -32,8 +32,9 @@ import { ENV_KEYS } from "constants/env.constant";
 import { EventUploadTriggerContext } from "contexts/EventUploadTriggerProvider";
 import useAuth from "hooks/useAuth";
 import * as React from "react";
-import { successMessage } from "utils/alert.util";
+import { successMessage, warningMessage } from "utils/alert.util";
 import { decryptId } from "utils/secure.util";
+import { convertBytetoMBandGB } from "utils/storage.util";
 import { v4 as uuidv4 } from "uuid";
 
 const Transition = React.forwardRef(function Transition(
@@ -84,10 +85,59 @@ export default function FloatingButton() {
     input.directory = type === "directory" ? "true" : "";
     input.webkitdirectory = type === "directory" ? "true" : "";
     input.addEventListener("change", (event) => {
-      const selectedFiles: any[] = event.target.files;
+      const selectedFiles: File[] = event.target.files;
       const newFiles: any[] = [];
+
+      const limitImageUpload = user?.packageId?.totalImageUpload;
+      const numberOfFileUpload = user?.packageId?.numberOfFileUpload || 15;
+      const maxFileSize = user?.packageId?.maxUploadSize;
+
+      let imageFileCount = 0;
+      let fileCount = 0;
+      let allFiles = 0;
+
       if (input.directory === "true") {
         for (let i = 0; i < selectedFiles.length; i++) {
+          const file = selectedFiles[i];
+
+          if (file.size > maxFileSize) {
+            warningMessage(
+              `You cannot select files larger than ${convertBytetoMBandGB(
+                maxFileSize,
+              )}`,
+              3000,
+            );
+            return;
+          }
+
+          if (file.type.startsWith("image/")) {
+            imageFileCount++;
+          } else {
+            fileCount++;
+          }
+
+          if (imageFileCount > limitImageUpload) {
+            warningMessage(
+              `You cannot select more than ${limitImageUpload} image files.`,
+              3000,
+            );
+            return;
+          }
+
+          allFiles = imageFileCount + fileCount;
+          if (
+            imageFileCount > 0 &&
+            fileCount > 0 &&
+            allFiles > numberOfFileUpload
+          ) {
+            warningMessage(
+              `You can select up to ${numberOfFileUpload} files if including non-images.`,
+              3000,
+            );
+
+            return;
+          }
+
           newFiles.push(selectedFiles[i]);
         }
         setSelectedFolderFiles((prevFiles) => [...prevFiles, newFiles]);

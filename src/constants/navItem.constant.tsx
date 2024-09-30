@@ -9,7 +9,7 @@ import { TbDashboard } from "react-icons/tb";
 // import { MdOutlineExplore } from "react-icons/md";
 // import { RiUserAddLine } from "react-icons/ri";
 // import { PiUserCircle } from "react-icons/pi";
-// import PeopleOutlineIcon from '@mui/icons-material/PeopleOutline';
+// import PeopleOutlineIcon from "@mui/icons-material/PeopleOutline";
 
 const dashboard = [
   {
@@ -136,7 +136,7 @@ const navItems: any = [
     title: "",
     pages: trash,
   },
-  // { title: "SHORT", pages: Feed },
+  // { title: "SHORT" },
   // {
   //   title: "",
   //   pages: feedForyou,

@@ -185,34 +185,6 @@ export default function ShowUpload(props: Props) {
     onDeleteData?.(index, type);
   };
 
-  // const isSuccessful = (index) => {
-  //   return successfulFiles.includes(index) || isSuccess[index];
-  // };
-
-  // const handleCancleUploadFile = async (index) => {
-  //   const id = fileId[index];
-  //   await deleteFile({
-  //     variables: {
-  //       id: id,
-  //     },
-  //     onCompleted: () => {
-  //       setCancelStatus((prev) => ({
-  //         ...prev,
-  //         [index]: true,
-  //       }));
-  //     },
-  //   });
-
-  //   if (cancelToken[index]) {
-  //     cancelToken[index].cancel();
-  //     setCancelToken((prev) => {
-  //       const newState = { ...prev };
-  //       delete newState[index];
-  //       return newState;
-  //     });
-  //   }
-  // };
-
   const handleCancelUploadFolder = async (folderKey) => {
     try {
       await cancelUploadFolder({

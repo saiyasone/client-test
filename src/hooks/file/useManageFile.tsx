@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import { ENV_KEYS } from "constants/env.constant";
 import CryptoJS from "crypto-js";
+import { IDownloadQueueType } from "types/downloadQueueType";
 import { errorMessage } from "utils/alert.util";
 import {
   isDateEarlierThisMonth,
@@ -449,8 +450,6 @@ const useManageFile = ({ user }) => {
         createdBy: newModelData?.[0]?.createdBy,
       };
 
-      console.log({ headers });
-
       const encryptedData = dataEncrypted({ headers });
       const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?download=${encryptedData}`;
 
@@ -461,6 +460,40 @@ const useManageFile = ({ user }) => {
     } catch (error) {
       onFailed?.();
       console.error(error);
+    }
+  };
+
+  const handlePreparedDownloadQueue = async (
+    data: IDownloadQueueType,
+  ): Promise<string> => {
+    const dataJson = JSON.stringify(data)
+    try {
+      const res = await axios.post<{ tag: string }>(
+        `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files/queues`,
+        dataJson,
+      );
+
+      return res.data.tag || "";
+    } catch (error: any) {
+      errorMessage(error?.message || "Something went wrong!", 3000);
+      return "";
+    }
+  };
+
+  const handleDownloadQueue = ({
+    tag,
+    onSuccess,
+  }: {
+    tag: string;
+    onSuccess?: () => void;
+  }) => {
+    if (tag) {
+      const baseUrl = `${ENV_KEYS.VITE_APP_LOAD_URL}downloader/file/download-multifolders-and-files?queues=${tag}`;
+
+      startDownload({ baseUrl });
+      setTimeout(() => {
+        onSuccess?.();
+      }, 1000);
     }
   };
 
@@ -713,6 +746,8 @@ const useManageFile = ({ user }) => {
     handleMultipleShareGetLinks,
     handleSingleFileDropDownload,
     handleMultipleDownloadTicketFileAndFolder,
+    handleDownloadQueue,
+    handlePreparedDownloadQueue,
   };
 };
 

@@ -359,7 +359,7 @@ const FileCardItem: React.FC<any> = ({
           </SelectionContainer>
         )}
 
-        {(!isNormalCard&& isMobile || (props?.menuItems && isOpenMenu)) && (
+        {((!isNormalCard && isMobile) || (props?.menuItems && isOpenMenu)) && (
           <MenuButtonContainer>
             <MenuDropdown
               customButton={props.customButton}
@@ -429,14 +429,24 @@ const FileCardItem: React.FC<any> = ({
                   </Box>
                 )}
                 {fileType !== "folder" && (
-                  <FileIconContainer>
-                    <FileIcon
-                      extension={getFileType(props.name) ?? ""}
-                      {...{
-                        ...styles[getFileType(props.name) as string],
-                      }}
-                    />
-                  </FileIconContainer>
+                  <Fragment>
+                    {props?.filePassword ? (
+                      <LockImage
+                        className="lock-icon-preview"
+                        src={lockIcon}
+                        alt={props.name}
+                      />
+                    ) : (
+                      <FileIconContainer>
+                        <FileIcon
+                          extension={getFileType(props.name) ?? ""}
+                          {...{
+                            ...styles[getFileType(props.name) as string],
+                          }}
+                        />
+                      </FileIconContainer>
+                    )}
+                  </Fragment>
                 )}
               </React.Fragment>
             )}
