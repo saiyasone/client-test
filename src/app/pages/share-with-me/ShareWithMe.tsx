@@ -58,7 +58,7 @@ import { FolderContext } from "contexts/FolderProvider";
 import { useMenuDropdownState } from "contexts/MenuDropdownProvider";
 import { useRefreshState } from "contexts/RefreshProvider";
 import useManageFile from "hooks/file/useManageFile";
-import useGetUrl from "hooks/url/useGetUrl";
+// import useGetUrl from "hooks/url/useGetUrl";
 import useGetUrlDownload from "hooks/url/useGetUrlDownload";
 import useManageGraphqlError from "hooks/useManageGraphqlError";
 import useScroll from "hooks/useScroll";
@@ -120,7 +120,7 @@ function ShareWithMe() {
   const manageGraphqlError = useManageGraphqlError();
   const { setFolderId }: any = useContext(FolderContext);
   const {
-    isOpenMenu: isMenu,
+    isOpenMenu: _isMenu,
     isSelected,
     isFolderSelected,
     isToggleMenu,
@@ -167,7 +167,7 @@ function ShareWithMe() {
   const eventUploadTrigger = useContext(EventUploadTriggerContext);
   const [currentPage, setCurrentPage] = useState<any>(1);
   const [isFiledrop, setIsFiledrop] = useState<any>(false);
-  const handleFileAndFolderURL = useGetUrl(dataForEvent.data);
+  // const handleFileAndFolderURL = useGetUrl(dataForEvent.data);
   const [showEncryptPassword, setShowEncryptPassword] = useState<any>(false);
   const [eventClick, setEventClick] = useState<any>(false);
   const [filePassword, setFilePassword] = useState<any>("");

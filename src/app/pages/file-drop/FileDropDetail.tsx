@@ -85,7 +85,7 @@ function FileDropDetail() {
   const [showPreview, setShowPreview] = useState<any>(false);
   const isMobile = useMediaQuery("(max-width:600px)");
   const { refreshAuto } = useRefreshState();
-  const { isOpenMenu, isSelected, isOnClicked, isToggleMenu } = useSelector(
+  const { isSelected, isToggleMenu } = useSelector(
     (state: RootState) => state.event,
   );
 
