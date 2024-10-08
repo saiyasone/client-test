@@ -101,6 +101,7 @@ export default function DialogPreviewFile(props) {
         aria-labelledby="scroll-dialog-title"
         aria-describedby="scroll-dialog-description"
       >
+        
         <Box
           sx={{
             display: "flex",
@@ -140,6 +141,7 @@ export default function DialogPreviewFile(props) {
           <MUI.DivPreviewBody>
             {type === "image" ? (
               <MUI.ShowImageBox>
+                {type}
                 {!showNotFoundImage ? (
                   <MUI.ImagePreview
                     className="image-preview"
@@ -224,7 +226,7 @@ export default function DialogPreviewFile(props) {
                   }}
                 />
               </div>
-            ) : type == "video" ? (
+            ) : type === "video" || type === "" ? (
               <React.Fragment>
                 <ReactPlayer
                   width={"100%"}

@@ -92,6 +92,7 @@ import CloudFileDataGrid from "./CloudFileDataGrid";
 import CloudFolderDataGrid from "./CloudFolderDataGrid";
 import DialogGetLink from "components/dialog/DialogGetLink";
 import DialogOneTimeLink from "components/dialog/DialogOneTimeLink";
+import DialogPreviewFile from "components/dialog/DialogPreviewFile";
 const ITEM_PER_PAGE_GRID = 20;
 
 export function MyCloud() {
@@ -134,6 +135,8 @@ export function MyCloud() {
   const [userPackage, setUserPackage] = useState<any>(null);
   const [renameDialogOpen, setRenameDialogOpen] = useState(false);
   const { refreshAuto } = useRefreshState();
+  const [newName, setNewName] = useState("");
+  const [fileType, setFileType] = useState("");
 
   // slice in redux
   const dispatch = useDispatch();
@@ -194,7 +197,7 @@ export function MyCloud() {
   const [currentFilePage, setCurrentFilePage] = useState(1);
   const detectResizeWindow = useDetectResizeWindow();
   const {
-    isOpenMenu: isMenu,
+    isOpenMenu: _isMenu,
     isSelected,
     isFolderSelected,
     isToggleMenu,
@@ -934,8 +937,10 @@ export function MyCloud() {
   };
 
   const handleDataPreview = () => {
-    setOpenPreview(!openPreview);
+    setOpenPreview(true);
     setName(dataForEvent.data?.filename);
+    setNewName(dataForEvent.data?.newFilename);
+    setFileType(dataForEvent.data?.fileType);
     setPath(dataForEvent.data?.newPath);
   };
 
@@ -2146,14 +2151,32 @@ export function MyCloud() {
         onClose={handleCloseDecryptedPassword}
       />
 
-      <DialogPreviewFileSlide
+      <DialogPreviewFile
+        open={openPreview}
+        handleClose={handleClosePreview}
+        onClick={() => {
+          if (userPackage?.downLoadOption === "another") {
+            handleGetDownloadLink();
+          } else {
+            handleDownloadFile(dataForEvent.data);
+          }
+        }}
+        filename={name}
+        newFilename={newName}
+        fileType={fileType}
+        path={path}
+        user={user}
+      />
+
+      {/* <DialogPreviewFileSlide
         open={openPreview}
         handleClose={handleClosePreview}
         data={dataForEvent.data}
         user={user}
         mainFile={mainFile}
         propsStatus="mycloud"
-      />
+      /> */}
+
       {openGetLink && dataForEvent.data && (
         <DialogGetLink
           isOpen={openGetLink}
